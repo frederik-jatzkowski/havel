@@ -1,0 +1,21 @@
+package main
+
+import (
+    "encoding/json"
+)
+
+type Point class {
+    x : int;
+    y : int;
+}
+
+constructor<Point> Origin() {
+    this.x = 0;
+    this.y = 0;
+}
+
+// is already defined implicitly
+constructor<Point> Point(x, y : int) {
+    this.x = x;
+    this.y = y;
+}

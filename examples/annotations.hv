@@ -1,0 +1,15 @@
+package main
+
+import (
+    "encoding/json"
+)
+
+@json.Encoder()
+@json.Decoder()
+type Point class {
+    @json.Include()
+    x : int;
+
+    @json.Include()
+    y : int;
+}
