@@ -1,9 +1,9 @@
 
 func main() {
     block entry {
-        // r0 : 32 = 0x1101;
-        // r1 : 32 = fib(r0);
-        // builtin.print_i_32(r1);
+        $r0 : 32 = 0b1101;
+        $r1 : 32 = fib($r0);
+        builtin.print_32_u($r1);
     } => return;
 }
 
@@ -16,21 +16,21 @@ func fib(a0 : 32) => (v0 : 32) {
     );
     
     block entry {
-        // s1 = 0x0;
-        // s2 = 0x0;
-        // s3 = 0x1;
-        // v0 = 0x0;
+        s1 = 0b0;
+        s2 = 0b0;
+        s3 = 0b1;
+        v0 = 0b0;
     } => b1;
     
     block b1 {
-        // $r0 : 32 = i_lt(s1, a0);
+        $r0 : 32 = lt_32_u(s1, a0);
     } => if $r0 then b2 else b3;
     
     block b2 {
-        // v0 = i_add(s2, s3);
-        // s2 = s3; s3 = v0;
-        // $r1 : 32 = 0x1;
-        // s1 = i_add(s1, r1);
+        v0 = add_32_u(s2, s3);
+        s2 = s3; s3 = v0;
+        $r1 : 32 = 0b1;
+        s1 = add_32_u(s1, $r1);
     } => b1;
     
     block b3 {} => return;

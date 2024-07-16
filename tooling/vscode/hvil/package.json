@@ -1,0 +1,25 @@
+{
+  "name": "havel-intermediate-language",
+  "displayName": "Havel Intermediate Language",
+  "description": "",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.91.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "hvil",
+      "aliases": ["Havel Intermediate Language", "hvil"],
+      "extensions": [".hvil"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "hvil",
+      "scopeName": "source.hvil",
+      "path": "./syntaxes/hvil.tmLanguage.json"
+    }]
+  }
+}
