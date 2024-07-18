@@ -1,37 +1,38 @@
 
 func main() {
     block entry {
-        $r0 : 32 = 0b1101;
-        $r1 : 32 = fib($r0);
-        builtin.print_32_u($r1);
+        $n : 32 = 0b1101;
+        $fib_n : 32 = fib($n);
+        debug.print_u_32($fib_n);
     } => return;
 }
 
-// returns the a0-ths fibonacci number
-func fib(a0 : 32) => (v0 : 32) {
+// fib returns the n-ths fibonacci number
+func fib(n : 32) => (result : 32) {
     declare (
-        s1 : 32,
-        s2 : 32,
-        s3 : 32
+        counter : 32,
+        fib_next : 32
     );
     
     block entry {
-        s1 = 0b0;
-        s2 = 0b0;
-        s3 = 0b1;
-        v0 = 0b0;
-    } => b1;
+        counter = 0b1;
+        result = 0b0;
+        fib_next = 0b1;
+    } => loop_head;
     
-    block b1 {
-        $r0 : 32 = lt_32_u(s1, a0);
-    } => if $r0 then b2 else b3;
+    block loop_head {
+        $check : 32 = lt_u_32(counter, n);
+    } => if $check then loop_body else exit;
     
-    block b2 {
-        v0 = add_32_u(s2, s3);
-        s2 = s3; s3 = v0;
-        $r1 : 32 = 0b1;
-        s1 = add_32_u(s1, $r1);
-    } => b1;
+    block loop_body {
+        // go to next fibonacci number
+        fib_next = add_u_32(result, fib_next);
+        result = sub_u_32(fib_next, result);
+        
+        // increment counter
+        $one : 32 = 0b1;
+        counter = add_u_32(counter, $one);
+    } => loop_head;
     
-    block b3 {} => return;
+    block exit {} => return;
 }
