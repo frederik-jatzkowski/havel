@@ -1,10 +1,6 @@
 package parser
 
-type Literal struct {
-}
-
-type FunctionCall struct {
-	ReturnValue  string   `@Identifier`
-	FunctionName string   `@Identifier`
-	Args         []string `@Identifier`
+type Instruction struct {
+	Result    *Write    `(@@ "=")?`
+	Operation Operation `@@ ";"`
 }

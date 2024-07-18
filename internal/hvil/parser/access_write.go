@@ -1,12 +1,12 @@
 package parser
 
-type WriteAccess interface{}
+type Write interface{}
 
-type RegisterWriteAccess struct {
+type WriteRegister struct {
 	Identifier string `"$" @Identifier`
 	Type       Type   `":" @@`
 }
 
-type VariableWriteAccess struct {
+type WriteVariable struct {
 	Identifier string `@Identifier`
 }

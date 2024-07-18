@@ -2,7 +2,7 @@
 func main() {
     block entry {
         $n : 32 = 0b1101;
-        $fib_n : 32 = fib($n);
+        $fib_n : 32 = local.fib($n);
         debug.print_u_32($fib_n);
     } => return;
 }
@@ -21,17 +21,17 @@ func fib(n : 32) => (result : 32) {
     } => loop_head;
     
     block loop_head {
-        $check : 32 = lt_u_32(counter, n);
+        $check : 32 = alu.lt_u_32(counter, n);
     } => if $check then loop_body else exit;
     
     block loop_body {
         // go to next fibonacci number
-        fib_next = add_u_32(result, fib_next);
-        result = sub_u_32(fib_next, result);
+        fib_next = alu.add_u_32(result, fib_next);
+        result = alu.sub_u_32(fib_next, result);
         
         // increment counter
         $one : 32 = 0b1;
-        counter = add_u_32(counter, $one);
+        counter = alu.add_u_32(counter, $one);
     } => loop_head;
     
     block exit {} => return;

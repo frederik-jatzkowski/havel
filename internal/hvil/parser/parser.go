@@ -13,9 +13,10 @@ var parser = participle.MustBuild[Package](
 	participle.Elide("Whitespace", "Comment"),
 	participle.UseLookahead(1),
 	participle.Union[Type](PrimitiveType{}, TupleType{}),
-	participle.Union[JumpTarget](Return{}, Jump{}, ConditionalJump{}),
-	participle.Union[ReadAccess](RegisterReadAccess{}, VariableReadAccess{}),
-	participle.Union[WriteAccess](RegisterWriteAccess{}, VariableWriteAccess{}),
+	participle.Union[BlockTerminator](Return{}, Jump{}, ConditionalJump{}),
+	participle.Union[Read](ReadRegister{}, ReadVariable{}),
+	participle.Union[Write](WriteRegister{}, WriteVariable{}),
+	participle.Union[Operation](PrimitiveLiteral{}, AluOperation{}, LocalCall{}, DebugOperation{}),
 )
 
 func Parse(fileName string, reader io.Reader) (Package, error) {

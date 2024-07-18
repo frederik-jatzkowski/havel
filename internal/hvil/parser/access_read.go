@@ -1,11 +1,11 @@
 package parser
 
-type ReadAccess interface{}
+type Read interface{}
 
-type RegisterReadAccess struct {
+type ReadRegister struct {
 	Identifier string `"$" @Identifier`
 }
 
-type VariableReadAccess struct {
+type ReadVariable struct {
 	Identifier string `@Identifier`
 }
