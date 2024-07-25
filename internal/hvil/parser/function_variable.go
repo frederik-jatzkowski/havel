@@ -7,20 +7,18 @@ import (
 	"github.com/frederik-jatzkowski/havel/internal/tooling/errors"
 )
 
-type VariableDeclaration interface{}
-
-type LocalVariableDeclaration struct {
+type FunctionVariableDeclaration struct {
 	Pos      lexer.Position
 	function *Function
 	Name     string `@Identifier`
 	Type     Type   `":" @@`
 }
 
-func (declaration *LocalVariableDeclaration) GenerateBackLinks(function *Function) {
+func (declaration *FunctionVariableDeclaration) GenerateBackLinks(function *Function) {
 	declaration.function = function
 }
 
-func (declaration *LocalVariableDeclaration) ResolveNames(errorsCollector *errors.Collector) {
+func (declaration *FunctionVariableDeclaration) ResolveNames(errorsCollector *errors.Collector) {
 	_, exists := declaration.function.variableDeclarationMap[declaration.Name]
 	if exists {
 		errorsCollector.Err(

@@ -13,8 +13,18 @@ type Function struct {
 	Name                   string       `"func":Keyword @Identifier`
 	Head                   FunctionHead `@@`
 	Body                   FunctionBody `@@`
-	variableDeclarationMap map[string]*LocalVariableDeclaration
+	variableDeclarationMap map[string]*FunctionVariableDeclaration
 	blockMap               map[string]*BasicBlock
+}
+
+type FunctionHead struct {
+	Parameters   CommaSeparatedList[*FunctionVariableDeclaration] `"(" @@ ")"`
+	ReturnValues CommaSeparatedList[*FunctionVariableDeclaration] `( "=>" "(" @@ ")" )?`
+}
+
+type FunctionBody struct {
+	LocalDeclarations CommaSeparatedList[*FunctionVariableDeclaration] `"{" ( "declare":Keyword "(" @@ ")" ";" )?`
+	BasicBlocks       []*BasicBlock                                    `@@+  "}"`
 }
 
 func (function *Function) GenerateBackLinks(pkg *Package) {
@@ -39,7 +49,7 @@ func (function *Function) GenerateBackLinks(pkg *Package) {
 
 func (function *Function) ResolveNames(errorsCollector *errors.Collector) {
 	function.variableDeclarationMap = make(
-		map[string]*LocalVariableDeclaration,
+		map[string]*FunctionVariableDeclaration,
 		len(function.Head.Parameters.Items)+
 			len(function.Head.ReturnValues.Items)+
 			len(function.Body.LocalDeclarations.Items),
@@ -74,14 +84,4 @@ func (function *Function) ResolveNames(errorsCollector *errors.Collector) {
 	for _, block := range function.Body.BasicBlocks {
 		block.ResolveNames(errorsCollector)
 	}
-}
-
-type FunctionHead struct {
-	Parameters   CommaSeparatedList[*LocalVariableDeclaration] `"(" @@ ")"`
-	ReturnValues CommaSeparatedList[*LocalVariableDeclaration] `( "=>" "(" @@ ")" )?`
-}
-
-type FunctionBody struct {
-	LocalDeclarations CommaSeparatedList[*LocalVariableDeclaration] `"{" ( "declare":Keyword "(" @@ ")" ";" )?`
-	BasicBlocks       []*BasicBlock                                 `@@+  "}"`
 }

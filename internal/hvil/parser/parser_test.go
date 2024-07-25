@@ -65,8 +65,8 @@ func main (a1 : [8,16,[[32],16,8]]) {
 					{
 						Name: "main",
 						Head: parser.FunctionHead{
-							Parameters: parser.CommaSeparatedList[*parser.LocalVariableDeclaration]{
-								Items: []*parser.LocalVariableDeclaration{
+							Parameters: parser.CommaSeparatedList[*parser.FunctionVariableDeclaration]{
+								Items: []*parser.FunctionVariableDeclaration{
 									{
 										Name: "a1",
 										Type: parser.TupleType{
@@ -114,8 +114,8 @@ func main () => (r1 : [8, 16]) {
 					{
 						Name: "main",
 						Head: parser.FunctionHead{
-							ReturnValues: parser.CommaSeparatedList[*parser.LocalVariableDeclaration]{
-								Items: []*parser.LocalVariableDeclaration{
+							ReturnValues: parser.CommaSeparatedList[*parser.FunctionVariableDeclaration]{
+								Items: []*parser.FunctionVariableDeclaration{
 									{
 										Name: "r1",
 										Type: parser.TupleType{
@@ -158,8 +158,8 @@ func main () {
 					{
 						Name: "main",
 						Body: parser.FunctionBody{
-							LocalDeclarations: parser.CommaSeparatedList[*parser.LocalVariableDeclaration]{
-								Items: []*parser.LocalVariableDeclaration{
+							LocalDeclarations: parser.CommaSeparatedList[*parser.FunctionVariableDeclaration]{
+								Items: []*parser.FunctionVariableDeclaration{
 									{
 										Name: "a",
 										Type: parser.TupleType{
