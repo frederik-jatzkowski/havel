@@ -1,9 +1,10 @@
 package cmd
 
 import (
+	"encoding/json"
 	"os"
+	"regexp"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/frederik-jatzkowski/havel/internal/hvil/parser"
 	"github.com/frederik-jatzkowski/havel/internal/tooling/errors"
 	"github.com/spf13/cobra"
@@ -23,15 +24,29 @@ var buildCmd = &cobra.Command{
 		mainPkg.Name = mainPkg.Pos.Filename
 		mainPkg.IsMain = true
 
+		program := parser.Program{
+			Packages: []*parser.Package{
+				&mainPkg,
+			},
+		}
+
 		errorsCollector := errors.NewCollector(os.Stderr)
 
-		mainPkg.ResolveNames(errorsCollector)
+		program.GenerateBackLinks()
+		program.ResolveNames(errorsCollector)
 
 		if errorsCollector.HasErrors() {
 			os.Exit(1)
 		}
 
-		spew.Dump(mainPkg)
+		data, err := json.MarshalIndent(program, "", "  ")
+		cobra.CheckErr(err)
+
+		removePos := regexp.MustCompile(`\n[\s]*"Pos": {\n.*\n.*\n.*\n.*\n.*},`)
+		os.Stdout.Write(removePos.ReplaceAll(data, []byte{}))
+		// os.Stdout.Write(data)
+
+		// spew.Dump(mainPkg)
 	},
 }
 

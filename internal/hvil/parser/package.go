@@ -9,32 +9,42 @@ import (
 
 type Package struct {
 	Pos          lexer.Position
+	program      *Program
 	Name         string
-	Functions    []Function `@@+`
 	IsMain       bool
-	FunctionsMap map[string]*Function
+	Functions    []*Function `@@+`
+	functionsMap map[string]*Function
+}
+
+func (pkg *Package) GenerateBackLinks(program *Program) {
+	pkg.program = program
+
+	for _, function := range pkg.Functions {
+		function.GenerateBackLinks(pkg)
+	}
 }
 
 func (pkg *Package) ResolveNames(errorsCollector *errors.Collector) {
-	pkg.FunctionsMap = make(map[string]*Function, len(pkg.Functions))
-
+	pkg.functionsMap = make(map[string]*Function, len(pkg.Functions))
 	for _, function := range pkg.Functions {
-		_, exists := pkg.FunctionsMap[function.Name]
+		_, exists := pkg.functionsMap[function.Name]
 		if exists {
 			errorsCollector.Err(
 				function.Pos,
 				"NameError",
-				fmt.Sprintf("the function %s is redeclared", function.Name),
+				fmt.Sprintf("the function %s is redeclared in this package", function.Name),
 			)
 		}
 
-		pkg.FunctionsMap[function.Name] = &function
+		pkg.functionsMap[function.Name] = function
+	}
 
+	for _, function := range pkg.Functions {
 		function.ResolveNames(errorsCollector)
 	}
 
 	if pkg.IsMain {
-		_, mainExists := pkg.FunctionsMap["main"]
+		_, mainExists := pkg.functionsMap["main"]
 		if !mainExists {
 			errorsCollector.Err(
 				pkg.Pos,
@@ -43,7 +53,7 @@ func (pkg *Package) ResolveNames(errorsCollector *errors.Collector) {
 			)
 		}
 	} else {
-		_, mainExists := pkg.FunctionsMap["main"]
+		_, mainExists := pkg.functionsMap["main"]
 		if mainExists {
 			errorsCollector.Err(
 				pkg.Pos,

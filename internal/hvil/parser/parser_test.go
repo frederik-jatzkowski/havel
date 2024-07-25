@@ -38,14 +38,14 @@ asd
 		}
 					`,
 			expected: parser.Package{
-				Functions: []parser.Function{
+				Functions: []*parser.Function{
 					{
 						Name: "main",
 						Body: parser.FunctionBody{
-							BasicBlocks: []parser.BasicBlock{
+							BasicBlocks: []*parser.BasicBlock{
 								{
 									Identifier: "entry",
-									JumpTarget: parser.Return{},
+									Terminator: &parser.Return{},
 								},
 							},
 						},
@@ -61,12 +61,12 @@ func main (a1 : [8,16,[[32],16,8]]) {
 }
 			`,
 			expected: parser.Package{
-				Functions: []parser.Function{
+				Functions: []*parser.Function{
 					{
 						Name: "main",
 						Head: parser.FunctionHead{
-							Parameters: parser.CommaSeparatedList[parser.VariableDeclaration]{
-								Items: []parser.VariableDeclaration{
+							Parameters: parser.CommaSeparatedList[*parser.LocalVariableDeclaration]{
+								Items: []*parser.LocalVariableDeclaration{
 									{
 										Name: "a1",
 										Type: parser.TupleType{
@@ -91,10 +91,10 @@ func main (a1 : [8,16,[[32],16,8]]) {
 							},
 						},
 						Body: parser.FunctionBody{
-							BasicBlocks: []parser.BasicBlock{
+							BasicBlocks: []*parser.BasicBlock{
 								{
 									Identifier: "entry",
-									JumpTarget: parser.Return{},
+									Terminator: &parser.Return{},
 								},
 							},
 						},
@@ -110,12 +110,12 @@ func main () => (r1 : [8, 16]) {
 }
 			`,
 			expected: parser.Package{
-				Functions: []parser.Function{
+				Functions: []*parser.Function{
 					{
 						Name: "main",
 						Head: parser.FunctionHead{
-							ReturnValues: parser.CommaSeparatedList[parser.VariableDeclaration]{
-								Items: []parser.VariableDeclaration{
+							ReturnValues: parser.CommaSeparatedList[*parser.LocalVariableDeclaration]{
+								Items: []*parser.LocalVariableDeclaration{
 									{
 										Name: "r1",
 										Type: parser.TupleType{
@@ -129,10 +129,10 @@ func main () => (r1 : [8, 16]) {
 							},
 						},
 						Body: parser.FunctionBody{
-							BasicBlocks: []parser.BasicBlock{
+							BasicBlocks: []*parser.BasicBlock{
 								{
 									Identifier: "entry",
-									JumpTarget: parser.Return{},
+									Terminator: &parser.Return{},
 								},
 							},
 						},
@@ -154,12 +154,12 @@ func main () {
 }
 			`,
 			expected: parser.Package{
-				Functions: []parser.Function{
+				Functions: []*parser.Function{
 					{
 						Name: "main",
 						Body: parser.FunctionBody{
-							LocalDeclarations: parser.CommaSeparatedList[parser.VariableDeclaration]{
-								Items: []parser.VariableDeclaration{
+							LocalDeclarations: parser.CommaSeparatedList[*parser.LocalVariableDeclaration]{
+								Items: []*parser.LocalVariableDeclaration{
 									{
 										Name: "a",
 										Type: parser.TupleType{
@@ -179,10 +179,10 @@ func main () {
 									},
 								},
 							},
-							BasicBlocks: []parser.BasicBlock{
+							BasicBlocks: []*parser.BasicBlock{
 								{
 									Identifier: "entry",
-									JumpTarget: parser.Return{},
+									Terminator: &parser.Return{},
 								},
 							},
 						},
