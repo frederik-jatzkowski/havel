@@ -37,9 +37,10 @@ func (write *WriteRegister) ResolveNames(errorsCollector *errors.Collector) {
 }
 
 type WriteVariable struct {
-	Pos        lexer.Position
-	block      *BasicBlock
-	Identifier string `@Identifier`
+	Pos         lexer.Position
+	block       *BasicBlock
+	Declaration VariableDeclaration
+	Identifier  string `@Identifier`
 }
 
 func (write *WriteVariable) GenerateBackLinks(block *BasicBlock) {
@@ -47,12 +48,14 @@ func (write *WriteVariable) GenerateBackLinks(block *BasicBlock) {
 }
 
 func (write *WriteVariable) ResolveNames(errorsCollector *errors.Collector) {
-	_, exists := write.block.function.variableDeclarationMap[write.Identifier]
+	localDeclaration, exists := write.block.function.variableDeclarationMap[write.Identifier]
 	if !exists {
 		errorsCollector.Err(
 			write.Pos,
 			"NameError",
 			fmt.Sprintf("variable %s is not found in the current scope", write.Identifier),
 		)
+	} else {
+		write.Declaration = localDeclaration
 	}
 }

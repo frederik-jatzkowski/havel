@@ -7,6 +7,8 @@ import (
 	"github.com/frederik-jatzkowski/havel/internal/tooling/errors"
 )
 
+type VariableDeclaration interface{}
+
 type LocalVariableDeclaration struct {
 	Pos      lexer.Position
 	function *Function

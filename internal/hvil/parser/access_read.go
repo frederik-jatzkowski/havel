@@ -13,9 +13,10 @@ type Read interface {
 }
 
 type ReadRegister struct {
-	Pos        lexer.Position
-	block      *BasicBlock
-	Identifier string `"$" @Identifier`
+	Pos         lexer.Position
+	block       *BasicBlock
+	Declaration *WriteRegister
+	Identifier  string `"$" @Identifier`
 }
 
 func (read *ReadRegister) GenerateBackLinks(block *BasicBlock) {
@@ -23,20 +24,23 @@ func (read *ReadRegister) GenerateBackLinks(block *BasicBlock) {
 }
 
 func (read *ReadRegister) ResolveNames(errorsCollector *errors.Collector) {
-	_, exists := read.block.registerMap[read.Identifier]
+	declaration, exists := read.block.registerMap[read.Identifier]
 	if !exists {
 		errorsCollector.Err(
 			read.Pos,
 			"NameError",
 			fmt.Sprintf("the register %s is not yet defined in the current scope", read.Identifier),
 		)
+	} else {
+		read.Declaration = declaration
 	}
 }
 
 type ReadVariable struct {
-	Pos        lexer.Position
-	block      *BasicBlock
-	Identifier string `@Identifier`
+	Pos         lexer.Position
+	block       *BasicBlock
+	Declaration VariableDeclaration
+	Identifier  string `@Identifier`
 }
 
 func (read *ReadVariable) GenerateBackLinks(block *BasicBlock) {
@@ -44,12 +48,14 @@ func (read *ReadVariable) GenerateBackLinks(block *BasicBlock) {
 }
 
 func (read *ReadVariable) ResolveNames(errorsCollector *errors.Collector) {
-	_, exists := read.block.function.variableDeclarationMap[read.Identifier]
+	localDeclaration, exists := read.block.function.variableDeclarationMap[read.Identifier]
 	if !exists {
 		errorsCollector.Err(
 			read.Pos,
 			"NameError",
 			fmt.Sprintf("variable %s is not found in the current scope", read.Identifier),
 		)
+	} else {
+		read.Declaration = localDeclaration
 	}
 }
