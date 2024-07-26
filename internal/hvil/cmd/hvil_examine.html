@@ -6,9 +6,18 @@
     <title>HVIL Examiner</title>
     <style>
       body {
-        background-color: #001f3f;
-        color: #ffffff;
-        font-family: Arial, sans-serif;
+        background-color: #00172d;
+        color: #aaa;
+        font-family: monospace;
+      }
+
+      *::-webkit-scrollbar {
+        display: none;
+      }
+
+      * {
+        -ms-overflow-style: none; /* IE and Edge */
+        scrollbar-width: none; /* Firefox */
       }
 
       .dropdown {
@@ -34,16 +43,18 @@
       }
 
       .preview {
-        opacity: .2;
+        opacity: 0.4;
       }
     </style>
   </head>
   <body>
+    <h3>Compiler Output:</h3>
     <output>
       {{ range .Output }}
       <p>{{ . }}</p>
       {{ end }}
     </output>
+    <h3>Abstract Syntax Tree:</h3>
     <ast id="ast"></ast>
     <script>
       // Example JSON data

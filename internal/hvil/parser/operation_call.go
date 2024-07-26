@@ -8,11 +8,12 @@ import (
 )
 
 type LocalCall struct {
-	Name   string                   `"local" "." @Identifier`
-	Args   CommaSeparatedList[Read] `"(" @@ ")"`
-	Pos    lexer.Position
-	Tokens []lexer.Token
-	block  *BasicBlock
+	Name        string                   `"local" "." @Identifier`
+	Args        CommaSeparatedList[Read] `"(" @@ ")"`
+	Pos         lexer.Position
+	Tokens      []lexer.Token
+	block       *BasicBlock
+	declaration *Function
 }
 
 func (op *LocalCall) GenerateBackLinks(block *BasicBlock) {
@@ -24,7 +25,7 @@ func (op *LocalCall) GenerateBackLinks(block *BasicBlock) {
 }
 
 func (op *LocalCall) ResolveNames(errorsCollector *errors.Collector) {
-	_, exists := op.block.function.pkg.functionsMap[op.Name]
+	declaration, exists := op.block.function.pkg.functionsMap[op.Name]
 	if !exists {
 		errorsCollector.Err(
 			op.Pos,
@@ -32,6 +33,8 @@ func (op *LocalCall) ResolveNames(errorsCollector *errors.Collector) {
 			fmt.Sprintf("the function %s is not defined locally in this package", op.Name),
 		)
 	}
+
+	op.declaration = declaration
 
 	for _, arg := range op.Args.Items {
 		arg.ResolveNames(errorsCollector)
