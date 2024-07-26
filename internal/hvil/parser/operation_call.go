@@ -8,10 +8,11 @@ import (
 )
 
 type LocalCall struct {
-	Name  string                   `"local" "." @Identifier`
-	Args  CommaSeparatedList[Read] `"(" @@ ")"`
-	Pos   lexer.Position
-	block *BasicBlock
+	Name   string                   `"local" "." @Identifier`
+	Args   CommaSeparatedList[Read] `"(" @@ ")"`
+	Pos    lexer.Position
+	Tokens []lexer.Token
+	block  *BasicBlock
 }
 
 func (op *LocalCall) GenerateBackLinks(block *BasicBlock) {

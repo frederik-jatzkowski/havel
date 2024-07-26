@@ -78,7 +78,8 @@
                   result += makeDropdown(
                       index.toString(),
                       printPreview(each),
-                      displayAnything(each)
+                      displayAnything(each),
+                      (each?.length ?? 10) < 6
                   )
               }
           } else if (typeof value === "object" && value !== null) {
@@ -88,7 +89,8 @@
                   result += makeDropdown(
                       key,
                       printPreview(value[key]),
-                      displayAnything(value[key])
+                      displayAnything(value[key]),
+                      (value[key]?.length ?? 10) < 6
                   )
               }
           } else {
@@ -98,9 +100,9 @@
           return result
       }
 
-      function makeDropdown(name, preview, content) {
+      function makeDropdown(name, preview, content, open = false) {
           return `
-          <div class="dropdown">
+          <div class="dropdown" data-open="${open}">
               <div class="head"><b>${name}</b>: <span class="preview">${preview}</span></div>
               <div class="content">${content}</div>
           </div>
