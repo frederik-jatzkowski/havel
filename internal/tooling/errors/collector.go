@@ -30,3 +30,7 @@ func (collector *Collector) Err(
 func (collector *Collector) HasErrors() bool {
 	return len(collector.collected) > 0
 }
+
+func (collector *Collector) Errors() []HelpfulError {
+	return collector.collected
+}

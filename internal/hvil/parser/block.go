@@ -6,11 +6,12 @@ import (
 )
 
 type BasicBlock struct {
-	Pos          lexer.Position
-	function     *Function
 	Identifier   string          `"block":Keyword @Identifier "{"`
 	Instructions []*Instruction  `@@*`
 	Terminator   BlockTerminator `"}" "=>" @@ ";"`
+	Pos          lexer.Position
+	Tokens       []lexer.Token
+	function     *Function
 	registerMap  map[string]*WriteRegister
 }
 

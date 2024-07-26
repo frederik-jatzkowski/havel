@@ -8,11 +8,11 @@ import (
 )
 
 type Package struct {
-	Pos          lexer.Position
-	program      *Program
 	Name         string
 	IsMain       bool
 	Functions    []*Function `@@+`
+	Pos          lexer.Position
+	program      *Program
 	functionsMap map[string]*Function
 }
 

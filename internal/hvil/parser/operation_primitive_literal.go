@@ -6,9 +6,9 @@ import (
 )
 
 type PrimitiveLiteral struct {
+	Value uint64 `@BitLiteral`
 	Pos   lexer.Position
 	block *BasicBlock
-	Value uint64 `@BitLiteral`
 }
 
 func (op *PrimitiveLiteral) GenerateBackLinks(block *BasicBlock) {

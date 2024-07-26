@@ -13,10 +13,11 @@ type Write interface {
 }
 
 type WriteRegister struct {
-	Pos        lexer.Position
-	block      *BasicBlock
 	Identifier string `"$" @Identifier`
 	Type       Type   `":" @@`
+	Pos        lexer.Position
+	Tokens     []lexer.Token
+	block      *BasicBlock
 }
 
 func (write *WriteRegister) GenerateBackLinks(block *BasicBlock) {
@@ -37,10 +38,11 @@ func (write *WriteRegister) ResolveNames(errorsCollector *errors.Collector) {
 }
 
 type WriteVariable struct {
-	Pos         lexer.Position
-	block       *BasicBlock
-	Declaration VariableDeclaration
 	Identifier  string `@Identifier`
+	Declaration VariableDeclaration
+	Pos         lexer.Position
+	Tokens      []lexer.Token
+	block       *BasicBlock
 }
 
 func (write *WriteVariable) GenerateBackLinks(block *BasicBlock) {

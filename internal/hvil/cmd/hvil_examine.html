@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HVIL Examiner</title>
+    <style>
+      body {
+        background-color: #001f3f;
+        color: #ffffff;
+        font-family: Arial, sans-serif;
+      }
+
+      .dropdown {
+        height: 2rem;
+        overflow: hidden;
+      }
+
+      .dropdown[data-open="true"] {
+        height: unset;
+      }
+
+      .dropdown > .head {
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+      }
+
+      .dropdown > .head:hover {
+        background-color: #005f8f33;
+      }
+
+      .dropdown > .content {
+        padding-left: 2ch;
+      }
+
+      .preview {
+        opacity: .2;
+      }
+    </style>
+  </head>
+  <body>
+    <output>
+      {{ range .Output }}
+      <p>{{ . }}</p>
+      {{ end }}
+    </output>
+    <ast id="ast"></ast>
+    <script>
+      // Example JSON data
+      const jsonData = JSON.parse({{ .Ast }})
+
+      function printTokens(tokens) {
+        let result = ""
+        for (const token of tokens) {
+            if(token.Value.startsWith("//")) continue;
+            result += token.Value
+        }
+
+        return result.replace("\n", " ").replace("\t", " ").replace("\r", "")
+      }
+
+      function printPreview(value) {
+        if (value && value.Tokens) {
+            return printTokens(value.Tokens).substring(0, 48)
+        } else if (Array.isArray(value)) {
+            return `length: ${value.length}`
+        } else if (typeof value === "object" && value !== null) {
+              return ""
+          } else {
+            return JSON.stringify(value)
+          }
+      }
+
+      function displayAnything(value) {
+          let result = ""
+          if (Array.isArray(value)) {
+              for (const [index, each] of value.entries()) {
+                  result += makeDropdown(
+                      index.toString(),
+                      printPreview(each),
+                      displayAnything(each)
+                  )
+              }
+          } else if (typeof value === "object" && value !== null) {
+              for (const key of Object.getOwnPropertyNames(value)) {
+                if (["Tokens", "Pos"].includes(key)) continue;
+
+                  result += makeDropdown(
+                      key,
+                      printPreview(value[key]),
+                      displayAnything(value[key])
+                  )
+              }
+          } else {
+              result += ""
+          }
+
+          return result
+      }
+
+      function makeDropdown(name, preview, content) {
+          return `
+          <div class="dropdown">
+              <div class="head"><b>${name}</b>: <span class="preview">${preview}</span></div>
+              <div class="content">${content}</div>
+          </div>
+          `
+      }
+
+      document.getElementById("ast").innerHTML = displayAnything(jsonData)
+
+      for (const dropdown of document.querySelectorAll("div.dropdown")) {
+        dropdown.onclick = (e) => {
+            e.stopPropagation()
+            dropdown.setAttribute("data-open", dropdown.getAttribute("data-open") == "true" ? "false" : "true")
+        }
+      }
+    </script>
+  </body>
+</html>

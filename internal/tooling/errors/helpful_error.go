@@ -14,7 +14,11 @@ type HelpfulError struct {
 }
 
 func (err HelpfulError) tryToWriteTo(writer io.Writer) {
-	fmt.Fprintf(writer, `
+	fmt.Fprint(writer, err.String())
+}
+
+func (err HelpfulError) String() string {
+	return fmt.Sprintf(`
 %s at %s: %s
 `,
 		err.Name,

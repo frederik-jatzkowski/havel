@@ -13,10 +13,11 @@ type Read interface {
 }
 
 type ReadRegister struct {
-	Pos         lexer.Position
-	block       *BasicBlock
-	Declaration *WriteRegister
 	Identifier  string `"$" @Identifier`
+	Declaration *WriteRegister
+	Pos         lexer.Position
+	Tokens      []lexer.Token
+	block       *BasicBlock
 }
 
 func (read *ReadRegister) GenerateBackLinks(block *BasicBlock) {
@@ -37,10 +38,11 @@ func (read *ReadRegister) ResolveNames(errorsCollector *errors.Collector) {
 }
 
 type ReadVariable struct {
-	Pos         lexer.Position
-	block       *BasicBlock
-	Declaration VariableDeclaration
 	Identifier  string `@Identifier`
+	Declaration VariableDeclaration
+	Pos         lexer.Position
+	Tokens      []lexer.Token
+	block       *BasicBlock
 }
 
 func (read *ReadVariable) GenerateBackLinks(block *BasicBlock) {

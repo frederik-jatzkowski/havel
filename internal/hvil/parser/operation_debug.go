@@ -8,10 +8,10 @@ import (
 )
 
 type DebugOperation struct {
-	Pos   lexer.Position
-	block *BasicBlock
 	Name  string                   `"debug" "." @Identifier`
 	Args  CommaSeparatedList[Read] `"(" @@ ")"`
+	Pos   lexer.Position
+	block *BasicBlock
 }
 
 func (op *DebugOperation) GenerateBackLinks(block *BasicBlock) {

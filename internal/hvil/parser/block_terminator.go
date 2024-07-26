@@ -13,9 +13,10 @@ type BlockTerminator interface {
 }
 
 type Return struct {
-	Pos   lexer.Position
-	block *BasicBlock
-	Token string `@"return":Keyword`
+	Token  string `@"return":Keyword`
+	Pos    lexer.Position
+	Tokens []lexer.Token
+	block  *BasicBlock
 }
 
 func (terminator *Return) GenerateBackLinks(block *BasicBlock) {
@@ -25,9 +26,10 @@ func (terminator *Return) GenerateBackLinks(block *BasicBlock) {
 func (terminator *Return) ResolveNames(errorsCollector *errors.Collector) {}
 
 type Jump struct {
-	Pos    lexer.Position
-	block  *BasicBlock
 	Target string `@Identifier`
+	Pos    lexer.Position
+	Tokens []lexer.Token
+	block  *BasicBlock
 }
 
 func (terminator *Jump) GenerateBackLinks(block *BasicBlock) {
@@ -46,11 +48,12 @@ func (terminator *Jump) ResolveNames(errorsCollector *errors.Collector) {
 }
 
 type ConditionalJump struct {
-	Pos       lexer.Position
-	block     *BasicBlock
 	Condition Read   `"if":Keyword @@`
 	True      string `"then":Keyword @Identifier`
 	False     string `"else":Keyword @Identifier`
+	Pos       lexer.Position
+	Tokens    []lexer.Token
+	block     *BasicBlock
 }
 
 func (terminator *ConditionalJump) GenerateBackLinks(block *BasicBlock) {

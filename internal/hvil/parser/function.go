@@ -8,11 +8,14 @@ import (
 )
 
 type Function struct {
+	Name                   string                                           `"func":Keyword @Identifier`
+	Parameters             CommaSeparatedList[*FunctionVariableDeclaration] `"(" @@ ")"`
+	ReturnValues           CommaSeparatedList[*FunctionVariableDeclaration] `( "=>" "(" @@ ")" )?`
+	LocalDeclarations      CommaSeparatedList[*FunctionVariableDeclaration] `"{" ( "declare":Keyword "(" @@ ")" ";" )?`
+	BasicBlocks            []*BasicBlock                                    `@@+  "}"`
 	Pos                    lexer.Position
+	Tokens                 []lexer.Token
 	pkg                    *Package
-	Name                   string       `"func":Keyword @Identifier`
-	Head                   FunctionHead `@@`
-	Body                   FunctionBody `@@`
 	variableDeclarationMap map[string]*FunctionVariableDeclaration
 	blockMap               map[string]*BasicBlock
 }
@@ -30,19 +33,19 @@ type FunctionBody struct {
 func (function *Function) GenerateBackLinks(pkg *Package) {
 	function.pkg = pkg
 
-	for _, declaration := range function.Head.Parameters.Items {
+	for _, declaration := range function.Parameters.Items {
 		declaration.GenerateBackLinks(function)
 	}
 
-	for _, declaration := range function.Head.ReturnValues.Items {
+	for _, declaration := range function.ReturnValues.Items {
 		declaration.GenerateBackLinks(function)
 	}
 
-	for _, declaration := range function.Body.LocalDeclarations.Items {
+	for _, declaration := range function.LocalDeclarations.Items {
 		declaration.GenerateBackLinks(function)
 	}
 
-	for _, block := range function.Body.BasicBlocks {
+	for _, block := range function.BasicBlocks {
 		block.GenerateBackLinks(function)
 	}
 }
@@ -50,25 +53,25 @@ func (function *Function) GenerateBackLinks(pkg *Package) {
 func (function *Function) ResolveNames(errorsCollector *errors.Collector) {
 	function.variableDeclarationMap = make(
 		map[string]*FunctionVariableDeclaration,
-		len(function.Head.Parameters.Items)+
-			len(function.Head.ReturnValues.Items)+
-			len(function.Body.LocalDeclarations.Items),
+		len(function.Parameters.Items)+
+			len(function.ReturnValues.Items)+
+			len(function.LocalDeclarations.Items),
 	)
 
-	for _, declaration := range function.Head.Parameters.Items {
+	for _, declaration := range function.Parameters.Items {
 		declaration.ResolveNames(errorsCollector)
 	}
 
-	for _, declaration := range function.Head.ReturnValues.Items {
+	for _, declaration := range function.ReturnValues.Items {
 		declaration.ResolveNames(errorsCollector)
 	}
 
-	for _, declaration := range function.Body.LocalDeclarations.Items {
+	for _, declaration := range function.LocalDeclarations.Items {
 		declaration.ResolveNames(errorsCollector)
 	}
 
-	function.blockMap = make(map[string]*BasicBlock, len(function.Body.BasicBlocks))
-	for _, block := range function.Body.BasicBlocks {
+	function.blockMap = make(map[string]*BasicBlock, len(function.BasicBlocks))
+	for _, block := range function.BasicBlocks {
 		_, exists := function.blockMap[block.Identifier]
 		if exists {
 			errorsCollector.Err(
@@ -81,7 +84,7 @@ func (function *Function) ResolveNames(errorsCollector *errors.Collector) {
 		function.blockMap[block.Identifier] = block
 	}
 
-	for _, block := range function.Body.BasicBlocks {
+	for _, block := range function.BasicBlocks {
 		block.ResolveNames(errorsCollector)
 	}
 }

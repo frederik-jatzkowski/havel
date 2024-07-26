@@ -8,10 +8,11 @@ import (
 )
 
 type FunctionVariableDeclaration struct {
-	Pos      lexer.Position
-	function *Function
 	Name     string `@Identifier`
 	Type     Type   `":" @@`
+	Pos      lexer.Position
+	Tokens   []lexer.Token
+	function *Function
 }
 
 func (declaration *FunctionVariableDeclaration) GenerateBackLinks(function *Function) {

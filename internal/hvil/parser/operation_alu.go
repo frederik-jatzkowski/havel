@@ -8,10 +8,10 @@ import (
 )
 
 type AluOperation struct {
-	Pos   lexer.Position
-	block *BasicBlock
 	Name  string                   `"alu" "." @Identifier`
 	Args  CommaSeparatedList[Read] `"(" @@ ")"`
+	Pos   lexer.Position
+	block *BasicBlock
 }
 
 func (op *AluOperation) GenerateBackLinks(block *BasicBlock) {

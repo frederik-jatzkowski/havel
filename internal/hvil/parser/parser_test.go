@@ -41,12 +41,10 @@ asd
 				Functions: []*parser.Function{
 					{
 						Name: "main",
-						Body: parser.FunctionBody{
-							BasicBlocks: []*parser.BasicBlock{
-								{
-									Identifier: "entry",
-									Terminator: &parser.Return{},
-								},
+						BasicBlocks: []*parser.BasicBlock{
+							{
+								Identifier: "entry",
+								Terminator: &parser.Return{},
 							},
 						},
 					},
@@ -64,25 +62,23 @@ func main (a1 : [8,16,[[32],16,8]]) {
 				Functions: []*parser.Function{
 					{
 						Name: "main",
-						Head: parser.FunctionHead{
-							Parameters: parser.CommaSeparatedList[*parser.FunctionVariableDeclaration]{
-								Items: []*parser.FunctionVariableDeclaration{
-									{
-										Name: "a1",
-										Type: parser.TupleType{
-											Members: []parser.Type{
-												parser.PrimitiveType{BitSize: 8},
-												parser.PrimitiveType{BitSize: 16},
-												parser.TupleType{
-													Members: []parser.Type{
-														parser.TupleType{
-															Members: []parser.Type{
-																parser.PrimitiveType{BitSize: 32},
-															},
+						Parameters: parser.CommaSeparatedList[*parser.FunctionVariableDeclaration]{
+							Items: []*parser.FunctionVariableDeclaration{
+								{
+									Name: "a1",
+									Type: parser.TupleType{
+										Members: []parser.Type{
+											parser.PrimitiveType{BitSize: 8},
+											parser.PrimitiveType{BitSize: 16},
+											parser.TupleType{
+												Members: []parser.Type{
+													parser.TupleType{
+														Members: []parser.Type{
+															parser.PrimitiveType{BitSize: 32},
 														},
-														parser.PrimitiveType{BitSize: 16},
-														parser.PrimitiveType{BitSize: 8},
 													},
+													parser.PrimitiveType{BitSize: 16},
+													parser.PrimitiveType{BitSize: 8},
 												},
 											},
 										},
@@ -90,12 +86,10 @@ func main (a1 : [8,16,[[32],16,8]]) {
 								},
 							},
 						},
-						Body: parser.FunctionBody{
-							BasicBlocks: []*parser.BasicBlock{
-								{
-									Identifier: "entry",
-									Terminator: &parser.Return{},
-								},
+						BasicBlocks: []*parser.BasicBlock{
+							{
+								Identifier: "entry",
+								Terminator: &parser.Return{},
 							},
 						},
 					},
@@ -113,27 +107,23 @@ func main () => (r1 : [8, 16]) {
 				Functions: []*parser.Function{
 					{
 						Name: "main",
-						Head: parser.FunctionHead{
-							ReturnValues: parser.CommaSeparatedList[*parser.FunctionVariableDeclaration]{
-								Items: []*parser.FunctionVariableDeclaration{
-									{
-										Name: "r1",
-										Type: parser.TupleType{
-											Members: []parser.Type{
-												parser.PrimitiveType{BitSize: 8},
-												parser.PrimitiveType{BitSize: 16},
-											},
+						ReturnValues: parser.CommaSeparatedList[*parser.FunctionVariableDeclaration]{
+							Items: []*parser.FunctionVariableDeclaration{
+								{
+									Name: "r1",
+									Type: parser.TupleType{
+										Members: []parser.Type{
+											parser.PrimitiveType{BitSize: 8},
+											parser.PrimitiveType{BitSize: 16},
 										},
 									},
 								},
 							},
 						},
-						Body: parser.FunctionBody{
-							BasicBlocks: []*parser.BasicBlock{
-								{
-									Identifier: "entry",
-									Terminator: &parser.Return{},
-								},
+						BasicBlocks: []*parser.BasicBlock{
+							{
+								Identifier: "entry",
+								Terminator: &parser.Return{},
 							},
 						},
 					},
@@ -157,33 +147,31 @@ func main () {
 				Functions: []*parser.Function{
 					{
 						Name: "main",
-						Body: parser.FunctionBody{
-							LocalDeclarations: parser.CommaSeparatedList[*parser.FunctionVariableDeclaration]{
-								Items: []*parser.FunctionVariableDeclaration{
-									{
-										Name: "a",
-										Type: parser.TupleType{
-											Members: []parser.Type{
-												parser.PrimitiveType{BitSize: 8},
-												parser.PrimitiveType{BitSize: 8},
-											},
+						LocalDeclarations: parser.CommaSeparatedList[*parser.FunctionVariableDeclaration]{
+							Items: []*parser.FunctionVariableDeclaration{
+								{
+									Name: "a",
+									Type: parser.TupleType{
+										Members: []parser.Type{
+											parser.PrimitiveType{BitSize: 8},
+											parser.PrimitiveType{BitSize: 8},
 										},
 									},
-									{
-										Name: "i1",
-										Type: parser.PrimitiveType{BitSize: 16},
-									},
-									{
-										Name: "i2",
-										Type: parser.PrimitiveType{BitSize: 32},
-									},
+								},
+								{
+									Name: "i1",
+									Type: parser.PrimitiveType{BitSize: 16},
+								},
+								{
+									Name: "i2",
+									Type: parser.PrimitiveType{BitSize: 32},
 								},
 							},
-							BasicBlocks: []*parser.BasicBlock{
-								{
-									Identifier: "entry",
-									Terminator: &parser.Return{},
-								},
+						},
+						BasicBlocks: []*parser.BasicBlock{
+							{
+								Identifier: "entry",
+								Terminator: &parser.Return{},
 							},
 						},
 					},
