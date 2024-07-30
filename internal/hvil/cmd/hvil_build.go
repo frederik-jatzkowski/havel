@@ -33,7 +33,7 @@ var buildCmd = &cobra.Command{
 		nameResolutionPass := parser.NameResolution{
 			Result: errors.NewCollector(os.Stderr),
 		}
-		program.VisitLCR(&nameResolutionPass)
+		program.VisitCLR(&nameResolutionPass)
 
 		if nameResolutionPass.Result.HasErrors() {
 			os.Exit(1)
