@@ -5,15 +5,10 @@ import (
 )
 
 type FunctionVariableDeclaration struct {
-	Name     string `@Identifier`
-	Type     Type   `":" @@`
-	Pos      lexer.Position
-	Tokens   []lexer.Token
-	function *Function
-}
-
-func (declaration *FunctionVariableDeclaration) GenerateBackLinks(function *Function) {
-	declaration.function = function
+	Name   string `@Identifier`
+	Type   Type   `":" @@`
+	Pos    lexer.Position
+	Tokens []lexer.Token
 }
 
 func (declaration *FunctionVariableDeclaration) VisitLCR(visitor Visitor) {

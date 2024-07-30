@@ -9,11 +9,6 @@ type WriteVariable struct {
 	Declaration VariableDeclaration
 	Pos         lexer.Position
 	Tokens      []lexer.Token
-	block       *BasicBlock
-}
-
-func (write *WriteVariable) GenerateBackLinks(block *BasicBlock) {
-	write.block = block
 }
 
 func (write *WriteVariable) VisitLCR(visitor Visitor) {

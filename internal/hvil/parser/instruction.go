@@ -6,12 +6,8 @@ type Instruction struct {
 	Result    *Write    `(@@ "=")?`
 	Operation Operation `@@ ";"`
 	Pos       lexer.Position
-	block     *BasicBlock
-	Tokens    []lexer.Token
-}
 
-func (instr *Instruction) GenerateBackLinks(block *BasicBlock) {
-	instr.block = block
+	Tokens []lexer.Token
 }
 
 func (instr *Instruction) VisitLCR(visitor Visitor) {

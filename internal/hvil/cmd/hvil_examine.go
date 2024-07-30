@@ -48,8 +48,6 @@ var examineCmd = &cobra.Command{
 				},
 			}
 
-			program.GenerateBackLinks()
-			// program.ResolveNames(errorsCollector)
 			nameResolutionPass := parser.NameResolution{
 				Result: errors.NewCollector(os.Stderr),
 			}

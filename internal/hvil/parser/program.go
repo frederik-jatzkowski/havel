@@ -5,12 +5,6 @@ type Program struct {
 	packageMap map[string]*Package
 }
 
-func (program *Program) GenerateBackLinks() {
-	for _, pkg := range program.Packages {
-		pkg.GenerateBackLinks(program)
-	}
-}
-
 func (program *Program) VisitLCR(visitor Visitor) {
 	visitor.SetCurrentProgram(program)
 	visitor.VisitProgram(program)

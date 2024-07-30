@@ -30,7 +30,6 @@ var buildCmd = &cobra.Command{
 			},
 		}
 
-		program.GenerateBackLinks()
 		nameResolutionPass := parser.NameResolution{
 			Result: errors.NewCollector(os.Stderr),
 		}

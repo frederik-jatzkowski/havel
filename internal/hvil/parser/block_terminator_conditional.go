@@ -10,13 +10,6 @@ type ConditionalJump struct {
 	False     string `"else":Keyword @Identifier`
 	Pos       lexer.Position
 	Tokens    []lexer.Token
-	block     *BasicBlock
-}
-
-func (terminator *ConditionalJump) GenerateBackLinks(block *BasicBlock) {
-	terminator.Condition.GenerateBackLinks(block)
-
-	terminator.block = block
 }
 
 func (terminator *ConditionalJump) VisitLCR(visitor Visitor) {

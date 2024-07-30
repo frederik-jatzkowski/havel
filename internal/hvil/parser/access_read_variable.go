@@ -9,11 +9,6 @@ type ReadVariable struct {
 	Declaration VariableDeclaration
 	Pos         lexer.Position
 	Tokens      []lexer.Token
-	block       *BasicBlock
-}
-
-func (read *ReadVariable) GenerateBackLinks(block *BasicBlock) {
-	read.block = block
 }
 
 func (read *ReadVariable) VisitLCR(visitor Visitor) {

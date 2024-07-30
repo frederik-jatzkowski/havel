@@ -9,15 +9,6 @@ type AluOperation struct {
 	Args   CommaSeparatedList[Read] `"(" @@ ")"`
 	Pos    lexer.Position
 	Tokens []lexer.Token
-	block  *BasicBlock
-}
-
-func (op *AluOperation) GenerateBackLinks(block *BasicBlock) {
-	op.block = block
-
-	for _, arg := range op.Args.Items {
-		arg.GenerateBackLinks(block)
-	}
 }
 
 func (op *AluOperation) VisitLCR(visitor Visitor) {

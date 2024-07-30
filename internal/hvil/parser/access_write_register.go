@@ -9,11 +9,6 @@ type WriteRegister struct {
 	Type       Type   `":" @@`
 	Pos        lexer.Position
 	Tokens     []lexer.Token
-	block      *BasicBlock
-}
-
-func (write *WriteRegister) GenerateBackLinks(block *BasicBlock) {
-	write.block = block
 }
 
 func (write *WriteRegister) VisitLCR(visitor Visitor) {

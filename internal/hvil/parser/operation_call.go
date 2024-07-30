@@ -9,16 +9,7 @@ type LocalCall struct {
 	Args        CommaSeparatedList[Read] `"(" @@ ")"`
 	Pos         lexer.Position
 	Tokens      []lexer.Token
-	block       *BasicBlock
 	declaration *Function
-}
-
-func (op *LocalCall) GenerateBackLinks(block *BasicBlock) {
-	op.block = block
-
-	for _, arg := range op.Args.Items {
-		arg.GenerateBackLinks(block)
-	}
 }
 
 func (op *LocalCall) VisitLCR(visitor Visitor) {

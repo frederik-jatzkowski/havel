@@ -9,11 +9,6 @@ type ReadRegister struct {
 	Declaration *WriteRegister
 	Pos         lexer.Position
 	Tokens      []lexer.Token
-	block       *BasicBlock
-}
-
-func (read *ReadRegister) GenerateBackLinks(block *BasicBlock) {
-	read.block = block
 }
 
 func (read *ReadRegister) VisitLCR(visitor Visitor) {
