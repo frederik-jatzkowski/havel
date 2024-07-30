@@ -5,8 +5,8 @@ import (
 )
 
 type DebugOperation struct {
-	Name   string                   `"debug" "." @Identifier`
-	Args   CommaSeparatedList[Read] `"(" @@ ")"`
+	Name   string                   `parser:"'debug' '.' @Identifier"`
+	Args   CommaSeparatedList[Read] `parser:"'(' @@ ')'"`
 	Pos    lexer.Position
 	Tokens []lexer.Token
 }

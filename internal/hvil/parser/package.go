@@ -7,7 +7,7 @@ import (
 type Package struct {
 	Name         string
 	IsMain       bool
-	Functions    []*Function `@@+`
+	Functions    []*Function `parser:"@@+"`
 	Pos          lexer.Position
 	functionsMap map[string]*Function
 }

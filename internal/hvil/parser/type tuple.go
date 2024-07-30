@@ -5,7 +5,7 @@ import (
 )
 
 type TupleType struct {
-	Members []Type `"[" @@ ("," @@)* "]"`
+	Members []Type `parser:"'[' @@ (',' @@)* ']'"`
 	Tokens  []lexer.Token
 }
 

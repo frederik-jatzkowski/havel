@@ -3,7 +3,7 @@ package parser
 import "encoding/json"
 
 type CommaSeparatedList[T any] struct {
-	Items []T `(@@ ( "," @@ )* )?`
+	Items []T `parser:"(@@ ( ',' @@ )* )?"`
 }
 
 func (list CommaSeparatedList[T]) MarshalJSON() ([]byte, error) {

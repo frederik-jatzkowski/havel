@@ -5,7 +5,7 @@ import (
 )
 
 type ReadVariable struct {
-	Identifier  string `@Identifier`
+	Identifier  string `parser:"@Identifier"`
 	Declaration VariableDeclaration
 	Pos         lexer.Position
 	Tokens      []lexer.Token

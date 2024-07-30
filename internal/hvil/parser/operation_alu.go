@@ -5,8 +5,8 @@ import (
 )
 
 type AluOperation struct {
-	Name   string                   `"alu" "." @Identifier`
-	Args   CommaSeparatedList[Read] `"(" @@ ")"`
+	Name   string                   `parser:"'alu' '.' @Identifier"`
+	Args   CommaSeparatedList[Read] `parser:"'(' @@ ')'"`
 	Pos    lexer.Position
 	Tokens []lexer.Token
 }

@@ -3,8 +3,8 @@ package parser
 import "github.com/alecthomas/participle/v2/lexer"
 
 type Instruction struct {
-	Result    *Write    `(@@ "=")?`
-	Operation Operation `@@ ";"`
+	Result    *Write    `parser:"(@@ '=')?"`
+	Operation Operation `parser:"@@ ';'"`
 	Pos       lexer.Position
 
 	Tokens []lexer.Token

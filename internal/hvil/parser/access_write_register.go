@@ -5,8 +5,8 @@ import (
 )
 
 type WriteRegister struct {
-	Identifier string `"$" @Identifier`
-	Type       Type   `":" @@`
+	Identifier string `parser:"'$' @Identifier"`
+	Type       Type   `parser:"':' @@"`
 	Pos        lexer.Position
 	Tokens     []lexer.Token
 }

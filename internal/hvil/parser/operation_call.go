@@ -5,8 +5,8 @@ import (
 )
 
 type LocalCall struct {
-	Name        string                   `"local" "." @Identifier`
-	Args        CommaSeparatedList[Read] `"(" @@ ")"`
+	Name        string                   `parser:"'local' '.' @Identifier"`
+	Args        CommaSeparatedList[Read] `parser:"'(' @@ ')'"`
 	Pos         lexer.Position
 	Tokens      []lexer.Token
 	declaration *Function

@@ -5,11 +5,11 @@ import (
 )
 
 type Function struct {
-	Name                   string                                           `"func":Keyword @Identifier`
-	Parameters             CommaSeparatedList[*FunctionVariableDeclaration] `"(" @@ ")"`
-	ReturnValue            *FunctionVariableDeclaration                     `( "=>" "(" @@ ")" )?`
-	LocalDeclarations      CommaSeparatedList[*FunctionVariableDeclaration] `"{" ( "declare":Keyword "(" @@ ")" ";" )?`
-	BasicBlocks            []*BasicBlock                                    `@@+  "}"`
+	Name                   string                                           `parser:"'func':Keyword @Identifier"`
+	Parameters             CommaSeparatedList[*FunctionVariableDeclaration] `parser:"'(' @@ ')'"`
+	ReturnValue            *FunctionVariableDeclaration                     `parser:"( '=>' '(' @@ ')' )?"`
+	LocalDeclarations      CommaSeparatedList[*FunctionVariableDeclaration] `parser:"'{' ( 'declare':Keyword '(' @@ ')' ';' )?"`
+	BasicBlocks            []*BasicBlock                                    `parser:"@@+  '}'"`
 	Pos                    lexer.Position
 	Tokens                 []lexer.Token
 	variableDeclarationMap map[string]*FunctionVariableDeclaration

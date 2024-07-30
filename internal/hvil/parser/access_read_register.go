@@ -5,7 +5,7 @@ import (
 )
 
 type ReadRegister struct {
-	Identifier  string `"$" @Identifier`
+	Identifier  string `parser:"'$' @Identifier"`
 	Declaration *WriteRegister
 	Pos         lexer.Position
 	Tokens      []lexer.Token

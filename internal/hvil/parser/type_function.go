@@ -1,8 +1,8 @@
 package parser
 
 type FunctionType struct {
-	Parameters  CommaSeparatedList[Type] `"func" "(" @@ ")"`
-	ReturnValue Type                     `( "=>" @@ )?`
+	Parameters  CommaSeparatedList[Type] `parser:"'func' '(' @@ ')'"`
+	ReturnValue Type                     `parser:"( '=>' @@ )?"`
 }
 
 func (t FunctionType) String() string {

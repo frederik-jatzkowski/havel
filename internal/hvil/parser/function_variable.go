@@ -5,8 +5,8 @@ import (
 )
 
 type FunctionVariableDeclaration struct {
-	Name   string `@Identifier`
-	Type   Type   `":" @@`
+	Name   string `parser:"@Identifier"`
+	Type   Type   `parser:"':' @@"`
 	Pos    lexer.Position
 	Tokens []lexer.Token
 }

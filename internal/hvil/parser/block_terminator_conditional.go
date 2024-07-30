@@ -5,9 +5,9 @@ import (
 )
 
 type ConditionalJump struct {
-	Condition Read   `"if":Keyword @@`
-	True      string `"then":Keyword @Identifier`
-	False     string `"else":Keyword @Identifier`
+	Condition Read   `parser:"'if':Keyword @@"`
+	True      string `parser:"'then':Keyword @Identifier"`
+	False     string `parser:"'else':Keyword @Identifier"`
 	Pos       lexer.Position
 	Tokens    []lexer.Token
 }

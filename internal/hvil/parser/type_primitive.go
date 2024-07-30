@@ -7,7 +7,7 @@ import (
 )
 
 type PrimitiveType struct {
-	BitSize uint8 `@BitSize`
+	BitSize uint8 `parser:"@BitSize"`
 	Tokens  []lexer.Token
 }
 

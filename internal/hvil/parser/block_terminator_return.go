@@ -5,7 +5,7 @@ import (
 )
 
 type Return struct {
-	Token  string `@"return":Keyword`
+	Token  string `parser:"@'return':Keyword"`
 	Pos    lexer.Position
 	Tokens []lexer.Token
 }

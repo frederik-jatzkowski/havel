@@ -5,9 +5,9 @@ import (
 )
 
 type BasicBlock struct {
-	Identifier   string          `"block":Keyword @Identifier "{"`
-	Instructions []*Instruction  `@@*`
-	Terminator   BlockTerminator `"}" "=>" @@ ";"`
+	Identifier   string          `parser:"'block':Keyword @Identifier '{'"`
+	Instructions []*Instruction  `parser:"@@*"`
+	Terminator   BlockTerminator `parser:"'}' '=>' @@ ';'"`
 	Pos          lexer.Position
 	Tokens       []lexer.Token
 	RegisterMap  map[string]*WriteRegister

@@ -5,7 +5,7 @@ import (
 )
 
 type Jump struct {
-	Target string `@Identifier`
+	Target string `parser:"@Identifier"`
 	Pos    lexer.Position
 	Tokens []lexer.Token
 }
