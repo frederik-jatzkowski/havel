@@ -11,10 +11,10 @@ type AluOperation struct {
 	Tokens []lexer.Token
 }
 
-func (op *AluOperation) VisitLCR(visitor Visitor) {
+func (op *AluOperation) VisitCLR(visitor Visitor) {
 	visitor.VisitAluOperation(op)
 
 	for _, arg := range op.Args.Items {
-		arg.VisitLCR(visitor)
+		arg.VisitCLR(visitor)
 	}
 }

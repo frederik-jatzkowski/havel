@@ -16,23 +16,23 @@ type Function struct {
 	BlockMap               map[string]*BasicBlock `parser:"" json:"-"`
 }
 
-func (function *Function) VisitLCR(visitor Visitor) {
+func (function *Function) VisitCLR(visitor Visitor) {
 	visitor.SetCurrentFunction(function)
 	visitor.VisitFunction(function)
 
 	for _, declaration := range function.Parameters.Items {
-		declaration.VisitLCR(visitor)
+		declaration.VisitCLR(visitor)
 	}
 
 	if function.ReturnValue != nil {
-		function.ReturnValue.VisitLCR(visitor)
+		function.ReturnValue.VisitCLR(visitor)
 	}
 
 	for _, declaration := range function.LocalDeclarations.Items {
-		declaration.VisitLCR(visitor)
+		declaration.VisitCLR(visitor)
 	}
 
 	for _, block := range function.BasicBlocks {
-		block.VisitLCR(visitor)
+		block.VisitCLR(visitor)
 	}
 }

@@ -12,10 +12,10 @@ type LocalCall struct {
 	declaration *Function
 }
 
-func (op *LocalCall) VisitLCR(visitor Visitor) {
+func (op *LocalCall) VisitCLR(visitor Visitor) {
 	visitor.VisitLocalCall(op)
 
 	for _, arg := range op.Args.Items {
-		arg.VisitLCR(visitor)
+		arg.VisitCLR(visitor)
 	}
 }

@@ -11,6 +11,6 @@ type WriteVariable struct {
 	Tokens      []lexer.Token
 }
 
-func (write *WriteVariable) VisitLCR(visitor Visitor) {
+func (write *WriteVariable) VisitCLR(visitor Visitor) {
 	visitor.VisitWriteVariable(write)
 }

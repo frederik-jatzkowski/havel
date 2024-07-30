@@ -12,11 +12,11 @@ type Package struct {
 	FunctionsMap map[string]*Function `parser:"" json:"-"`
 }
 
-func (pkg *Package) VisitLCR(visitor Visitor) {
+func (pkg *Package) VisitCLR(visitor Visitor) {
 	visitor.SetCurrentPackage(pkg)
 	visitor.VisitPackage(pkg)
 
 	for _, function := range pkg.Functions {
-		function.VisitLCR(visitor)
+		function.VisitCLR(visitor)
 	}
 }

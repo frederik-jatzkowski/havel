@@ -1,5 +1,5 @@
 package parser
 
 type Read interface {
-	VisitLCR(visitor Visitor)
+	VisitCLR(visitor Visitor)
 }

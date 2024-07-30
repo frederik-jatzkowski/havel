@@ -1,5 +1,5 @@
 package parser
 
 type Operation interface {
-	VisitLCR(visitor Visitor)
+	VisitCLR(visitor Visitor)
 }

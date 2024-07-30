@@ -11,6 +11,6 @@ type ReadVariable struct {
 	Tokens      []lexer.Token
 }
 
-func (read *ReadVariable) VisitLCR(visitor Visitor) {
+func (read *ReadVariable) VisitCLR(visitor Visitor) {
 	visitor.VisitReadVariable(read)
 }

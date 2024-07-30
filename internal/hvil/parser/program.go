@@ -5,11 +5,11 @@ type Program struct {
 	PackageMap map[string]*Package `parser:"" json:"-"`
 }
 
-func (program *Program) VisitLCR(visitor Visitor) {
+func (program *Program) VisitCLR(visitor Visitor) {
 	visitor.SetCurrentProgram(program)
 	visitor.VisitProgram(program)
 
 	for _, pkg := range program.Packages {
-		pkg.VisitLCR(visitor)
+		pkg.VisitCLR(visitor)
 	}
 }

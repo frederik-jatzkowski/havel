@@ -11,6 +11,6 @@ type WriteRegister struct {
 	Tokens     []lexer.Token
 }
 
-func (write *WriteRegister) VisitLCR(visitor Visitor) {
+func (write *WriteRegister) VisitCLR(visitor Visitor) {
 	visitor.VisitWriteRegister(write)
 }

@@ -10,6 +10,6 @@ type Jump struct {
 	Tokens []lexer.Token
 }
 
-func (terminator *Jump) VisitLCR(visitor Visitor) {
+func (terminator *Jump) VisitCLR(visitor Visitor) {
 	visitor.VisitJump(terminator)
 }

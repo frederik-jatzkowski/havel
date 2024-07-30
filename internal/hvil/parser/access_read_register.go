@@ -11,6 +11,6 @@ type ReadRegister struct {
 	Tokens      []lexer.Token
 }
 
-func (read *ReadRegister) VisitLCR(visitor Visitor) {
+func (read *ReadRegister) VisitCLR(visitor Visitor) {
 	visitor.VisitReadRegister(read)
 }

@@ -9,12 +9,12 @@ type Instruction struct {
 	Tokens    []lexer.Token
 }
 
-func (instr *Instruction) VisitLCR(visitor Visitor) {
+func (instr *Instruction) VisitCLR(visitor Visitor) {
 	visitor.VisitInstruction(instr)
 
 	if instr.Result != nil {
-		(*instr.Result).VisitLCR(visitor)
+		(*instr.Result).VisitCLR(visitor)
 	}
 
-	instr.Operation.VisitLCR(visitor)
+	instr.Operation.VisitCLR(visitor)
 }

@@ -10,6 +10,6 @@ type PrimitiveLiteral struct {
 	Tokens []lexer.Token
 }
 
-func (op *PrimitiveLiteral) VisitLCR(visitor Visitor) {
+func (op *PrimitiveLiteral) VisitCLR(visitor Visitor) {
 	visitor.VisitPrimitiveLiteral(op)
 }

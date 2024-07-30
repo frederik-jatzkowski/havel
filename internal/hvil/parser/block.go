@@ -13,14 +13,14 @@ type BasicBlock struct {
 	RegisterMap  map[string]*WriteRegister
 }
 
-func (block *BasicBlock) VisitLCR(visitor Visitor) {
+func (block *BasicBlock) VisitCLR(visitor Visitor) {
 	visitor.SetCurrentBlock(block)
 
 	visitor.VisitBlock(block)
 
 	for _, instr := range block.Instructions {
-		instr.VisitLCR(visitor)
+		instr.VisitCLR(visitor)
 	}
 
-	block.Terminator.VisitLCR(visitor)
+	block.Terminator.VisitCLR(visitor)
 }

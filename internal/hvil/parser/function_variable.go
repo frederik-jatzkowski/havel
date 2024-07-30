@@ -11,6 +11,6 @@ type FunctionVariableDeclaration struct {
 	Tokens []lexer.Token
 }
 
-func (declaration *FunctionVariableDeclaration) VisitLCR(visitor Visitor) {
+func (declaration *FunctionVariableDeclaration) VisitCLR(visitor Visitor) {
 	visitor.VisitFunctionVariableDeclaration(declaration)
 }

@@ -11,6 +11,6 @@ type DebugOperation struct {
 	Tokens []lexer.Token
 }
 
-func (op *DebugOperation) VisitLCR(visitor Visitor) {
+func (op *DebugOperation) VisitCLR(visitor Visitor) {
 	visitor.VisitDebugOperation(op)
 }

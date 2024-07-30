@@ -12,7 +12,7 @@ type ConditionalJump struct {
 	Tokens    []lexer.Token
 }
 
-func (terminator *ConditionalJump) VisitLCR(visitor Visitor) {
+func (terminator *ConditionalJump) VisitCLR(visitor Visitor) {
 	visitor.VisitConditionalJump(terminator)
-	terminator.Condition.VisitLCR(visitor)
+	terminator.Condition.VisitCLR(visitor)
 }

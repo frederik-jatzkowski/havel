@@ -10,6 +10,6 @@ type Return struct {
 	Tokens []lexer.Token
 }
 
-func (terminator *Return) VisitLCR(visitor Visitor) {
+func (terminator *Return) VisitCLR(visitor Visitor) {
 	visitor.VisitReturn(terminator)
 }

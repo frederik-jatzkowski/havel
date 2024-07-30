@@ -51,7 +51,7 @@ var examineCmd = &cobra.Command{
 			nameResolutionPass := parser.NameResolution{
 				Result: errors.NewCollector(os.Stderr),
 			}
-			program.VisitLCR(&nameResolutionPass)
+			program.VisitCLR(&nameResolutionPass)
 
 			if nameResolutionPass.Result.HasErrors() {
 				for _, err := range nameResolutionPass.Result.Errors() {
