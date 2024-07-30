@@ -66,19 +66,19 @@ func main (a1 : [8,16,[[32],16,8]]) {
 							Items: []*parser.FunctionVariableDeclaration{
 								{
 									Name: "a1",
-									Type: parser.TupleType{
+									DeclaredType: parser.TupleType{
 										Members: []parser.Type{
-											parser.PrimitiveType{BitSize: 8},
-											parser.PrimitiveType{BitSize: 16},
+											parser.ScalarType{BitSize: 8},
+											parser.ScalarType{BitSize: 16},
 											parser.TupleType{
 												Members: []parser.Type{
 													parser.TupleType{
 														Members: []parser.Type{
-															parser.PrimitiveType{BitSize: 32},
+															parser.ScalarType{BitSize: 32},
 														},
 													},
-													parser.PrimitiveType{BitSize: 16},
-													parser.PrimitiveType{BitSize: 8},
+													parser.ScalarType{BitSize: 16},
+													parser.ScalarType{BitSize: 8},
 												},
 											},
 										},
@@ -109,10 +109,10 @@ func main () => (r1 : [8, 16]) {
 						Name: "main",
 						ReturnValue: &parser.FunctionVariableDeclaration{
 							Name: "r1",
-							Type: parser.TupleType{
+							DeclaredType: parser.TupleType{
 								Members: []parser.Type{
-									parser.PrimitiveType{BitSize: 8},
-									parser.PrimitiveType{BitSize: 16},
+									parser.ScalarType{BitSize: 8},
+									parser.ScalarType{BitSize: 16},
 								},
 							},
 						},
@@ -147,20 +147,20 @@ func main () {
 							Items: []*parser.FunctionVariableDeclaration{
 								{
 									Name: "a",
-									Type: parser.TupleType{
+									DeclaredType: parser.TupleType{
 										Members: []parser.Type{
-											parser.PrimitiveType{BitSize: 8},
-											parser.PrimitiveType{BitSize: 8},
+											parser.ScalarType{BitSize: 8},
+											parser.ScalarType{BitSize: 8},
 										},
 									},
 								},
 								{
-									Name: "i1",
-									Type: parser.PrimitiveType{BitSize: 16},
+									Name:         "i1",
+									DeclaredType: parser.ScalarType{BitSize: 16},
 								},
 								{
-									Name: "i2",
-									Type: parser.PrimitiveType{BitSize: 32},
+									Name:         "i2",
+									DeclaredType: parser.ScalarType{BitSize: 32},
 								},
 							},
 						},

@@ -20,5 +20,5 @@ func (t FunctionType) String() string {
 }
 
 func (t FunctionType) Equals(other Type) bool {
-	return false
+	return t.String() == other.String()
 }

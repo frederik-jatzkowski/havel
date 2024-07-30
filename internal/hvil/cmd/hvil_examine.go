@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/frederik-jatzkowski/havel/internal/hvil/parser"
+	"github.com/frederik-jatzkowski/havel/internal/hvil/pass"
 	"github.com/frederik-jatzkowski/havel/internal/tooling/errors"
 	"github.com/spf13/cobra"
 )
@@ -48,13 +49,24 @@ var examineCmd = &cobra.Command{
 				},
 			}
 
-			nameResolutionPass := parser.NameResolution{
+			nameResolutionPass := pass.NameResolution{
 				Result: errors.NewCollector(os.Stderr),
 			}
 			program.VisitCLR(&nameResolutionPass)
 
 			if nameResolutionPass.Result.HasErrors() {
 				for _, err := range nameResolutionPass.Result.Errors() {
+					data.Output = append(data.Output, err.String())
+				}
+			}
+
+			typeCheckPass := pass.TypeCheck{
+				Result: errors.NewCollector(os.Stderr),
+			}
+			program.VisitCLR(&typeCheckPass)
+
+			if typeCheckPass.Result.HasErrors() {
+				for _, err := range typeCheckPass.Result.Errors() {
 					data.Output = append(data.Output, err.String())
 				}
 			}

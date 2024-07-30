@@ -19,5 +19,5 @@ func (t TupleType) String() string {
 }
 
 func (t TupleType) Equals(other Type) bool {
-	return false
+	return t.String() == other.String()
 }

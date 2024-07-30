@@ -6,6 +6,7 @@ import (
 	"regexp"
 
 	"github.com/frederik-jatzkowski/havel/internal/hvil/parser"
+	"github.com/frederik-jatzkowski/havel/internal/hvil/pass"
 	"github.com/frederik-jatzkowski/havel/internal/tooling/errors"
 	"github.com/spf13/cobra"
 )
@@ -30,12 +31,21 @@ var buildCmd = &cobra.Command{
 			},
 		}
 
-		nameResolutionPass := parser.NameResolution{
+		nameResolutionPass := pass.NameResolution{
 			Result: errors.NewCollector(os.Stderr),
 		}
 		program.VisitCLR(&nameResolutionPass)
 
 		if nameResolutionPass.Result.HasErrors() {
+			os.Exit(1)
+		}
+
+		typeCheckPass := pass.TypeCheck{
+			Result: errors.NewCollector(os.Stderr),
+		}
+		program.VisitCLR(&typeCheckPass)
+
+		if typeCheckPass.Result.HasErrors() {
 			os.Exit(1)
 		}
 

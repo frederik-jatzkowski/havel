@@ -14,3 +14,11 @@ type ReadRegister struct {
 func (read *ReadRegister) VisitCLR(visitor Visitor) {
 	visitor.VisitReadRegister(read)
 }
+
+func (read *ReadRegister) Type() Type {
+	return read.Declaration.Type
+}
+
+func (read *ReadRegister) Position() lexer.Position {
+	return read.Pos
+}

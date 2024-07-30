@@ -1,3 +1,5 @@
 package parser
 
-type VariableDeclaration interface{}
+type VariableDeclaration interface {
+	Type() Type
+}

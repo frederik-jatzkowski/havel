@@ -14,3 +14,11 @@ type ReadVariable struct {
 func (read *ReadVariable) VisitCLR(visitor Visitor) {
 	visitor.VisitReadVariable(read)
 }
+
+func (read *ReadVariable) Type() Type {
+	return read.Declaration.Type()
+}
+
+func (read *ReadVariable) Position() lexer.Position {
+	return read.Pos
+}

@@ -6,15 +6,15 @@ import (
 	"github.com/alecthomas/participle/v2/lexer"
 )
 
-type PrimitiveType struct {
+type ScalarType struct {
 	BitSize uint8 `parser:"@BitSize"`
 	Tokens  []lexer.Token
 }
 
-func (t PrimitiveType) String() string {
+func (t ScalarType) String() string {
 	return strconv.FormatUint(uint64(t.BitSize), 10)
 }
 
-func (t PrimitiveType) Equals(other Type) bool {
-	return false
+func (t ScalarType) Equals(other Type) bool {
+	return t.String() == other.String()
 }

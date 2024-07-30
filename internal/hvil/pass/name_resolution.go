@@ -1,18 +1,19 @@
-package parser
+package pass
 
 import (
 	"fmt"
 
+	"github.com/frederik-jatzkowski/havel/internal/hvil/parser"
 	"github.com/frederik-jatzkowski/havel/internal/tooling/errors"
 )
 
 type NameResolution struct {
-	VisitorContext
 	Result *errors.Collector
+	parser.VisitorContext
 }
 
-func (pass *NameResolution) VisitProgram(program *Program) {
-	program.PackageMap = make(map[string]*Package, len(program.Packages))
+func (pass *NameResolution) VisitProgram(program *parser.Program) {
+	program.PackageMap = make(map[string]*parser.Package, len(program.Packages))
 	for _, pkg := range program.Packages {
 		_, exists := program.PackageMap[pkg.Name]
 		if exists {
@@ -27,8 +28,8 @@ func (pass *NameResolution) VisitProgram(program *Program) {
 	}
 }
 
-func (pass *NameResolution) VisitPackage(pkg *Package) {
-	pkg.FunctionsMap = make(map[string]*Function, len(pkg.Functions))
+func (pass *NameResolution) VisitPackage(pkg *parser.Package) {
+	pkg.FunctionsMap = make(map[string]*parser.Function, len(pkg.Functions))
 	for _, function := range pkg.Functions {
 		_, exists := pkg.FunctionsMap[function.Name]
 		if exists {
@@ -63,15 +64,15 @@ func (pass *NameResolution) VisitPackage(pkg *Package) {
 	}
 }
 
-func (pass *NameResolution) VisitFunction(function *Function) {
+func (pass *NameResolution) VisitFunction(function *parser.Function) {
 	mapSize := len(function.Parameters.Items) + len(function.LocalDeclarations.Items)
 	if function.ReturnValue != nil {
 		mapSize++
 	}
 
-	function.VariableDeclarationMap = make(map[string]*FunctionVariableDeclaration, mapSize)
+	function.VariableDeclarationMap = make(map[string]*parser.FunctionVariableDeclaration, mapSize)
 
-	function.BlockMap = make(map[string]*BasicBlock, len(function.BasicBlocks))
+	function.BlockMap = make(map[string]*parser.BasicBlock, len(function.BasicBlocks))
 	for _, block := range function.BasicBlocks {
 		_, exists := function.BlockMap[block.Identifier]
 		if exists {
@@ -86,7 +87,7 @@ func (pass *NameResolution) VisitFunction(function *Function) {
 	}
 }
 
-func (pass *NameResolution) VisitFunctionVariableDeclaration(declaration *FunctionVariableDeclaration) {
+func (pass *NameResolution) VisitFunctionVariableDeclaration(declaration *parser.FunctionVariableDeclaration) {
 	_, exists := pass.CurrentFunction.VariableDeclarationMap[declaration.Name]
 	if exists {
 		pass.Result.Err(
@@ -99,10 +100,10 @@ func (pass *NameResolution) VisitFunctionVariableDeclaration(declaration *Functi
 	pass.CurrentFunction.VariableDeclarationMap[declaration.Name] = declaration
 }
 
-func (pass *NameResolution) VisitBlock(block *BasicBlock) {
-	block.RegisterMap = make(map[string]*WriteRegister, len(block.Instructions))
+func (pass *NameResolution) VisitBlock(block *parser.BasicBlock) {
+	block.RegisterMap = make(map[string]*parser.WriteRegister, len(block.Instructions))
 }
-func (pass *NameResolution) VisitConditionalJump(terminator *ConditionalJump) {
+func (pass *NameResolution) VisitConditionalJump(terminator *parser.ConditionalJump) {
 	_, exists := pass.CurrentFunction.BlockMap[terminator.True]
 	if !exists {
 		pass.Result.Err(
@@ -122,7 +123,7 @@ func (pass *NameResolution) VisitConditionalJump(terminator *ConditionalJump) {
 	}
 }
 
-func (pass *NameResolution) VisitJump(terminator *Jump) {
+func (pass *NameResolution) VisitJump(terminator *parser.Jump) {
 	_, exists := pass.CurrentFunction.BlockMap[terminator.Target]
 	if !exists {
 		pass.Result.Err(
@@ -133,11 +134,11 @@ func (pass *NameResolution) VisitJump(terminator *Jump) {
 	}
 }
 
-func (pass *NameResolution) VisitReturn(terminator *Return) {}
+func (pass *NameResolution) VisitReturn(terminator *parser.Return) {}
 
-func (pass *NameResolution) VisitInstruction(instr *Instruction) {}
+func (pass *NameResolution) VisitInstruction(instr *parser.Instruction) {}
 
-func (pass *NameResolution) VisitWriteRegister(write *WriteRegister) {
+func (pass *NameResolution) VisitWriteRegister(write *parser.WriteRegister) {
 	_, exists := pass.CurrentBlock.RegisterMap[write.Identifier]
 	if exists {
 		pass.Result.Err(
@@ -150,7 +151,7 @@ func (pass *NameResolution) VisitWriteRegister(write *WriteRegister) {
 	pass.CurrentBlock.RegisterMap[write.Identifier] = write
 }
 
-func (pass *NameResolution) VisitWriteVariable(write *WriteVariable) {
+func (pass *NameResolution) VisitWriteVariable(write *parser.WriteVariable) {
 	localDeclaration, exists := pass.CurrentFunction.VariableDeclarationMap[write.Identifier]
 	if !exists {
 		pass.Result.Err(
@@ -163,7 +164,7 @@ func (pass *NameResolution) VisitWriteVariable(write *WriteVariable) {
 	}
 }
 
-func (pass *NameResolution) VisitReadRegister(read *ReadRegister) {
+func (pass *NameResolution) VisitReadRegister(read *parser.ReadRegister) {
 	declaration, exists := pass.CurrentBlock.RegisterMap[read.Identifier]
 	if !exists {
 		pass.Result.Err(
@@ -176,7 +177,7 @@ func (pass *NameResolution) VisitReadRegister(read *ReadRegister) {
 	}
 }
 
-func (pass *NameResolution) VisitReadVariable(read *ReadVariable) {
+func (pass *NameResolution) VisitReadVariable(read *parser.ReadVariable) {
 	localDeclaration, exists := pass.CurrentFunction.VariableDeclarationMap[read.Identifier]
 	if !exists {
 		pass.Result.Err(
@@ -189,19 +190,18 @@ func (pass *NameResolution) VisitReadVariable(read *ReadVariable) {
 	}
 }
 
-func (pass *NameResolution) VisitAluOperation(op *AluOperation) {
-	switch op.Name {
-	case "add_u_32", "sub_u_32", "lt_u_32":
-	default:
+func (pass *NameResolution) VisitAluOperation(op *parser.AluOperation) {
+	_, exists := aluDefinitions[op.Name]
+	if !exists {
 		pass.Result.Err(
 			op.Pos,
 			"NameError",
-			fmt.Sprintf("there is no ALU operation called '%s'", op.Name),
+			fmt.Sprintf("there is no alu operation called '%s'", op.Name),
 		)
 	}
 }
 
-func (pass *NameResolution) VisitLocalCall(op *LocalCall) {
+func (pass *NameResolution) VisitLocalCall(op *parser.LocalCall) {
 	declaration, exists := pass.CurrentPackage.FunctionsMap[op.Name]
 	if !exists {
 		pass.Result.Err(
@@ -210,14 +210,13 @@ func (pass *NameResolution) VisitLocalCall(op *LocalCall) {
 			fmt.Sprintf("the function %s is not defined locally in this package", op.Name),
 		)
 	} else {
-		op.declaration = declaration
+		op.Declaration = declaration
 	}
 }
 
-func (pass *NameResolution) VisitDebugOperation(op *DebugOperation) {
-	switch op.Name {
-	case "print_u_32":
-	default:
+func (pass *NameResolution) VisitDebugOperation(op *parser.DebugOperation) {
+	_, exists := debugDefinitions[op.Name]
+	if !exists {
 		pass.Result.Err(
 			op.Pos,
 			"NameError",
@@ -226,4 +225,4 @@ func (pass *NameResolution) VisitDebugOperation(op *DebugOperation) {
 	}
 }
 
-func (pass *NameResolution) VisitPrimitiveLiteral(op *PrimitiveLiteral) {}
+func (pass *NameResolution) VisitScalarLiteral(op *parser.ScalarLiteral) {}

@@ -9,7 +9,7 @@ type LocalCall struct {
 	Args        CommaSeparatedList[Read] `parser:"'(' @@ ')'"`
 	Pos         lexer.Position
 	Tokens      []lexer.Token
-	declaration *Function
+	Declaration *Function `parser:"" json:"-"`
 }
 
 func (op *LocalCall) VisitCLR(visitor Visitor) {

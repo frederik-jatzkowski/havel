@@ -13,4 +13,8 @@ type DebugOperation struct {
 
 func (op *DebugOperation) VisitCLR(visitor Visitor) {
 	visitor.VisitDebugOperation(op)
+
+	for _, arg := range op.Args.Items {
+		arg.VisitCLR(visitor)
+	}
 }

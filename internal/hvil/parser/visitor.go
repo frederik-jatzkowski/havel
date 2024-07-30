@@ -28,7 +28,7 @@ type Visitor interface {
 	VisitAluOperation(op *AluOperation)
 	VisitLocalCall(op *LocalCall)
 	VisitDebugOperation(op *DebugOperation)
-	VisitPrimitiveLiteral(op *PrimitiveLiteral)
+	VisitScalarLiteral(op *ScalarLiteral)
 
 	// visiting context
 	SetCurrentProgram(program *Program)

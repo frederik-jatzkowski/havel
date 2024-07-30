@@ -36,3 +36,15 @@ func (function *Function) VisitCLR(visitor Visitor) {
 		block.VisitCLR(visitor)
 	}
 }
+
+func (function *Function) Type() (result FunctionType) {
+	for _, param := range function.Parameters.Items {
+		result.Parameters.Items = append(result.Parameters.Items, param.DeclaredType)
+	}
+
+	if function.ReturnValue != nil {
+		result.ReturnValue = function.ReturnValue.DeclaredType
+	}
+
+	return result
+}
