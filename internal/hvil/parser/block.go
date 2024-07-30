@@ -2,7 +2,6 @@ package parser
 
 import (
 	"github.com/alecthomas/participle/v2/lexer"
-	"github.com/frederik-jatzkowski/havel/internal/tooling/errors"
 )
 
 type BasicBlock struct {
@@ -30,16 +29,14 @@ func (block *BasicBlock) GenerateBackLinks(function *Function) {
 	block.Terminator.GenerateBackLinks(block)
 }
 
-func (block *BasicBlock) ResolveNames(errorsCollector *errors.Collector) {
-	block.registerMap = make(map[string]*WriteRegister, len(block.Instructions))
+func (block *BasicBlock) VisitLCR(visitor Visitor) {
+	visitor.SetCurrentBlock(block)
+
+	visitor.VisitBlock(block)
 
 	for _, instr := range block.Instructions {
-		if instr.Result != nil {
-			(*instr.Result).ResolveNames(errorsCollector)
-		}
-
-		instr.Operation.ResolveNames(errorsCollector)
+		instr.VisitLCR(visitor)
 	}
 
-	block.Terminator.ResolveNames(errorsCollector)
+	block.Terminator.VisitLCR(visitor)
 }

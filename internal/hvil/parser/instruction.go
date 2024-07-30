@@ -13,3 +13,13 @@ type Instruction struct {
 func (instr *Instruction) GenerateBackLinks(block *BasicBlock) {
 	instr.block = block
 }
+
+func (instr *Instruction) VisitLCR(visitor Visitor) {
+	visitor.VisitInstruction(instr)
+
+	if instr.Result != nil {
+		(*instr.Result).VisitLCR(visitor)
+	}
+
+	instr.Operation.VisitLCR(visitor)
+}

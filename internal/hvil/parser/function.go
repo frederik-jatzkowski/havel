@@ -1,16 +1,13 @@
 package parser
 
 import (
-	"fmt"
-
 	"github.com/alecthomas/participle/v2/lexer"
-	"github.com/frederik-jatzkowski/havel/internal/tooling/errors"
 )
 
 type Function struct {
 	Name                   string                                           `"func":Keyword @Identifier`
 	Parameters             CommaSeparatedList[*FunctionVariableDeclaration] `"(" @@ ")"`
-	ReturnValues           CommaSeparatedList[*FunctionVariableDeclaration] `( "=>" "(" @@ ")" )?`
+	ReturnValue            *FunctionVariableDeclaration                     `( "=>" "(" @@ ")" )?`
 	LocalDeclarations      CommaSeparatedList[*FunctionVariableDeclaration] `"{" ( "declare":Keyword "(" @@ ")" ";" )?`
 	BasicBlocks            []*BasicBlock                                    `@@+  "}"`
 	Pos                    lexer.Position
@@ -37,8 +34,8 @@ func (function *Function) GenerateBackLinks(pkg *Package) {
 		declaration.GenerateBackLinks(function)
 	}
 
-	for _, declaration := range function.ReturnValues.Items {
-		declaration.GenerateBackLinks(function)
+	if function.ReturnValue != nil {
+		function.ReturnValue.GenerateBackLinks(function)
 	}
 
 	for _, declaration := range function.LocalDeclarations.Items {
@@ -50,41 +47,23 @@ func (function *Function) GenerateBackLinks(pkg *Package) {
 	}
 }
 
-func (function *Function) ResolveNames(errorsCollector *errors.Collector) {
-	function.variableDeclarationMap = make(
-		map[string]*FunctionVariableDeclaration,
-		len(function.Parameters.Items)+
-			len(function.ReturnValues.Items)+
-			len(function.LocalDeclarations.Items),
-	)
+func (function *Function) VisitLCR(visitor Visitor) {
+	visitor.SetCurrentFunction(function)
+	visitor.VisitFunction(function)
 
 	for _, declaration := range function.Parameters.Items {
-		declaration.ResolveNames(errorsCollector)
+		declaration.VisitLCR(visitor)
 	}
 
-	for _, declaration := range function.ReturnValues.Items {
-		declaration.ResolveNames(errorsCollector)
+	if function.ReturnValue != nil {
+		function.ReturnValue.VisitLCR(visitor)
 	}
 
 	for _, declaration := range function.LocalDeclarations.Items {
-		declaration.ResolveNames(errorsCollector)
-	}
-
-	function.blockMap = make(map[string]*BasicBlock, len(function.BasicBlocks))
-	for _, block := range function.BasicBlocks {
-		_, exists := function.blockMap[block.Identifier]
-		if exists {
-			errorsCollector.Err(
-				block.Pos,
-				"NameError",
-				fmt.Sprintf("the basic block %s is redeclared in this function", block.Identifier),
-			)
-		}
-
-		function.blockMap[block.Identifier] = block
+		declaration.VisitLCR(visitor)
 	}
 
 	for _, block := range function.BasicBlocks {
-		block.ResolveNames(errorsCollector)
+		block.VisitLCR(visitor)
 	}
 }

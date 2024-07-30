@@ -12,7 +12,7 @@ var parser = participle.MustBuild[Package](
 	participle.Lexer(token.Tokenizer),
 	participle.Elide("Whitespace", "Comment"),
 	participle.UseLookahead(1),
-	participle.Union[Type](PrimitiveType{}, TupleType{}),
+	participle.Union[Type](PrimitiveType{}, TupleType{}, FunctionType{}),
 	participle.Union[BlockTerminator](&Return{}, &Jump{}, &ConditionalJump{}),
 	participle.Union[Read](&ReadRegister{}, &ReadVariable{}),
 	participle.Union[Write](&WriteRegister{}, &WriteVariable{}),

@@ -2,7 +2,6 @@ package parser
 
 import (
 	"github.com/alecthomas/participle/v2/lexer"
-	"github.com/frederik-jatzkowski/havel/internal/tooling/errors"
 )
 
 type PrimitiveLiteral struct {
@@ -16,4 +15,6 @@ func (op *PrimitiveLiteral) GenerateBackLinks(block *BasicBlock) {
 	op.block = block
 }
 
-func (op *PrimitiveLiteral) ResolveNames(errorsCollector *errors.Collector) {}
+func (op *PrimitiveLiteral) VisitLCR(visitor Visitor) {
+	visitor.VisitPrimitiveLiteral(op)
+}

@@ -1,10 +1,7 @@
 package parser
 
 import (
-	"fmt"
-
 	"github.com/alecthomas/participle/v2/lexer"
-	"github.com/frederik-jatzkowski/havel/internal/tooling/errors"
 )
 
 type DebugOperation struct {
@@ -23,18 +20,10 @@ func (op *DebugOperation) GenerateBackLinks(block *BasicBlock) {
 	}
 }
 
-func (op *DebugOperation) ResolveNames(errorsCollector *errors.Collector) {
-	switch op.Name {
-	case "print_u_32":
-	default:
-		errorsCollector.Err(
-			op.Pos,
-			"NameError",
-			fmt.Sprintf("there is no debug operation called '%s'", op.Name),
-		)
-	}
+func (op *DebugOperation) VisitLCR(visitor Visitor) {
+	visitor.VisitDebugOperation(op)
 
 	for _, arg := range op.Args.Items {
-		arg.ResolveNames(errorsCollector)
+		arg.VisitLCR(visitor)
 	}
 }

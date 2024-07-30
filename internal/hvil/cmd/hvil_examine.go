@@ -48,18 +48,22 @@ var examineCmd = &cobra.Command{
 				},
 			}
 
-			errorsCollector := errors.NewCollector(os.Stderr)
-
 			program.GenerateBackLinks()
-			program.ResolveNames(errorsCollector)
+			// program.ResolveNames(errorsCollector)
+			nameResolutionPass := parser.NameResolution{
+				Result: errors.NewCollector(os.Stderr),
+			}
+			program.VisitLCR(&nameResolutionPass)
 
-			if errorsCollector.HasErrors() {
-				for _, err := range errorsCollector.Errors() {
+			if nameResolutionPass.Result.HasErrors() {
+				for _, err := range nameResolutionPass.Result.Errors() {
 					data.Output = append(data.Output, err.String())
 				}
 			}
 
 			astData, err := json.MarshalIndent(program, "", "  ")
+			cobra.CheckErr(err)
+
 			data.Ast = string(astData)
 
 			template.Execute(w, data)

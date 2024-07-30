@@ -1,10 +1,7 @@
 package parser
 
 import (
-	"fmt"
-
 	"github.com/alecthomas/participle/v2/lexer"
-	"github.com/frederik-jatzkowski/havel/internal/tooling/errors"
 )
 
 type AluOperation struct {
@@ -23,18 +20,10 @@ func (op *AluOperation) GenerateBackLinks(block *BasicBlock) {
 	}
 }
 
-func (op *AluOperation) ResolveNames(errorsCollector *errors.Collector) {
-	switch op.Name {
-	case "add_u_32", "sub_u_32", "lt_u_32":
-	default:
-		errorsCollector.Err(
-			op.Pos,
-			"NameError",
-			fmt.Sprintf("there is no ALU operation called '%s'", op.Name),
-		)
-	}
+func (op *AluOperation) VisitLCR(visitor Visitor) {
+	visitor.VisitAluOperation(op)
 
 	for _, arg := range op.Args.Items {
-		arg.ResolveNames(errorsCollector)
+		arg.VisitLCR(visitor)
 	}
 }

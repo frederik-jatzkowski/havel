@@ -1,3 +1,8 @@
 package parser
 
-type Type interface{}
+import "fmt"
+
+type Type interface {
+	fmt.Stringer
+	Equals(Type) bool
+}

@@ -30,12 +30,13 @@ var buildCmd = &cobra.Command{
 			},
 		}
 
-		errorsCollector := errors.NewCollector(os.Stderr)
-
 		program.GenerateBackLinks()
-		program.ResolveNames(errorsCollector)
+		nameResolutionPass := parser.NameResolution{
+			Result: errors.NewCollector(os.Stderr),
+		}
+		program.VisitLCR(&nameResolutionPass)
 
-		if errorsCollector.HasErrors() {
+		if nameResolutionPass.Result.HasErrors() {
 			os.Exit(1)
 		}
 

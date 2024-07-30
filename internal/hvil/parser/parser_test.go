@@ -107,16 +107,12 @@ func main () => (r1 : [8, 16]) {
 				Functions: []*parser.Function{
 					{
 						Name: "main",
-						ReturnValues: parser.CommaSeparatedList[*parser.FunctionVariableDeclaration]{
-							Items: []*parser.FunctionVariableDeclaration{
-								{
-									Name: "r1",
-									Type: parser.TupleType{
-										Members: []parser.Type{
-											parser.PrimitiveType{BitSize: 8},
-											parser.PrimitiveType{BitSize: 16},
-										},
-									},
+						ReturnValue: &parser.FunctionVariableDeclaration{
+							Name: "r1",
+							Type: parser.TupleType{
+								Members: []parser.Type{
+									parser.PrimitiveType{BitSize: 8},
+									parser.PrimitiveType{BitSize: 16},
 								},
 							},
 						},

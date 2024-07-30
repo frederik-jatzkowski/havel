@@ -1,10 +1,7 @@
 package parser
 
 import (
-	"fmt"
-
 	"github.com/alecthomas/participle/v2/lexer"
-	"github.com/frederik-jatzkowski/havel/internal/tooling/errors"
 )
 
 type LocalCall struct {
@@ -24,19 +21,10 @@ func (op *LocalCall) GenerateBackLinks(block *BasicBlock) {
 	}
 }
 
-func (op *LocalCall) ResolveNames(errorsCollector *errors.Collector) {
-	declaration, exists := op.block.function.pkg.functionsMap[op.Name]
-	if !exists {
-		errorsCollector.Err(
-			op.Pos,
-			"NameError",
-			fmt.Sprintf("the function %s is not defined locally in this package", op.Name),
-		)
-	}
-
-	op.declaration = declaration
+func (op *LocalCall) VisitLCR(visitor Visitor) {
+	visitor.VisitLocalCall(op)
 
 	for _, arg := range op.Args.Items {
-		arg.ResolveNames(errorsCollector)
+		arg.VisitLCR(visitor)
 	}
 }
