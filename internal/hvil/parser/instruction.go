@@ -6,8 +6,7 @@ type Instruction struct {
 	Result    *Write    `parser:"(@@ '=')?"`
 	Operation Operation `parser:"@@ ';'"`
 	Pos       lexer.Position
-
-	Tokens []lexer.Token
+	Tokens    []lexer.Token
 }
 
 func (instr *Instruction) VisitLCR(visitor Visitor) {

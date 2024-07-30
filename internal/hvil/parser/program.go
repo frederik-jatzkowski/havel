@@ -2,7 +2,7 @@ package parser
 
 type Program struct {
 	Packages   []*Package
-	packageMap map[string]*Package
+	PackageMap map[string]*Package `parser:"" json:"-"`
 }
 
 func (program *Program) VisitLCR(visitor Visitor) {

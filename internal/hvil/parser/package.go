@@ -9,7 +9,7 @@ type Package struct {
 	IsMain       bool
 	Functions    []*Function `parser:"@@+"`
 	Pos          lexer.Position
-	functionsMap map[string]*Function
+	FunctionsMap map[string]*Function `parser:"" json:"-"`
 }
 
 func (pkg *Package) VisitLCR(visitor Visitor) {

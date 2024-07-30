@@ -12,8 +12,8 @@ type Function struct {
 	BasicBlocks            []*BasicBlock                                    `parser:"@@+  '}'"`
 	Pos                    lexer.Position
 	Tokens                 []lexer.Token
-	variableDeclarationMap map[string]*FunctionVariableDeclaration
-	blockMap               map[string]*BasicBlock
+	VariableDeclarationMap map[string]*FunctionVariableDeclaration
+	BlockMap               map[string]*BasicBlock `parser:"" json:"-"`
 }
 
 func (function *Function) VisitLCR(visitor Visitor) {

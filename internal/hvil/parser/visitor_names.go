@@ -12,9 +12,9 @@ type NameResolution struct {
 }
 
 func (pass *NameResolution) VisitProgram(program *Program) {
-	program.packageMap = make(map[string]*Package, len(program.Packages))
+	program.PackageMap = make(map[string]*Package, len(program.Packages))
 	for _, pkg := range program.Packages {
-		_, exists := program.packageMap[pkg.Name]
+		_, exists := program.PackageMap[pkg.Name]
 		if exists {
 			pass.Result.Err(
 				pkg.Pos,
@@ -23,14 +23,14 @@ func (pass *NameResolution) VisitProgram(program *Program) {
 			)
 		}
 
-		program.packageMap[pkg.Name] = pkg
+		program.PackageMap[pkg.Name] = pkg
 	}
 }
 
 func (pass *NameResolution) VisitPackage(pkg *Package) {
-	pkg.functionsMap = make(map[string]*Function, len(pkg.Functions))
+	pkg.FunctionsMap = make(map[string]*Function, len(pkg.Functions))
 	for _, function := range pkg.Functions {
-		_, exists := pkg.functionsMap[function.Name]
+		_, exists := pkg.FunctionsMap[function.Name]
 		if exists {
 			pass.Result.Err(
 				function.Pos,
@@ -39,11 +39,11 @@ func (pass *NameResolution) VisitPackage(pkg *Package) {
 			)
 		}
 
-		pkg.functionsMap[function.Name] = function
+		pkg.FunctionsMap[function.Name] = function
 	}
 
 	if pkg.IsMain {
-		_, mainExists := pkg.functionsMap["main"]
+		_, mainExists := pkg.FunctionsMap["main"]
 		if !mainExists {
 			pass.Result.Err(
 				pkg.Pos,
@@ -52,7 +52,7 @@ func (pass *NameResolution) VisitPackage(pkg *Package) {
 			)
 		}
 	} else {
-		_, mainExists := pkg.functionsMap["main"]
+		_, mainExists := pkg.FunctionsMap["main"]
 		if mainExists {
 			pass.Result.Err(
 				pkg.Pos,
@@ -69,11 +69,11 @@ func (pass *NameResolution) VisitFunction(function *Function) {
 		mapSize++
 	}
 
-	function.variableDeclarationMap = make(map[string]*FunctionVariableDeclaration, mapSize)
+	function.VariableDeclarationMap = make(map[string]*FunctionVariableDeclaration, mapSize)
 
-	function.blockMap = make(map[string]*BasicBlock, len(function.BasicBlocks))
+	function.BlockMap = make(map[string]*BasicBlock, len(function.BasicBlocks))
 	for _, block := range function.BasicBlocks {
-		_, exists := function.blockMap[block.Identifier]
+		_, exists := function.BlockMap[block.Identifier]
 		if exists {
 			pass.Result.Err(
 				block.Pos,
@@ -82,12 +82,12 @@ func (pass *NameResolution) VisitFunction(function *Function) {
 			)
 		}
 
-		function.blockMap[block.Identifier] = block
+		function.BlockMap[block.Identifier] = block
 	}
 }
 
 func (pass *NameResolution) VisitFunctionVariableDeclaration(declaration *FunctionVariableDeclaration) {
-	_, exists := pass.CurrentFunction.variableDeclarationMap[declaration.Name]
+	_, exists := pass.CurrentFunction.VariableDeclarationMap[declaration.Name]
 	if exists {
 		pass.Result.Err(
 			declaration.Pos,
@@ -96,14 +96,14 @@ func (pass *NameResolution) VisitFunctionVariableDeclaration(declaration *Functi
 		)
 	}
 
-	pass.CurrentFunction.variableDeclarationMap[declaration.Name] = declaration
+	pass.CurrentFunction.VariableDeclarationMap[declaration.Name] = declaration
 }
 
 func (pass *NameResolution) VisitBlock(block *BasicBlock) {
 	block.RegisterMap = make(map[string]*WriteRegister, len(block.Instructions))
 }
 func (pass *NameResolution) VisitConditionalJump(terminator *ConditionalJump) {
-	_, exists := pass.CurrentFunction.blockMap[terminator.True]
+	_, exists := pass.CurrentFunction.BlockMap[terminator.True]
 	if !exists {
 		pass.Result.Err(
 			terminator.Pos,
@@ -112,7 +112,7 @@ func (pass *NameResolution) VisitConditionalJump(terminator *ConditionalJump) {
 		)
 	}
 
-	_, exists = pass.CurrentFunction.blockMap[terminator.False]
+	_, exists = pass.CurrentFunction.BlockMap[terminator.False]
 	if !exists {
 		pass.Result.Err(
 			terminator.Pos,
@@ -123,7 +123,7 @@ func (pass *NameResolution) VisitConditionalJump(terminator *ConditionalJump) {
 }
 
 func (pass *NameResolution) VisitJump(terminator *Jump) {
-	_, exists := pass.CurrentFunction.blockMap[terminator.Target]
+	_, exists := pass.CurrentFunction.BlockMap[terminator.Target]
 	if !exists {
 		pass.Result.Err(
 			terminator.Pos,
@@ -151,7 +151,7 @@ func (pass *NameResolution) VisitWriteRegister(write *WriteRegister) {
 }
 
 func (pass *NameResolution) VisitWriteVariable(write *WriteVariable) {
-	localDeclaration, exists := pass.CurrentFunction.variableDeclarationMap[write.Identifier]
+	localDeclaration, exists := pass.CurrentFunction.VariableDeclarationMap[write.Identifier]
 	if !exists {
 		pass.Result.Err(
 			write.Pos,
@@ -177,7 +177,7 @@ func (pass *NameResolution) VisitReadRegister(read *ReadRegister) {
 }
 
 func (pass *NameResolution) VisitReadVariable(read *ReadVariable) {
-	localDeclaration, exists := pass.CurrentFunction.variableDeclarationMap[read.Identifier]
+	localDeclaration, exists := pass.CurrentFunction.VariableDeclarationMap[read.Identifier]
 	if !exists {
 		pass.Result.Err(
 			read.Pos,
@@ -202,7 +202,7 @@ func (pass *NameResolution) VisitAluOperation(op *AluOperation) {
 }
 
 func (pass *NameResolution) VisitLocalCall(op *LocalCall) {
-	declaration, exists := pass.CurrentPackage.functionsMap[op.Name]
+	declaration, exists := pass.CurrentPackage.FunctionsMap[op.Name]
 	if !exists {
 		pass.Result.Err(
 			op.Pos,
