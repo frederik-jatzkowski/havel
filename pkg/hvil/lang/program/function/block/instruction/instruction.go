@@ -3,6 +3,7 @@ package instruction
 import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
 )
 
@@ -24,4 +25,12 @@ func (i Instruction) ResolveNames(
 	errs = append(errs, i.Operation.ResolveNames(vars, regs)...)
 
 	return errs
+}
+
+func (i *Instruction) ResolveTypes() (errs []error) {
+	if i.Result != nil {
+		return i.Operation.ResolveTypes(i.Result.Type())
+	}
+
+	return i.Operation.ResolveTypes(types.Void{})
 }

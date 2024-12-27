@@ -2,6 +2,7 @@ package memory
 
 import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
 )
 
@@ -20,4 +21,8 @@ func (w VarWrite) ResolveNames(
 	_ names.Scope[RegWrite],
 ) (errs []error) {
 	return nil
+}
+
+func (w VarWrite) Type() types.Type {
+	return w.NameResolutionPass.Decl.Type()
 }

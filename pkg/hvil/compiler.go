@@ -24,5 +24,10 @@ func (c Compiler) Compile(path string, src io.Reader) (program.Program, []error)
 		return p, errs
 	}
 
+	errs = p.ResolveTypes()
+	if len(errs) > 0 {
+		return p, errs
+	}
+
 	return p, nil
 }

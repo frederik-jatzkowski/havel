@@ -4,5 +4,6 @@ import "fmt"
 
 type Type interface {
 	fmt.Stringer
-	Equals(Type) bool
+	CanBeAssigned(Type) bool
+	BitSize() int
 }

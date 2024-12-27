@@ -52,3 +52,11 @@ func (f *Function) ResolveNames() (errs []error) {
 
 	return errs
 }
+
+func (f *Function) ResolveTypes() (errs []error) {
+	for i := 0; i < len(f.Blocks); i++ {
+		errs = append(errs, f.Blocks[i].ResolveTypes()...)
+	}
+
+	return errs
+}

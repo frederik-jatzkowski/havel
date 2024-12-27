@@ -9,8 +9,6 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/stack"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types/scalar"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types/tuple"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/parser"
 	"reflect"
 	"testing"
@@ -74,19 +72,19 @@ func main (a1 : [8,16,[[32],16,8]]) {
 							Items: []*stack.Decl{
 								{
 									Name: "a1",
-									DeclaredType: tuple.Type{
+									DeclaredType: types.TupleType{
 										Members: []types.Type{
-											scalar.Type{BitSize: 8},
-											scalar.Type{BitSize: 16},
-											tuple.Type{
+											types.ScalarType{Size: 8},
+											types.ScalarType{Size: 16},
+											types.TupleType{
 												Members: []types.Type{
-													tuple.Type{
+													types.TupleType{
 														Members: []types.Type{
-															scalar.Type{BitSize: 32},
+															types.ScalarType{Size: 32},
 														},
 													},
-													scalar.Type{BitSize: 16},
-													scalar.Type{BitSize: 8},
+													types.ScalarType{Size: 16},
+													types.ScalarType{Size: 8},
 												},
 											},
 										},
@@ -117,10 +115,10 @@ func main () => (r1 : [8, 16]) {
 						Name: "main",
 						Result: &stack.Decl{
 							Name: "r1",
-							DeclaredType: tuple.Type{
+							DeclaredType: types.TupleType{
 								Members: []types.Type{
-									scalar.Type{BitSize: 8},
-									scalar.Type{BitSize: 16},
+									types.ScalarType{Size: 8},
+									types.ScalarType{Size: 16},
 								},
 							},
 						},
@@ -155,20 +153,20 @@ func main () {
 							Items: []*stack.Decl{
 								{
 									Name: "a",
-									DeclaredType: tuple.Type{
+									DeclaredType: types.TupleType{
 										Members: []types.Type{
-											scalar.Type{BitSize: 8},
-											scalar.Type{BitSize: 8},
+											types.ScalarType{Size: 8},
+											types.ScalarType{Size: 8},
 										},
 									},
 								},
 								{
 									Name:         "i1",
-									DeclaredType: scalar.Type{BitSize: 16},
+									DeclaredType: types.ScalarType{Size: 16},
 								},
 								{
 									Name:         "i2",
-									DeclaredType: scalar.Type{BitSize: 32},
+									DeclaredType: types.ScalarType{Size: 32},
 								},
 							},
 						},

@@ -31,3 +31,11 @@ func (b *Block) ResolveNames(vars names.Scope[memory.VarDecl]) (errs []error) {
 
 	return errs
 }
+
+func (b *Block) ResolveTypes() (errs []error) {
+	for i := 0; i < len(b.Instructions); i++ {
+		errs = append(errs, b.Instructions[i].ResolveTypes()...)
+	}
+
+	return errs
+}

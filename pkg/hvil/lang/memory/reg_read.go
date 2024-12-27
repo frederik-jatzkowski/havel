@@ -27,5 +27,5 @@ func (read *RegRead) ResolveNames(_ names.Scope[VarDecl], regs names.Scope[RegWr
 }
 
 func (read *RegRead) Type() types.Type {
-	return read.NameResolutionPass.Decl.Type
+	return read.NameResolutionPass.Decl.RegType
 }

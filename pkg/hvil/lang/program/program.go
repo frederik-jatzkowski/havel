@@ -31,3 +31,11 @@ func (p *Program) ResolveNames() []error {
 
 	return errs
 }
+
+func (p *Program) ResolveTypes() (errs []error) {
+	for i := 0; i < len(p.Functions); i++ {
+		errs = append(errs, p.Functions[i].ResolveTypes()...)
+	}
+
+	return errs
+}

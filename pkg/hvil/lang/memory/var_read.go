@@ -1,8 +1,8 @@
 package memory
 
 import (
-	"github.com/alecthomas/participle/v2/lexer"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
 )
 
@@ -27,6 +27,6 @@ func (read *VarRead) ResolveNames(vars names.Scope[VarDecl], _ names.Scope[RegWr
 	return nil
 }
 
-func (read *VarRead) Position() lexer.Position {
-	return read.Pos
+func (read *VarRead) Type() types.Type {
+	return read.NameResolutionPass.Decl.Type()
 }

@@ -1,6 +1,7 @@
 package memory
 
 import (
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
 )
 
@@ -9,4 +10,5 @@ type Write interface {
 		vars names.Scope[VarDecl],
 		regs names.Scope[RegWrite],
 	) (errs []error)
+	Type() types.Type
 }

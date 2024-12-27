@@ -9,8 +9,8 @@ import (
 type RegWrite struct {
 	tool.Node[RegWrite]
 
-	Ident string     `parser:"'$' @Ident"`
-	Type  types.Type `parser:"':' @@"`
+	Ident   string     `parser:"'$' @Ident"`
+	RegType types.Type `parser:"':' @@"`
 }
 
 func (w RegWrite) Identifier() string {
@@ -27,4 +27,8 @@ func (w RegWrite) ResolveNames(
 	}
 
 	return errs
+}
+
+func (w RegWrite) Type() types.Type {
+	return w.RegType
 }
