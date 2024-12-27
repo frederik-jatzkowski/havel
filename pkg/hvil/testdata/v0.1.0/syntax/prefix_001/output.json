@@ -1,0 +1,9 @@
+{
+  "compiler": {
+    "errors": [
+      {
+        "message": "testdata\\v0.1.0\\syntax\\prefix_001\\src.hvil:5:9: unexpected token \"never_a_prefix\" (expected \"}\" \"=>\" Terminator \";\")"
+      }
+    ]
+  }
+}

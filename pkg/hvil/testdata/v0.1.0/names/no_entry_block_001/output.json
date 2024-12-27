@@ -1,0 +1,9 @@
+{
+  "compiler": {
+    "errors": [
+      {
+        "message": "testdata\\v0.1.0\\names\\no_entry_block_001\\src.hvil:2:1: no entry block defined"
+      }
+    ]
+  }
+}

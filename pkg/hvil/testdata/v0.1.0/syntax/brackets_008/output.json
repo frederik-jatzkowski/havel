@@ -1,0 +1,9 @@
+{
+  "compiler": {
+    "errors": [
+      {
+        "message": "testdata\\v0.1.0\\syntax\\brackets_008\\src.hvil:2:10: unexpected token \")\" (expected \"(\" List[github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory.VarDecl] \")\" (\"=>\" \"(\" VarDecl \")\")? \"{\" (\"declare\" \"(\" List[github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory.VarDecl] \")\" \";\")? Block+ \"}\")"
+      }
+    ]
+  }
+}

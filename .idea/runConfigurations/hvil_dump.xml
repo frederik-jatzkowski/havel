@@ -2,7 +2,7 @@
   <configuration default="false" name="hvil dump" type="GoApplicationRunConfiguration" factoryName="Go Application">
     <module name="havel" />
     <working_directory value="$PROJECT_DIR$" />
-    <parameters value="hvil dump ./internal/hvil/test" />
+    <parameters value="hvil dump ./pkg/hvil/testdata" />
     <kind value="PACKAGE" />
     <package value="github.com/frederik-jatzkowski/havel" />
     <directory value="$PROJECT_DIR$" />

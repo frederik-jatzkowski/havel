@@ -1,0 +1,33 @@
+package program
+
+import (
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
+)
+
+type Program struct {
+	tool.Node[Program]
+	names.NameResolution[struct {
+		Functions names.Scope[function.Function]
+	}]
+
+	Functions []function.Function `parser:"@@+"`
+}
+
+func (p *Program) ResolveNames() []error {
+	p.NameResolutionPass.Functions = names.NewRootScope[function.Function]("function")
+
+	errs := p.NameResolutionPass.Functions.DefineAll(p.Functions)
+
+	for i := 0; i < len(p.Functions); i++ {
+		errs = append(errs, p.Functions[i].ResolveNames()...)
+	}
+
+	_, exists := p.NameResolutionPass.Functions.Find("main")
+	if !exists {
+		errs = append(errs, p.Errorf("no main function defined"))
+	}
+
+	return errs
+}

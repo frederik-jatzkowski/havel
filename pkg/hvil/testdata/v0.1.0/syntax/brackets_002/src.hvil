@@ -1,0 +1,7 @@
+
+func main() {
+    block entry {
+        $n : 32 = 0b1;
+        debug.print_u_32($n);
+     => return;
+}

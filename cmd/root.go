@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	hvilCmd "github.com/frederik-jatzkowski/havel/internal/hvil/cmd"
 	"github.com/spf13/cobra"
 )
 
@@ -13,7 +12,7 @@ var rootCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(hvilCmd.RootCmd)
+	rootCmd.AddCommand(hvilCmd)
 }
 
 func Execute() {

@@ -1,0 +1,9 @@
+{
+  "compiler": {
+    "errors": [
+      {
+        "message": "testdata\\v0.1.0\\names\\no_main_001\\src.hvil:2:1: no main function defined"
+      }
+    ]
+  }
+}
