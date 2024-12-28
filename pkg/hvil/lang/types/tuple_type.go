@@ -24,12 +24,12 @@ func (t TupleType) String() string {
 }
 
 func (t TupleType) CanBeAssigned(other Type) bool {
-	return t.BitSize() == other.BitSize()
+	return t.Bytes() == other.Bytes()
 }
 
-func (t TupleType) BitSize() (size int) {
+func (t TupleType) Bytes() (size int) {
 	for _, member := range t.Members {
-		size += member.BitSize()
+		size += member.Bytes()
 	}
 
 	return size

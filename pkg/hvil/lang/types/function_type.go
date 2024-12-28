@@ -16,6 +16,6 @@ func (t FunctionType) CanBeAssigned(other Type) bool {
 	return false
 }
 
-func (t FunctionType) BitSize() int {
-	return 64
+func (t FunctionType) Bytes() int {
+	return 8
 }

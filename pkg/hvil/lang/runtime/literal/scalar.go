@@ -28,9 +28,9 @@ func (l *Scalar) ResolveTypes(target types.Type) (errs []error) {
 		return append(errs, l.Errorf("cannot assign scalar literal to %s", target))
 	}
 
-	requiredBitSize := bits.Len64(l.Value)
-	expectedBitSize := target.BitSize()
-	if requiredBitSize > expectedBitSize {
+	requiredBytes := (bits.Len64(l.Value) + 7) / 8
+	availableBytes := target.Bytes()
+	if requiredBytes > availableBytes {
 		errs = append(errs, l.Errorf("cannot assign scalar literal %d to %s: value too big", l.Value, target))
 	}
 

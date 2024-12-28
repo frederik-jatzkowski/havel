@@ -10,6 +10,6 @@ func (v Void) CanBeAssigned(_ Type) bool {
 	return true
 }
 
-func (v Void) BitSize() int {
+func (v Void) Bytes() int {
 	return 0
 }

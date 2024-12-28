@@ -20,13 +20,13 @@ func (t ScalarType) String() string {
 }
 
 func (t ScalarType) CanBeAssigned(other Type) bool {
-	return t.BitSize() == other.BitSize()
+	return t.Bytes() == other.Bytes()
 }
 
-func (t ScalarType) BitSize() int {
+func (t ScalarType) Bytes() int {
 	if t.Size == 0 {
-		return 8
+		return 1
 	}
 
-	return t.Size * 8
+	return t.Size
 }
