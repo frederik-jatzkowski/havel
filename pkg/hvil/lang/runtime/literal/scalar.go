@@ -34,5 +34,7 @@ func (l *Scalar) ResolveTypes(target types.Type) (errs []error) {
 		errs = append(errs, l.Errorf("cannot assign scalar literal %d to %s: value too big", l.Value, target))
 	}
 
+	l.TypeCheckPass.Type = target
+
 	return errs
 }
