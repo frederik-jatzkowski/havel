@@ -1,0 +1,9 @@
+{
+  "compiler": {
+    "errors": [
+      {
+        "message": "testdata\\v0.1.0\\types\\invalid_type_001\\src.hvil:5:26: expected 4 byte but got byte"
+      }
+    ]
+  }
+}

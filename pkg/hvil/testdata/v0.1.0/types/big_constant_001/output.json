@@ -1,9 +1,0 @@
-{
-  "compiler": {
-    "errors": [
-      {
-        "message": "testdata\\v0.1.0\\types\\big_constant_001\\src.hvil:4:19: cannot assign scalar literal 4294967296 to 32: value too big"
-      }
-    ]
-  }
-}

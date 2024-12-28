@@ -1,5 +1,8 @@
 {
   "compiler": {
     "errors": []
+  },
+  "program": {
+    "stdout": "1\n"
   }
 }

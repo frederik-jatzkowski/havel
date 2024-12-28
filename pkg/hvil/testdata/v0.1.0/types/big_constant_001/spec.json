@@ -1,0 +1,9 @@
+{
+  "compiler": {
+    "errors": [
+      {
+        "message": "testdata\\v0.1.0\\types\\big_constant_001\\src.hvil:4:23: cannot assign scalar literal 4294967296 to 4 byte: value too big"
+      }
+    ]
+  }
+}

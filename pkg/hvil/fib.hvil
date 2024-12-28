@@ -1,17 +1,17 @@
 
 func main() {
     block entry {
-        $n : 32 = 0b1101;
-        $fib_n : 32 = local.fib($n);
+        $n : 4 byte = 0b1101;
+        $fib_n : 4 byte = local.fib($n);
         debug.print_u_32($fib_n);
     } => return;
 }
 
 // fib returns the n-ths fibonacci number
-func fib(n : 32) => (result : 32) {
+func fib(n : 4 byte) => (result : 4 byte) {
     declare (
-        counter : 32,
-        fib_next : 32
+        counter : 4 byte,
+        fib_next : 4 byte
     );
     
     block entry {
@@ -21,7 +21,7 @@ func fib(n : 32) => (result : 32) {
     } => loop_head;
     
     block loop_head {
-        $check : 32 = alu.lt_u_32(counter, n);
+        $check : 4 byte = alu.lt_u_32(counter, n);
     } => if $check then loop_body else exit;
     
     block loop_body {
@@ -30,7 +30,7 @@ func fib(n : 32) => (result : 32) {
         result = alu.sub_u_32(fib_next, result);
         
         // increment counter
-        $one : 32 = 0b1;
+        $one : 4 byte = 0b1;
         counter = alu.add_u_32(counter, $one);
     } => loop_head;
     

@@ -5,6 +5,12 @@ import (
 	"github.com/alecthomas/participle/v2/lexer"
 )
 
+type NodeLike interface {
+	fmt.Stringer
+	Position() lexer.Position
+	Errorf(format string, a ...any) error
+}
+
 type Node[TKind any] struct {
 	Pos    lexer.Position `parser:"" json:"-"`
 	EndPos lexer.Position `parser:"" json:"-"`

@@ -4,7 +4,7 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/parser"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -31,20 +31,11 @@ var dumpCmd = &cobra.Command{
 			cobra.CheckErr(err)
 			defer file.Close()
 
-			program, err := parser.Parse(path, file)
-			if err != nil {
+			compiler := hvil.NewCompiler()
+
+			program, errs := compiler.Compile(path, file)
+			for _, err := range errs {
 				fmt.Println(err)
-
-				return nil
-			}
-
-			errs := program.ResolveNames()
-			if len(errs) > 0 {
-				for _, err := range errs {
-					fmt.Println(err)
-				}
-
-				return nil
 			}
 
 			data, err := json.MarshalIndent(program, "", "  ")
@@ -56,6 +47,10 @@ var dumpCmd = &cobra.Command{
 
 			_, err = astFile.Write(data)
 			cobra.CheckErr(err)
+
+			if len(errs) > 0 {
+				return nil
+			}
 
 			return nil
 		})

@@ -13,8 +13,11 @@ type TupleType struct {
 
 func (t TupleType) String() string {
 	result := "["
-	for _, member := range t.Members {
+	for i, member := range t.Members {
 		result += member.String()
+		if i < len(t.Members)-1 {
+			result += ", "
+		}
 	}
 
 	return result + "]"

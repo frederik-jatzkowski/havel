@@ -6,7 +6,7 @@ var Tokenizer = lexer.MustStateful(lexer.Rules{
 	"Root": {
 		{Name: "Comment", Pattern: `//.*\n`},
 		{Name: "Whitespace", Pattern: `[ \t\n\r]+`},
-		{Name: "Size", Pattern: `8|16|32|64`},
+		{Name: "Size", Pattern: `1|2|4|8`},
 		{Name: "Keyword", Pattern: `func|declare|block|return|if|then|else`},
 		{Name: "BitLiteral", Pattern: `0b[10]+`},
 		{Name: "Ident", Pattern: `[a-z][_a-z0-9]*`},

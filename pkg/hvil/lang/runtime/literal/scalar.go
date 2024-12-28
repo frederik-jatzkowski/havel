@@ -5,11 +5,15 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/typecheck"
 	"math/bits"
 )
 
 type Scalar struct {
 	tool.Node[Scalar]
+	typecheck.TypeCheck[struct {
+		Type types.Type
+	}]
 
 	Value uint64 `parser:"@BitLiteral"`
 }

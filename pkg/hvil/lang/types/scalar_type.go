@@ -8,11 +8,15 @@ import (
 type ScalarType struct {
 	tool.Node[ScalarType]
 
-	Size int `parser:"@Size"`
+	Size int `parser:"@Size? 'byte'"`
 }
 
 func (t ScalarType) String() string {
-	return strconv.FormatUint(uint64(t.Size), 10)
+	if t.Size <= 1 {
+		return "byte"
+	}
+
+	return strconv.FormatUint(uint64(t.Size), 10) + " byte"
 }
 
 func (t ScalarType) CanBeAssigned(other Type) bool {
@@ -20,5 +24,9 @@ func (t ScalarType) CanBeAssigned(other Type) bool {
 }
 
 func (t ScalarType) BitSize() int {
-	return t.Size
+	if t.Size == 0 {
+		return 8
+	}
+
+	return t.Size * 8
 }

@@ -19,12 +19,12 @@ func (p *PrintU32) ResolveNames(vars names.Scope[memory.VarDecl], regs names.Sco
 
 func (p *PrintU32) ResolveTypes(target types.Type) (errs []error) {
 	{
-		expected := types.ScalarType{Size: 32}
+		expected := types.ScalarType{Size: 4}
 		actual := p.Param.Type()
 
 		assignable := expected.CanBeAssigned(actual)
 		if !assignable {
-			errs = append(errs, p.Errorf("cannot assign %s to %s", actual, expected))
+			errs = append(errs, p.Param.Errorf("expected %s but got %s", expected, actual))
 		}
 	}
 

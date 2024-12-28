@@ -40,7 +40,7 @@ func TestCompiler(t *testing.T) {
 		t.Run(path, func(t *testing.T) {
 			t.Parallel()
 
-			expectedErrsData, err := os.ReadFile(filepath.Join(path, "output.json"))
+			expectedErrsData, err := os.ReadFile(filepath.Join(path, "spec.json"))
 			require.NoError(t, err)
 
 			var expectedOutput ExpectedOutput
