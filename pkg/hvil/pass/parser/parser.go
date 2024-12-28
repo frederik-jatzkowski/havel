@@ -29,7 +29,7 @@ var parser = participle.MustBuild[program.Program](
 	participle.Union[memory.Read](&memory.RegRead{}, &memory.VarRead{}),
 	participle.Union[memory.VarDecl](&stack.Decl{}),
 	participle.Union[instruction.Op](&literal.Scalar{}, &alu.Operation{}, &function.Call{}, &debug.Call{}),
-	participle.Union[debug.Op](&debug.PrintU32{}),
+	participle.Union[debug.Op](&debug.Dump{}),
 )
 
 func Parse(fileName string, reader io.Reader) (program.Program, error) {

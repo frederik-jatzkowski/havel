@@ -2,6 +2,6 @@
 func main() {
     block entry {
         $n : 4 byte = 0b1;
-        debug.print_u_32($n;
+        debug.dump($n;
     } => return;
 }

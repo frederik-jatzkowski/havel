@@ -1,7 +1,0 @@
-
-func main() {
-    block entry {
-        $n : byte = 0b1;
-        debug.print_u_32($n);
-    } => return;
-}

@@ -2,7 +2,7 @@
   "compiler": {
     "errors": [
       {
-        "message": "testdata\\v0.1.0\\syntax\\brackets_003\\src.hvil:5:28: unexpected token \";\" (expected \")\")"
+        "message": "testdata\\v0.1.0\\syntax\\brackets_003\\src.hvil:5:22: unexpected token \";\" (expected \")\")"
       }
     ]
   }

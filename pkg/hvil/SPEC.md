@@ -101,5 +101,3 @@ instruction_result ::= variable_declaration | identifier;
 ### Predefined Builtin Functions
 
 #### Debug
-
-- `debug.print_u_32`: Prints the contents of the argument formatted as a base 10 unsigned integer.

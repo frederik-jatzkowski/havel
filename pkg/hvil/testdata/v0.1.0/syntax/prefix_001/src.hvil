@@ -2,6 +2,6 @@
 func main() {
     block entry {
         $n : 4 byte = 0b1;
-        never_a_prefix.print_u_32($n);
+        never_a_prefix.dump($n);
     } => return;
 }

@@ -2,7 +2,7 @@
   "compiler": {
     "errors": [
       {
-        "message": "testdata\\v0.1.0\\names\\reg_not_found_001\\src.hvil:5:26: register 'm' is not defined"
+        "message": "testdata\\v0.1.0\\names\\reg_not_found_001\\src.hvil:5:20: register 'm' is not defined"
       }
     ]
   }
