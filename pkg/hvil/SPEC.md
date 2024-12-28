@@ -7,19 +7,19 @@
 ```
 func main() {
     block entry {
-        r0 : 32 = 0x1101;
-        r1 : 32 = fib(r0);
+        r0 : 4 byte = 0x1101;
+        r1 : 4 byte = fib(r0);
         builtin.print_i_32(r1);
     } => return;
 }
 
 
 // returns the a0-ths fibonacci number
-func fib(a0 : 32) : (v0 : 32) {
+func fib(a0 : 4 byte) : (v0 : 4 byte) {
     declare (
-        s1 : 32,
-        s2 : 32,
-        s3 : 32
+        s1 : 4 byte,
+        s2 : 4 byte,
+        s3 : 4 byte
     );
     
     block entry {
@@ -30,13 +30,13 @@ func fib(a0 : 32) : (v0 : 32) {
     } => b1;
     
     block b1 {
-        r0 : 32 = i_lt(s1, a0);
+        r0 : 4 byte = i_lt(s1, a0);
     } => r0 ? b2 : b3;
     
     block b2 {
         v0 = i_add(s2, s3);
         s2 = s3; s3 = v0;
-        r1 : 32 = 0x1;
+        r1 : 4 byte = 0x1;
         s1 = i_add(s1, r1);
     } => b1;
     
