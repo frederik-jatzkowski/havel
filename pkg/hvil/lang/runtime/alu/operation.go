@@ -2,9 +2,11 @@ package alu
 
 import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
+	"unsafe"
 )
 
 type Operation struct {
@@ -21,4 +23,8 @@ func (o Operation) ResolveNames(vars names.Scope[memory.VarDecl], regs names.Sco
 
 func (o Operation) ResolveTypes(target types.Type) (errs []error) {
 	return append(errs, o.Errorf("not implemented"))
+}
+
+func (o Operation) Execute(vm *runtime.VirtualMachine, result unsafe.Pointer) error {
+	return o.Errorf("not implemented")
 }

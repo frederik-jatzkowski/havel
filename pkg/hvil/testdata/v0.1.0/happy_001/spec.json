@@ -2,7 +2,9 @@
   "compiler": {
     "errors": []
   },
-  "program": {
-    "stdout": "1\n"
+  "execution": {
+    "stdout_lines": [
+      "testdata\\v0.1.0\\happy_001\\src.hvil:5:15 1 (4 byte register 'n')"
+    ]
   }
 }

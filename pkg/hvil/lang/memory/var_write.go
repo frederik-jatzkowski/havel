@@ -1,9 +1,11 @@
 package memory
 
 import (
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
+	"unsafe"
 )
 
 type VarWrite struct {
@@ -25,4 +27,8 @@ func (w VarWrite) ResolveNames(
 
 func (w VarWrite) Type() types.Type {
 	return w.NameResolutionPass.Decl.Type()
+}
+
+func (w *VarWrite) Addr(vm *runtime.VirtualMachine) unsafe.Pointer {
+	return unsafe.Pointer(uintptr(1))
 }

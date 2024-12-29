@@ -4,11 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -20,6 +23,9 @@ func TestCompiler(t *testing.T) {
 		Compiler struct {
 			Errors []ExpectedCompilerError `json:"errors"`
 		} `json:"compiler"`
+		Execution struct {
+			StdoutLines []string `json:"stdout_lines"`
+		} `json:"execution"`
 	}
 
 	err := filepath.WalkDir("./testdata", func(path string, d fs.DirEntry, err error) error {
@@ -54,7 +60,7 @@ func TestCompiler(t *testing.T) {
 			}
 
 			compiler := NewCompiler()
-			_, actualErrs := compiler.Compile(srcPath, bytes.NewBuffer(src))
+			program, actualErrs := compiler.Compile(srcPath, bytes.NewBuffer(src))
 
 			for _, actualErr := range actualErrs {
 				errMsg := actualErr.Error()
@@ -70,6 +76,19 @@ func TestCompiler(t *testing.T) {
 				t.Fail()
 				t.Logf("remaining error expectation: '%s'", expectedErr.Message)
 			}
+
+			if len(actualErrs) > 0 {
+				return
+			}
+
+			stdout := bytes.NewBuffer(nil)
+
+			vm := runtime.New(1024, bytes.NewBuffer(nil), stdout, io.Discard)
+
+			err = program.Execute(vm)
+			require.NoError(t, err)
+
+			assert.Equal(t, strings.Join(expectedOutput.Execution.StdoutLines, "\n"), strings.TrimSpace(stdout.String()))
 		})
 
 		return nil

@@ -2,9 +2,11 @@ package instruction
 
 import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
+	"unsafe"
 )
 
 type Instruction struct {
@@ -33,4 +35,13 @@ func (i *Instruction) ResolveTypes() (errs []error) {
 	}
 
 	return i.Operation.ResolveTypes(types.Void{})
+}
+
+func (i *Instruction) Execute(vm *runtime.VirtualMachine) error {
+	var result unsafe.Pointer
+	if i.Result != nil {
+		result = i.Result.Addr(vm)
+	}
+
+	return i.Operation.Execute(vm, result)
 }

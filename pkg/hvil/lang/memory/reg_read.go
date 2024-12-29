@@ -1,9 +1,11 @@
 package memory
 
 import (
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
+	"unsafe"
 )
 
 type RegRead struct {
@@ -13,6 +15,10 @@ type RegRead struct {
 	}]
 
 	Ident string `parser:"'$' @Ident"`
+}
+
+func (read *RegRead) Identifier() string {
+	return read.NameResolutionPass.Decl.Identifier()
 }
 
 func (read *RegRead) ResolveNames(_ names.Scope[VarDecl], regs names.Scope[RegWrite]) (errs []error) {
@@ -28,4 +34,8 @@ func (read *RegRead) ResolveNames(_ names.Scope[VarDecl], regs names.Scope[RegWr
 
 func (read *RegRead) Type() types.Type {
 	return read.NameResolutionPass.Decl.RegType
+}
+
+func (read *RegRead) Addr(vm *runtime.VirtualMachine) unsafe.Pointer {
+	return read.NameResolutionPass.Decl.Addr(vm)
 }

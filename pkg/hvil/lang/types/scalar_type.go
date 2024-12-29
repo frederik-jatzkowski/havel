@@ -19,6 +19,10 @@ func (t ScalarType) String() string {
 	return strconv.FormatUint(uint64(t.Size), 10) + " byte"
 }
 
+func (t ScalarType) MarshalText() ([]byte, error) {
+	return []byte(t.String()), nil
+}
+
 func (t ScalarType) CanBeAssigned(other Type) bool {
 	return t.Bytes() == other.Bytes()
 }

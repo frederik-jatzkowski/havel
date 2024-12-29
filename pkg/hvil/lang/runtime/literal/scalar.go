@@ -2,11 +2,13 @@ package literal
 
 import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/typecheck"
 	"math/bits"
+	"unsafe"
 )
 
 type Scalar struct {
@@ -37,4 +39,19 @@ func (l *Scalar) ResolveTypes(target types.Type) (errs []error) {
 	l.TypeCheckPass.Type = target
 
 	return errs
+}
+
+func (l *Scalar) Execute(vm *runtime.VirtualMachine, result unsafe.Pointer) error {
+	switch l.TypeCheckPass.Type.Bytes() {
+	case 1:
+		*(*byte)(result) = byte(l.Value)
+	case 2:
+		*(*uint16)(result) = uint16(l.Value)
+	case 4:
+		*(*uint32)(result) = uint32(l.Value)
+	case 8:
+		*(*uint64)(result) = l.Value
+	}
+
+	return nil
 }

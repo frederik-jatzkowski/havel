@@ -1,10 +1,13 @@
 package names
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
+)
 
 type ScopedObject interface {
+	tool.NodeLike
 	Identifier() string
-	Errorf(format string, a ...any) error
 }
 
 type Scope[T ScopedObject] struct {

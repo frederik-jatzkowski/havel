@@ -3,15 +3,25 @@ package function
 import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/address"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
 )
 
 type Function struct {
 	tool.Node[Function]
 	names.NameResolution[struct {
+		Entry  *block.Block
 		Blocks names.Scope[block.Block]
 		Vars   names.Scope[memory.VarDecl]
+	}]
+	address.Resolution[struct {
+		FrameSize  int
+		ArgsSize   int
+		ReturnSize int
+		VarsSize   int
+		RegsSize   int
 	}]
 
 	Name   string                    `parser:"'func':Keyword @Ident"`
@@ -45,10 +55,12 @@ func (f *Function) ResolveNames() (errs []error) {
 		errs = append(errs, f.Blocks[i].ResolveNames(f.NameResolutionPass.Vars)...)
 	}
 
-	_, exists := f.NameResolutionPass.Blocks.Find("entry")
+	entry, exists := f.NameResolutionPass.Blocks.Find("entry")
 	if !exists {
 		errs = append(errs, f.Errorf("no entry block defined"))
 	}
+
+	f.NameResolutionPass.Entry = entry
 
 	return errs
 }
@@ -59,4 +71,36 @@ func (f *Function) ResolveTypes() (errs []error) {
 	}
 
 	return errs
+}
+
+func (f *Function) ResolveAddresses() (errs []error) {
+	regsOffset := f.AddressResolutionPass.ArgsSize +
+		f.AddressResolutionPass.ReturnSize +
+		f.AddressResolutionPass.VarsSize
+
+	for i := 0; i < len(f.Blocks); i++ {
+		blockRegSize := 0
+		for _, reg := range f.Blocks[i].NameResolutionPass.OrderedRegs {
+			reg.AddressResolutionPass.RelAddr = regsOffset + blockRegSize
+			blockRegSize += reg.Type().Bytes()
+		}
+
+		f.AddressResolutionPass.RegsSize = max(blockRegSize, f.AddressResolutionPass.RegsSize)
+	}
+
+	f.AddressResolutionPass.FrameSize += f.AddressResolutionPass.RegsSize
+
+	return errs
+}
+
+func (f *Function) Execute(vm *runtime.VirtualMachine) (err error) {
+	next := f.NameResolutionPass.Entry
+	for next != nil {
+		next, err = next.Execute(vm)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

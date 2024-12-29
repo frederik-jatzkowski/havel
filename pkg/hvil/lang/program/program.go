@@ -2,6 +2,7 @@ package program
 
 import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
 )
@@ -9,6 +10,7 @@ import (
 type Program struct {
 	tool.Node[Program]
 	names.NameResolution[struct {
+		Main      *function.Function
 		Functions names.Scope[function.Function]
 	}]
 
@@ -24,10 +26,12 @@ func (p *Program) ResolveNames() []error {
 		errs = append(errs, p.Functions[i].ResolveNames()...)
 	}
 
-	_, exists := p.NameResolutionPass.Functions.Find("main")
+	main, exists := p.NameResolutionPass.Functions.Find("main")
 	if !exists {
 		errs = append(errs, p.Errorf("no main function defined"))
 	}
+
+	p.NameResolutionPass.Main = main
 
 	return errs
 }
@@ -38,4 +42,20 @@ func (p *Program) ResolveTypes() (errs []error) {
 	}
 
 	return errs
+}
+
+func (p *Program) ResolveAddresses() (errs []error) {
+	for i := 0; i < len(p.Functions); i++ {
+		errs = append(errs, p.Functions[i].ResolveAddresses()...)
+	}
+
+	return errs
+}
+
+func (p *Program) Execute(vm *runtime.VirtualMachine) error {
+	vm.CallStack = append(vm.CallStack, runtime.Call{
+		Name: p.NameResolutionPass.Main.Name,
+	})
+
+	return p.NameResolutionPass.Main.Execute(vm)
 }
