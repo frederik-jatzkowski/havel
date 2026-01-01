@@ -19,15 +19,15 @@ type Decl struct {
 	DeclaredType types.Type `parser:"':' @@"`
 }
 
-func (d *Decl) Identifier() string {
-	return d.Name
+func (node *Decl) Identifier() string {
+	return node.Name
 }
 
-func (d *Decl) Type() types.Type {
-	return d.DeclaredType
+func (node *Decl) Type() types.Type {
+	return node.DeclaredType
 }
 
-func (d *Decl) Addr(vm *runtime.VirtualMachine) unsafe.Pointer {
-	stackAddr := vm.StackPointer + d.AddressResolutionPass.RelAddr
+func (node *Decl) Addr(vm *runtime.VirtualMachine) unsafe.Pointer {
+	stackAddr := vm.StackPointer + node.AddressResolutionPass.RelAddr
 	return unsafe.Pointer(&vm.Stack[stackAddr])
 }

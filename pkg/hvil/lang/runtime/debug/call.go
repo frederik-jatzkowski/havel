@@ -17,14 +17,14 @@ type Call struct {
 	Op Op `parser:"'debug' '.' @@"`
 }
 
-func (c *Call) ResolveNames(vars names.Scope[*stack.Decl], regs names.Scope[*memory.RegWrite]) (errs []error) {
-	return c.Op.ResolveNames(vars, regs)
+func (node *Call) ResolveNames(vars names.Scope[*stack.Decl], regs names.Scope[*memory.RegWrite]) (errs []error) {
+	return node.Op.ResolveNames(vars, regs)
 }
 
-func (c *Call) ResolveTypes(target types.Type) (errs []error) {
-	return c.Op.ResolveTypes(target)
+func (node *Call) ResolveTypes(target types.Type) (errs []error) {
+	return node.Op.ResolveTypes(target)
 }
 
-func (c *Call) Execute(vm *runtime.VirtualMachine, result unsafe.Pointer) error {
-	return c.Op.Execute(vm, result)
+func (node *Call) Execute(vm *runtime.VirtualMachine, result unsafe.Pointer) error {
+	return node.Op.Execute(vm, result)
 }

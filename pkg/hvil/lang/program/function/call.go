@@ -22,14 +22,14 @@ type Call struct {
 	Args tool.List[memory.Read] `parser:"'(' @@ ')'"`
 }
 
-func (c *Call) ResolveNames(vars names.Scope[*stack.Decl], regs names.Scope[*memory.RegWrite]) (errs []error) {
+func (node *Call) ResolveNames(vars names.Scope[*stack.Decl], regs names.Scope[*memory.RegWrite]) (errs []error) {
 	return nil
 }
 
-func (c *Call) ResolveTypes(target types.Type) (errs []error) {
-	return append(errs, c.Errorf("not implemented"))
+func (node *Call) ResolveTypes(target types.Type) (errs []error) {
+	return append(errs, node.Errorf("not implemented"))
 }
 
-func (c *Call) Execute(vm *runtime.VirtualMachine, result unsafe.Pointer) error {
-	return c.Errorf("not implemented")
+func (node *Call) Execute(vm *runtime.VirtualMachine, result unsafe.Pointer) error {
+	return node.Errorf("not implemented")
 }

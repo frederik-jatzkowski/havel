@@ -31,82 +31,82 @@ type Function struct {
 	Blocks []*block.Block         `parser:"@@+  '}'"`
 }
 
-func (f *Function) Identifier() string {
-	return f.Name
+func (node *Function) Identifier() string {
+	return node.Name
 }
 
-func (f *Function) ResolveNames() (errs []error) {
-	f.NameResolutionPass.Vars = names.NewRootScope[*stack.Decl]("variable")
+func (node *Function) ResolveNames() (errs []error) {
+	node.NameResolutionPass.Vars = names.NewRootScope[*stack.Decl]("variable")
 
-	errs = f.NameResolutionPass.Vars.DefineAll(f.Params.Items)
+	errs = node.NameResolutionPass.Vars.DefineAll(node.Params.Items)
 
-	if f.Result != nil {
-		err := f.NameResolutionPass.Vars.Define(f.Result)
+	if node.Result != nil {
+		err := node.NameResolutionPass.Vars.Define(node.Result)
 		if err != nil {
 			errs = append(errs, err)
 		}
 	}
 
-	errs = append(errs, f.NameResolutionPass.Vars.DefineAll(f.Locals.Items)...)
+	errs = append(errs, node.NameResolutionPass.Vars.DefineAll(node.Locals.Items)...)
 
-	f.NameResolutionPass.Blocks = names.NewRootScope[*block.Block]("block")
-	errs = append(errs, f.NameResolutionPass.Blocks.DefineAll(f.Blocks)...)
+	node.NameResolutionPass.Blocks = names.NewRootScope[*block.Block]("block")
+	errs = append(errs, node.NameResolutionPass.Blocks.DefineAll(node.Blocks)...)
 
-	for i := 0; i < len(f.Blocks); i++ {
-		errs = append(errs, f.Blocks[i].ResolveNames(f.NameResolutionPass.Vars)...)
+	for i := 0; i < len(node.Blocks); i++ {
+		errs = append(errs, node.Blocks[i].ResolveNames(node.NameResolutionPass.Vars)...)
 	}
 
-	entry, err := f.NameResolutionPass.Blocks.Find("entry")
+	entry, err := node.NameResolutionPass.Blocks.Find("entry")
 	if err != nil {
-		errs = append(errs, f.Errorf("no entry block defined"))
+		errs = append(errs, node.Errorf("no entry block defined"))
 	}
 
-	f.NameResolutionPass.Entry = entry
+	node.NameResolutionPass.Entry = entry
 
 	return errs
 }
 
-func (f *Function) ResolveTypes() (errs []error) {
-	for i := 0; i < len(f.Blocks); i++ {
-		errs = append(errs, f.Blocks[i].ResolveTypes()...)
+func (node *Function) ResolveTypes() (errs []error) {
+	for i := 0; i < len(node.Blocks); i++ {
+		errs = append(errs, node.Blocks[i].ResolveTypes()...)
 	}
 
 	return errs
 }
 
-func (f *Function) ResolveAddresses() (errs []error) {
+func (node *Function) ResolveAddresses() (errs []error) {
 	offset := 0
-	f.resolveLocalsAddresses(offset)
-	offset += f.AddressResolutionPass.VarsSize
-	f.resolveRegisterAddresses(offset)
+	node.resolveLocalsAddresses(offset)
+	offset += node.AddressResolutionPass.VarsSize
+	node.resolveRegisterAddresses(offset)
 
-	f.AddressResolutionPass.FrameSize = offset
+	node.AddressResolutionPass.FrameSize = offset
 
 	return errs
 }
 
-func (f *Function) resolveLocalsAddresses(offset int) {
-	for _, decl := range f.Locals.Items {
+func (node *Function) resolveLocalsAddresses(offset int) {
+	for _, decl := range node.Locals.Items {
 		size := decl.Type().Bytes()
-		decl.AddressResolutionPass.RelAddr = offset + f.AddressResolutionPass.VarsSize
-		f.AddressResolutionPass.VarsSize += size
+		decl.AddressResolutionPass.RelAddr = offset + node.AddressResolutionPass.VarsSize
+		node.AddressResolutionPass.VarsSize += size
 	}
 }
 
-func (f *Function) resolveRegisterAddresses(offset int) {
-	for i := 0; i < len(f.Blocks); i++ {
+func (node *Function) resolveRegisterAddresses(offset int) {
+	for i := 0; i < len(node.Blocks); i++ {
 		blockRegSize := 0
-		for _, reg := range f.Blocks[i].NameResolutionPass.OrderedRegs {
+		for _, reg := range node.Blocks[i].NameResolutionPass.OrderedRegs {
 			reg.AddressResolutionPass.RelAddr = offset + blockRegSize
 			blockRegSize += reg.Type().Bytes()
 		}
 
-		f.AddressResolutionPass.RegsSize = max(blockRegSize, f.AddressResolutionPass.RegsSize)
+		node.AddressResolutionPass.RegsSize = max(blockRegSize, node.AddressResolutionPass.RegsSize)
 	}
 }
 
-func (f *Function) Execute(vm *runtime.VirtualMachine) (err error) {
-	next := f.NameResolutionPass.Entry
+func (node *Function) Execute(vm *runtime.VirtualMachine) (err error) {
+	next := node.NameResolutionPass.Entry
 	for next != nil {
 		next, err = next.Execute(vm)
 		if err != nil {

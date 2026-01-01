@@ -18,32 +18,32 @@ type Instruction struct {
 	Operation Op           `parser:"@@ ';'"`
 }
 
-func (i *Instruction) ResolveNames(
+func (node *Instruction) ResolveNames(
 	vars names.Scope[*stack.Decl],
 	regs names.Scope[*memory.RegWrite],
 ) (errs []error) {
-	if i.Result != nil {
-		errs = append(errs, i.Result.ResolveNames(vars, regs)...)
+	if node.Result != nil {
+		errs = append(errs, node.Result.ResolveNames(vars, regs)...)
 	}
 
-	errs = append(errs, i.Operation.ResolveNames(vars, regs)...)
+	errs = append(errs, node.Operation.ResolveNames(vars, regs)...)
 
 	return errs
 }
 
-func (i *Instruction) ResolveTypes() (errs []error) {
-	if i.Result != nil {
-		return i.Operation.ResolveTypes(i.Result.Type())
+func (node *Instruction) ResolveTypes() (errs []error) {
+	if node.Result != nil {
+		return node.Operation.ResolveTypes(node.Result.Type())
 	}
 
-	return i.Operation.ResolveTypes(types.Void{})
+	return node.Operation.ResolveTypes(types.Void{})
 }
 
-func (i *Instruction) Execute(vm *runtime.VirtualMachine) error {
+func (node *Instruction) Execute(vm *runtime.VirtualMachine) error {
 	var result unsafe.Pointer
-	if i.Result != nil {
-		result = i.Result.Addr(vm)
+	if node.Result != nil {
+		result = node.Result.Addr(vm)
 	}
 
-	return i.Operation.Execute(vm, result)
+	return node.Operation.Execute(vm, result)
 }

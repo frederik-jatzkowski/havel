@@ -19,14 +19,14 @@ type Operation struct {
 	Args tool.List[memory.Read] `parser:"'(' @@ ')'"`
 }
 
-func (o Operation) ResolveNames(vars names.Scope[*stack.Decl], regs names.Scope[*memory.RegWrite]) (errs []error) {
+func (node Operation) ResolveNames(vars names.Scope[*stack.Decl], regs names.Scope[*memory.RegWrite]) (errs []error) {
 	return nil
 }
 
-func (o Operation) ResolveTypes(target types.Type) (errs []error) {
-	return append(errs, o.Errorf("not implemented"))
+func (node Operation) ResolveTypes(target types.Type) (errs []error) {
+	return append(errs, node.Errorf("not implemented"))
 }
 
-func (o Operation) Execute(vm *runtime.VirtualMachine, result unsafe.Pointer) error {
-	return o.Errorf("not implemented")
+func (node Operation) Execute(vm *runtime.VirtualMachine, result unsafe.Pointer) error {
+	return node.Errorf("not implemented")
 }

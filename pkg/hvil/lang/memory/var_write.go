@@ -19,24 +19,24 @@ type VarWrite struct {
 	Ident string `parser:"@Ident"`
 }
 
-func (w *VarWrite) ResolveNames(
+func (node *VarWrite) ResolveNames(
 	vars names.Scope[*stack.Decl],
 	_ names.Scope[*RegWrite],
 ) (errs []error) {
-	decl, err := vars.Find(w.Ident)
+	decl, err := vars.Find(node.Ident)
 	if err != nil {
-		return append(errs, w.Wrap(err))
+		return append(errs, node.Wrap(err))
 	}
 
-	w.NameResolutionPass.Decl = decl
+	node.NameResolutionPass.Decl = decl
 
 	return nil
 }
 
-func (w *VarWrite) Type() types.Type {
-	return w.NameResolutionPass.Decl.Type()
+func (node *VarWrite) Type() types.Type {
+	return node.NameResolutionPass.Decl.Type()
 }
 
-func (w *VarWrite) Addr(vm *runtime.VirtualMachine) unsafe.Pointer {
-	return w.NameResolutionPass.Decl.Addr(vm)
+func (node *VarWrite) Addr(vm *runtime.VirtualMachine) unsafe.Pointer {
+	return node.NameResolutionPass.Decl.Addr(vm)
 }

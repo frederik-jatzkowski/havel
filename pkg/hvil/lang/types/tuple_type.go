@@ -11,11 +11,11 @@ type TupleType struct {
 	Members []Type `parser:"'[' @@ (',' @@)* ']'"`
 }
 
-func (t TupleType) String() string {
+func (node TupleType) String() string {
 	result := "["
-	for i, member := range t.Members {
+	for i, member := range node.Members {
 		result += member.String()
-		if i < len(t.Members)-1 {
+		if i < len(node.Members)-1 {
 			result += ", "
 		}
 	}
@@ -23,12 +23,12 @@ func (t TupleType) String() string {
 	return result + "]"
 }
 
-func (t TupleType) CanBeAssigned(other Type) bool {
-	return t.Bytes() == other.Bytes()
+func (node TupleType) CanBeAssigned(other Type) bool {
+	return node.Bytes() == other.Bytes()
 }
 
-func (t TupleType) Bytes() (size int) {
-	for _, member := range t.Members {
+func (node TupleType) Bytes() (size int) {
+	for _, member := range node.Members {
 		size += member.Bytes()
 	}
 

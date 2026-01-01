@@ -21,33 +21,33 @@ type Block struct {
 	Terminator   Terminator                `parser:"'}' '=>' @@ ';'"`
 }
 
-func (b *Block) Identifier() string {
-	return b.Name
+func (node *Block) Identifier() string {
+	return node.Name
 }
 
-func (b *Block) ResolveNames(vars names.Scope[*stack.Decl]) (errs []error) {
-	b.NameResolutionPass.Regs = names.NewRootScope[*memory.RegWrite]("register")
+func (node *Block) ResolveNames(vars names.Scope[*stack.Decl]) (errs []error) {
+	node.NameResolutionPass.Regs = names.NewRootScope[*memory.RegWrite]("register")
 
-	for _, i := range b.Instructions {
-		errs = append(errs, i.ResolveNames(vars, b.NameResolutionPass.Regs)...)
+	for _, i := range node.Instructions {
+		errs = append(errs, i.ResolveNames(vars, node.NameResolutionPass.Regs)...)
 		if reg, ok := i.Result.(*memory.RegWrite); ok {
-			b.NameResolutionPass.OrderedRegs = append(b.NameResolutionPass.OrderedRegs, reg)
+			node.NameResolutionPass.OrderedRegs = append(node.NameResolutionPass.OrderedRegs, reg)
 		}
 	}
 
 	return errs
 }
 
-func (b *Block) ResolveTypes() (errs []error) {
-	for i := 0; i < len(b.Instructions); i++ {
-		errs = append(errs, b.Instructions[i].ResolveTypes()...)
+func (node *Block) ResolveTypes() (errs []error) {
+	for i := 0; i < len(node.Instructions); i++ {
+		errs = append(errs, node.Instructions[i].ResolveTypes()...)
 	}
 
 	return errs
 }
 
-func (b *Block) Execute(vm *runtime.VirtualMachine) (*Block, error) {
-	for _, i := range b.Instructions {
+func (node *Block) Execute(vm *runtime.VirtualMachine) (*Block, error) {
+	for _, i := range node.Instructions {
 		err := i.Execute(vm)
 		if err != nil {
 			return nil, err

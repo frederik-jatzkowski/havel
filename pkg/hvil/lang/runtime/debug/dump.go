@@ -22,44 +22,44 @@ type Dump struct {
 	Param memory.Read `parser:"'dump' '(' @@ ')'"`
 }
 
-func (d *Dump) ResolveNames(vars names.Scope[*stack.Decl], regs names.Scope[*memory.RegWrite]) (errs []error) {
-	return d.Param.ResolveNames(vars, regs)
+func (node *Dump) ResolveNames(vars names.Scope[*stack.Decl], regs names.Scope[*memory.RegWrite]) (errs []error) {
+	return node.Param.ResolveNames(vars, regs)
 }
 
-func (d *Dump) ResolveTypes(target types.Type) (errs []error) {
+func (node *Dump) ResolveTypes(target types.Type) (errs []error) {
 	if !target.CanBeAssigned(types.Void{}) {
-		errs = append(errs, d.Errorf("cannot assign void to %s", target))
+		errs = append(errs, node.Errorf("cannot assign void to %s", target))
 	}
 
-	d.TypeCheckPass.Type = d.Param.Type()
+	node.TypeCheckPass.Type = node.Param.Type()
 
 	return errs
 }
 
-func (d *Dump) Execute(vm *runtime.VirtualMachine, _ unsafe.Pointer) (err error) {
+func (node *Dump) Execute(vm *runtime.VirtualMachine, _ unsafe.Pointer) (err error) {
 	var value any
-	switch d.TypeCheckPass.Type.Bytes() {
+	switch node.TypeCheckPass.Type.Bytes() {
 	case 1:
-		value = *(*byte)(d.Param.Addr(vm))
+		value = *(*byte)(node.Param.Addr(vm))
 	case 2:
-		value = *(*uint16)(d.Param.Addr(vm))
+		value = *(*uint16)(node.Param.Addr(vm))
 	case 4:
-		value = *(*uint32)(d.Param.Addr(vm))
+		value = *(*uint32)(node.Param.Addr(vm))
 	case 8:
-		value = *(*uint64)(d.Param.Addr(vm))
+		value = *(*uint64)(node.Param.Addr(vm))
 	}
 
 	memKind := "unknown"
-	switch d.Param.(type) {
+	switch node.Param.(type) {
 	case *memory.RegRead:
 		memKind = "register"
 	case *memory.VarRead:
 		memKind = "variable"
 	}
 
-	metaString := fmt.Sprintf("(%s %s '%s')", d.Param.Type(), memKind, d.Param.Identifier())
+	metaString := fmt.Sprintf("(%s %s '%s')", node.Param.Type(), memKind, node.Param.Identifier())
 
-	_, err = fmt.Fprintln(vm.Stdout, d.Pos, value, metaString)
+	_, err = fmt.Fprintln(vm.Stdout, node.Pos, value, metaString)
 
 	return err
 }

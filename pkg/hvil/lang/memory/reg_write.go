@@ -23,15 +23,15 @@ type RegWrite struct {
 
 var _ Write = (*RegWrite)(nil)
 
-func (w *RegWrite) Identifier() string {
-	return w.Ident
+func (node *RegWrite) Identifier() string {
+	return node.Ident
 }
 
-func (w *RegWrite) ResolveNames(
+func (node *RegWrite) ResolveNames(
 	_ names.Scope[*stack.Decl],
 	regs names.Scope[*RegWrite],
 ) (errs []error) {
-	err := regs.Define(w)
+	err := regs.Define(node)
 	if err != nil {
 		errs = append(errs, err)
 	}
@@ -39,11 +39,11 @@ func (w *RegWrite) ResolveNames(
 	return errs
 }
 
-func (w *RegWrite) Type() types.Type {
-	return w.RegType
+func (node *RegWrite) Type() types.Type {
+	return node.RegType
 }
 
-func (w *RegWrite) Addr(vm *runtime.VirtualMachine) unsafe.Pointer {
-	stackAddr := vm.StackPointer + w.AddressResolutionPass.RelAddr
+func (node *RegWrite) Addr(vm *runtime.VirtualMachine) unsafe.Pointer {
+	stackAddr := vm.StackPointer + node.AddressResolutionPass.RelAddr
 	return unsafe.Pointer(&vm.Stack[stackAddr])
 }

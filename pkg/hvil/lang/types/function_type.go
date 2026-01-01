@@ -12,10 +12,10 @@ type FunctionType struct {
 	ReturnValue Type            `parser:"( '=>' @@ )?"`
 }
 
-func (t FunctionType) CanBeAssigned(other Type) bool {
+func (node FunctionType) CanBeAssigned(other Type) bool {
 	return false
 }
 
-func (t FunctionType) Bytes() int {
+func (node FunctionType) Bytes() int {
 	return 8
 }

@@ -19,25 +19,25 @@ type RegRead struct {
 	Ident string `parser:"'$' @Ident"`
 }
 
-func (read *RegRead) Identifier() string {
-	return read.NameResolutionPass.Decl.Identifier()
+func (node *RegRead) Identifier() string {
+	return node.NameResolutionPass.Decl.Identifier()
 }
 
-func (read *RegRead) ResolveNames(_ names.Scope[*stack.Decl], regs names.Scope[*RegWrite]) (errs []error) {
-	decl, err := regs.Find(read.Ident)
+func (node *RegRead) ResolveNames(_ names.Scope[*stack.Decl], regs names.Scope[*RegWrite]) (errs []error) {
+	decl, err := regs.Find(node.Ident)
 	if err != nil {
-		return append(errs, read.Wrap(err))
+		return append(errs, node.Wrap(err))
 	}
 
-	read.NameResolutionPass.Decl = decl
+	node.NameResolutionPass.Decl = decl
 
 	return nil
 }
 
-func (read *RegRead) Type() types.Type {
-	return read.NameResolutionPass.Decl.RegType
+func (node *RegRead) Type() types.Type {
+	return node.NameResolutionPass.Decl.RegType
 }
 
-func (read *RegRead) Addr(vm *runtime.VirtualMachine) unsafe.Pointer {
-	return read.NameResolutionPass.Decl.Addr(vm)
+func (node *RegRead) Addr(vm *runtime.VirtualMachine) unsafe.Pointer {
+	return node.NameResolutionPass.Decl.Addr(vm)
 }

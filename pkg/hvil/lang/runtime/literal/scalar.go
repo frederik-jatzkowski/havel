@@ -22,37 +22,37 @@ type Scalar struct {
 	Value uint64 `parser:"@BitLiteral"`
 }
 
-func (l *Scalar) ResolveNames(vars names.Scope[*stack.Decl], regs names.Scope[*memory.RegWrite]) (errs []error) {
+func (node *Scalar) ResolveNames(vars names.Scope[*stack.Decl], regs names.Scope[*memory.RegWrite]) (errs []error) {
 	return nil
 }
 
-func (l *Scalar) ResolveTypes(target types.Type) (errs []error) {
+func (node *Scalar) ResolveTypes(target types.Type) (errs []error) {
 	_, ok := target.(types.ScalarType)
 	if !ok {
-		return append(errs, l.Errorf("cannot assign scalar literal to %s", target))
+		return append(errs, node.Errorf("cannot assign scalar literal to %s", target))
 	}
 
-	requiredBytes := (bits.Len64(l.Value) + 7) / 8
+	requiredBytes := (bits.Len64(node.Value) + 7) / 8
 	availableBytes := target.Bytes()
 	if requiredBytes > availableBytes {
-		errs = append(errs, l.Errorf("cannot assign scalar literal %d to %s: value too big", l.Value, target))
+		errs = append(errs, node.Errorf("cannot assign scalar literal %d to %s: value too big", node.Value, target))
 	}
 
-	l.TypeCheckPass.Type = target
+	node.TypeCheckPass.Type = target
 
 	return errs
 }
 
-func (l *Scalar) Execute(vm *runtime.VirtualMachine, result unsafe.Pointer) error {
-	switch l.TypeCheckPass.Type.Bytes() {
+func (node *Scalar) Execute(vm *runtime.VirtualMachine, result unsafe.Pointer) error {
+	switch node.TypeCheckPass.Type.Bytes() {
 	case 1:
-		*(*byte)(result) = byte(l.Value)
+		*(*byte)(result) = byte(node.Value)
 	case 2:
-		*(*uint16)(result) = uint16(l.Value)
+		*(*uint16)(result) = uint16(node.Value)
 	case 4:
-		*(*uint32)(result) = uint32(l.Value)
+		*(*uint32)(result) = uint32(node.Value)
 	case 8:
-		*(*uint64)(result) = l.Value
+		*(*uint64)(result) = node.Value
 	}
 
 	return nil

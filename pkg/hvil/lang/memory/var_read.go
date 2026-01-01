@@ -19,25 +19,25 @@ type VarRead struct {
 	Ident string `parser:"@Ident"`
 }
 
-func (read *VarRead) Identifier() string {
-	return read.NameResolutionPass.Decl.Identifier()
+func (node *VarRead) Identifier() string {
+	return node.NameResolutionPass.Decl.Identifier()
 }
 
-func (read *VarRead) ResolveNames(vars names.Scope[*stack.Decl], _ names.Scope[*RegWrite]) (errs []error) {
-	decl, err := vars.Find(read.Ident)
+func (node *VarRead) ResolveNames(vars names.Scope[*stack.Decl], _ names.Scope[*RegWrite]) (errs []error) {
+	decl, err := vars.Find(node.Ident)
 	if err != nil {
-		return append(errs, read.Wrap(err))
+		return append(errs, node.Wrap(err))
 	}
 
-	read.NameResolutionPass.Decl = decl
+	node.NameResolutionPass.Decl = decl
 
 	return nil
 }
 
-func (read *VarRead) Type() types.Type {
-	return read.NameResolutionPass.Decl.Type()
+func (node *VarRead) Type() types.Type {
+	return node.NameResolutionPass.Decl.Type()
 }
 
-func (read *VarRead) Addr(vm *runtime.VirtualMachine) unsafe.Pointer {
-	return read.NameResolutionPass.Decl.Addr(vm)
+func (node *VarRead) Addr(vm *runtime.VirtualMachine) unsafe.Pointer {
+	return node.NameResolutionPass.Decl.Addr(vm)
 }

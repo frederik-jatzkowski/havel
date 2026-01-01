@@ -17,45 +17,45 @@ type Program struct {
 	Functions []*function.Function `parser:"@@+"`
 }
 
-func (p *Program) ResolveNames() []error {
-	p.NameResolutionPass.Functions = names.NewRootScope[*function.Function]("function")
+func (node *Program) ResolveNames() []error {
+	node.NameResolutionPass.Functions = names.NewRootScope[*function.Function]("function")
 
-	errs := p.NameResolutionPass.Functions.DefineAll(p.Functions)
+	errs := node.NameResolutionPass.Functions.DefineAll(node.Functions)
 
-	for i := 0; i < len(p.Functions); i++ {
-		errs = append(errs, p.Functions[i].ResolveNames()...)
+	for i := 0; i < len(node.Functions); i++ {
+		errs = append(errs, node.Functions[i].ResolveNames()...)
 	}
 
-	main, err := p.NameResolutionPass.Functions.Find("main")
+	main, err := node.NameResolutionPass.Functions.Find("main")
 	if err != nil {
-		errs = append(errs, p.Errorf("no main function defined"))
+		errs = append(errs, node.Errorf("no main function defined"))
 	}
 
-	p.NameResolutionPass.Main = main
+	node.NameResolutionPass.Main = main
 
 	return errs
 }
 
-func (p *Program) ResolveTypes() (errs []error) {
-	for i := 0; i < len(p.Functions); i++ {
-		errs = append(errs, p.Functions[i].ResolveTypes()...)
-	}
-
-	return errs
-}
-
-func (p *Program) ResolveAddresses() (errs []error) {
-	for i := 0; i < len(p.Functions); i++ {
-		errs = append(errs, p.Functions[i].ResolveAddresses()...)
+func (node *Program) ResolveTypes() (errs []error) {
+	for i := 0; i < len(node.Functions); i++ {
+		errs = append(errs, node.Functions[i].ResolveTypes()...)
 	}
 
 	return errs
 }
 
-func (p *Program) Execute(vm *runtime.VirtualMachine) error {
+func (node *Program) ResolveAddresses() (errs []error) {
+	for i := 0; i < len(node.Functions); i++ {
+		errs = append(errs, node.Functions[i].ResolveAddresses()...)
+	}
+
+	return errs
+}
+
+func (node *Program) Execute(vm *runtime.VirtualMachine) error {
 	vm.CallStack = append(vm.CallStack, runtime.Call{
-		Name: p.NameResolutionPass.Main.Name,
+		Name: node.NameResolutionPass.Main.Name,
 	})
 
-	return p.NameResolutionPass.Main.Execute(vm)
+	return node.NameResolutionPass.Main.Execute(vm)
 }
