@@ -27,7 +27,7 @@ func (node *Scalar) ResolveNames(vars names.Scope[*stack.Decl], regs names.Scope
 }
 
 func (node *Scalar) ResolveTypes(target types.Type) (errs []error) {
-	_, ok := target.(types.ScalarType)
+	_, ok := target.(*types.ScalarType)
 	if !ok {
 		return append(errs, node.Errorf("cannot assign scalar literal to %s", target))
 	}

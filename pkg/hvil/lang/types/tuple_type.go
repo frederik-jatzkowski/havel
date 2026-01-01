@@ -11,7 +11,7 @@ type TupleType struct {
 	Members []Type `parser:"'[' @@ (',' @@)* ']'"`
 }
 
-func (node TupleType) String() string {
+func (node *TupleType) String() string {
 	result := "["
 	for i, member := range node.Members {
 		result += member.String()
@@ -23,11 +23,11 @@ func (node TupleType) String() string {
 	return result + "]"
 }
 
-func (node TupleType) CanBeAssigned(other Type) bool {
+func (node *TupleType) CanBeAssigned(other Type) bool {
 	return node.Bytes() == other.Bytes()
 }
 
-func (node TupleType) Bytes() (size int) {
+func (node *TupleType) Bytes() (size int) {
 	for _, member := range node.Members {
 		size += member.Bytes()
 	}

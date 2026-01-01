@@ -23,7 +23,7 @@ var parser = participle.MustBuild[program.Program](
 	participle.Lexer(token.Tokenizer),
 	participle.Elide("Whitespace", "Comment"),
 	participle.UseLookahead(1),
-	participle.Union[types.Type](types.ScalarType{}, types.TupleType{}, types.FunctionType{}),
+	participle.Union[types.Type](&types.ScalarType{}, &types.TupleType{}, types.FunctionType{}),
 	participle.Union[block.Terminator](&terminator.Return{}, &terminator.Jump{}, &terminator.Conditional{}),
 	participle.Union[memory.Write](&memory.RegWrite{}, &memory.VarWrite{}),
 	participle.Union[memory.Read](&memory.RegRead{}, &memory.VarRead{}),
