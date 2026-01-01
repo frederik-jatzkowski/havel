@@ -1,0 +1,9 @@
+{
+  "compiler": {
+    "errors": [
+      {
+        "contains": "cannot assign scalar literal 4294967296 to 4 byte: value too big"
+      }
+    ]
+  }
+}

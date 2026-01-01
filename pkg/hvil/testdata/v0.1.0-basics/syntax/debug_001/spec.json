@@ -1,0 +1,9 @@
+{
+  "compiler": {
+    "errors": [
+      {
+        "contains": "src.hvil:5:15: unexpected token \"never_a_debug_operation\" (expected Op)"
+      }
+    ]
+  }
+}

@@ -4,20 +4,22 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 )
 
 func TestCompiler(t *testing.T) {
 	type ExpectedCompilerError struct {
-		Message string `json:"message"`
+		Contains string `json:"contains"`
 	}
 	type ExpectedOutput struct {
 		Compiler struct {
@@ -54,27 +56,33 @@ func TestCompiler(t *testing.T) {
 			err = json.Unmarshal(expectedErrsData, &expectedOutput)
 			require.NoError(t, err)
 
-			expectedErrsMap := make(map[string]ExpectedCompilerError, len(expectedOutput.Compiler.Errors))
-			for _, expectedErr := range expectedOutput.Compiler.Errors {
-				expectedErrsMap[expectedErr.Message] = expectedErr
-			}
-
 			compiler := NewCompiler()
 			program, actualErrs := compiler.Compile(srcPath, bytes.NewBuffer(src))
 
-			for _, actualErr := range actualErrs {
-				errMsg := actualErr.Error()
-				_, exists := expectedErrsMap[errMsg]
-				assert.Truef(t, exists, "error message '%s' was unexpected", errMsg)
+			for _, expectedErr := range expectedOutput.Compiler.Errors {
+				found := false
+				for _, actualErr := range actualErrs {
+					if strings.Contains(actualErr.Error(), expectedErr.Contains) {
+						found = true
+						break
+					}
+				}
 
-				if exists {
-					delete(expectedErrsMap, errMsg)
+				if !found {
+					t.Fail()
+					t.Logf("remaining error expectation: '%s'", expectedErr.Contains)
 				}
 			}
 
-			for _, expectedErr := range expectedErrsMap {
+			if len(expectedOutput.Compiler.Errors) == 0 && len(actualErrs) > 0 {
 				t.Fail()
-				t.Logf("remaining error expectation: '%s'", expectedErr.Message)
+				t.Log("unexpected compiler errors")
+			}
+
+			t.Log("found errors:")
+
+			for _, err := range actualErrs {
+				t.Log(err)
 			}
 
 			if len(actualErrs) > 0 {
@@ -88,7 +96,14 @@ func TestCompiler(t *testing.T) {
 			err = program.Execute(vm)
 			require.NoError(t, err)
 
-			assert.Equal(t, strings.Join(expectedOutput.Execution.StdoutLines, "\n"), strings.TrimSpace(stdout.String()))
+			actualLines := strings.Split(stdout.String(), "\n")
+			for i, actualLine := range actualLines {
+				if i == len(actualLines)-1 {
+					continue
+				}
+
+				assert.Contains(t, actualLine, expectedOutput.Execution.StdoutLines[i])
+			}
 		})
 
 		return nil

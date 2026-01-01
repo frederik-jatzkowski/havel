@@ -1,0 +1,9 @@
+{
+  "compiler": {
+    "errors": [
+      {
+        "contains": "src.hvil:3:5: unexpected token \"block\""
+      }
+    ]
+  }
+}

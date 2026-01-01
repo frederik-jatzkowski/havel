@@ -1,9 +1,0 @@
-{
-  "compiler": {
-    "errors": [
-      {
-        "message": "testdata\\v0.1.0\\types\\void_assignment_001\\src.hvil:5:27: cannot assign void to byte"
-      }
-    ]
-  }
-}

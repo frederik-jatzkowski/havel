@@ -1,0 +1,9 @@
+{
+  "compiler": {
+    "errors": [
+      {
+        "contains": "cannot assign void to 4 byte"
+      }
+    ]
+  }
+}

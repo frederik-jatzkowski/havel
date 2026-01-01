@@ -1,0 +1,11 @@
+
+func main() {
+    declare (
+        m : 4 byte
+    );
+
+    block entry {
+        $n : 4 byte = 0b1;
+        m = debug.dump($n);
+    } => return;
+}

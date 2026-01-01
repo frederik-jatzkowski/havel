@@ -1,9 +1,0 @@
-{
-  "compiler": {
-    "errors": [
-      {
-        "message": "testdata\\v0.1.0\\names\\reg_redeclared_001\\src.hvil:5:9: register 'n' is redeclared"
-      }
-    ]
-  }
-}

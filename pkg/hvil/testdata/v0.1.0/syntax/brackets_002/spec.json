@@ -1,9 +1,0 @@
-{
-  "compiler": {
-    "errors": [
-      {
-        "message": "testdata\\v0.1.0\\syntax\\brackets_002\\src.hvil:6:6: unexpected token \"=>\" (expected \"}\" \"=>\" Terminator \";\")"
-      }
-    ]
-  }
-}

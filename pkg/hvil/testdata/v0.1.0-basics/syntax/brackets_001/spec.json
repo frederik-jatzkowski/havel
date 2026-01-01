@@ -1,0 +1,9 @@
+{
+  "compiler": {
+    "errors": [
+      {
+        "contains": "src.hvil:7:1: unexpected token \"<EOF>\" (expected \"}\")"
+      }
+    ]
+  }
+}

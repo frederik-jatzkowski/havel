@@ -1,0 +1,9 @@
+{
+  "compiler": {
+    "errors": [
+      {
+        "contains": "src.hvil:6:6: unexpected token \"=>\" (expected \"}\" \"=>\" Terminator \";\")"
+      }
+    ]
+  }
+}

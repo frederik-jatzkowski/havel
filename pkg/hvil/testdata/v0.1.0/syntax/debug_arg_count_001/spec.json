@@ -1,9 +1,0 @@
-{
-  "compiler": {
-    "errors": [
-      {
-        "message": "testdata\\v0.1.0\\syntax\\debug_arg_count_001\\src.hvil:5:22: unexpected token \",\" (expected \")\")"
-      }
-    ]
-  }
-}
