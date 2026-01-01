@@ -10,7 +10,7 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
 )
 
-type Op interface {
+type Operation interface {
 	ResolveNames(
 		vars names.Scope[*stack.Decl],
 		regs names.Scope[*memory.RegWrite],

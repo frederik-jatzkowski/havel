@@ -15,7 +15,7 @@ type Instruction struct {
 	tool.Node[Instruction]
 
 	Result    memory.Write `parser:"(@@ '=')?"`
-	Operation Op           `parser:"@@ ';'"`
+	Operation Operation    `parser:"@@ ';'"`
 }
 
 func (node *Instruction) ResolveNames(

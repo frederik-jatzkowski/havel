@@ -1,4 +1,4 @@
-package debug
+package alu
 
 import (
 	"unsafe"
@@ -17,11 +17,11 @@ type Operation instruction.Operation
 type Call struct {
 	tool.Node[Call]
 
-	Operation Operation `parser:"'debug' '.' @@"`
+	Operation Operation `parser:"'alu' '.' @@"`
 }
 
 func (node *Call) ResolveNames(vars names.Scope[*stack.Decl], regs names.Scope[*memory.RegWrite]) (errs []error) {
-	return node.Operation.ResolveNames(vars, regs)
+	return nil
 }
 
 func (node *Call) ResolveTypes(target types.Type) (errs []error) {
