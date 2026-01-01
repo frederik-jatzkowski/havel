@@ -1,11 +1,13 @@
 package memory
 
 import (
+	"unsafe"
+
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/stack"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
-	"unsafe"
 )
 
 type RegRead struct {
@@ -21,10 +23,10 @@ func (read *RegRead) Identifier() string {
 	return read.NameResolutionPass.Decl.Identifier()
 }
 
-func (read *RegRead) ResolveNames(_ names.Scope[VarDecl], regs names.Scope[RegWrite]) (errs []error) {
-	decl, exists := regs.Find(read.Ident)
-	if !exists {
-		return append(errs, read.Errorf("register '%s' is not defined", read.Ident))
+func (read *RegRead) ResolveNames(_ names.Scope[*stack.Decl], regs names.Scope[*RegWrite]) (errs []error) {
+	decl, err := regs.Find(read.Ident)
+	if err != nil {
+		return append(errs, read.Wrap(err))
 	}
 
 	read.NameResolutionPass.Decl = decl

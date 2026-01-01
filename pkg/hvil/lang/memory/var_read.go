@@ -1,19 +1,20 @@
 package memory
 
 import (
+	"unsafe"
+
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/stack"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
-	"unsafe"
 )
 
 type VarRead struct {
 	tool.Node[VarRead]
 	names.NameResolution[struct {
-		Decl VarDecl
+		Decl *stack.Decl
 	}]
-	tool.NotImplemented[VarRead]
 
 	Ident string `parser:"@Ident"`
 }
@@ -22,13 +23,13 @@ func (read *VarRead) Identifier() string {
 	return read.NameResolutionPass.Decl.Identifier()
 }
 
-func (read *VarRead) ResolveNames(vars names.Scope[VarDecl], _ names.Scope[RegWrite]) (errs []error) {
-	decl, exists := vars.Find(read.Ident)
-	if !exists {
-		return append(errs, read.Errorf("register '%s' is not defined", read.Ident))
+func (read *VarRead) ResolveNames(vars names.Scope[*stack.Decl], _ names.Scope[*RegWrite]) (errs []error) {
+	decl, err := vars.Find(read.Ident)
+	if err != nil {
+		return append(errs, read.Wrap(err))
 	}
 
-	read.NameResolutionPass.Decl = *decl
+	read.NameResolutionPass.Decl = decl
 
 	return nil
 }

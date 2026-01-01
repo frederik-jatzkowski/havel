@@ -2,19 +2,19 @@ package parser
 
 import (
 	"fmt"
+	"io"
+
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block/instruction"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block/terminator"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/stack"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime/alu"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime/debug"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime/literal"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/token"
-	"io"
 
 	"github.com/alecthomas/participle/v2"
 )
@@ -27,7 +27,6 @@ var parser = participle.MustBuild[program.Program](
 	participle.Union[block.Terminator](&terminator.Return{}, &terminator.Jump{}, &terminator.Conditional{}),
 	participle.Union[memory.Write](&memory.RegWrite{}, &memory.VarWrite{}),
 	participle.Union[memory.Read](&memory.RegRead{}, &memory.VarRead{}),
-	participle.Union[memory.VarDecl](&stack.Decl{}),
 	participle.Union[instruction.Op](&literal.Scalar{}, &alu.Operation{}, &function.Call{}, &debug.Call{}),
 	participle.Union[debug.Op](&debug.Dump{}),
 )

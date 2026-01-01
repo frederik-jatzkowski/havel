@@ -1,14 +1,16 @@
 package literal
 
 import (
+	"math/bits"
+	"unsafe"
+
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/stack"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/typecheck"
-	"math/bits"
-	"unsafe"
 )
 
 type Scalar struct {
@@ -20,7 +22,7 @@ type Scalar struct {
 	Value uint64 `parser:"@BitLiteral"`
 }
 
-func (l *Scalar) ResolveNames(vars names.Scope[memory.VarDecl], regs names.Scope[memory.RegWrite]) (errs []error) {
+func (l *Scalar) ResolveNames(vars names.Scope[*stack.Decl], regs names.Scope[*memory.RegWrite]) (errs []error) {
 	return nil
 }
 

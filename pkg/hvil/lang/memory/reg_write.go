@@ -1,12 +1,14 @@
 package memory
 
 import (
+	"unsafe"
+
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/stack"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/address"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
-	"unsafe"
 )
 
 type RegWrite struct {
@@ -19,13 +21,15 @@ type RegWrite struct {
 	RegType types.Type `parser:"':' @@"`
 }
 
-func (w RegWrite) Identifier() string {
+var _ Write = (*RegWrite)(nil)
+
+func (w *RegWrite) Identifier() string {
 	return w.Ident
 }
 
 func (w *RegWrite) ResolveNames(
-	_ names.Scope[VarDecl],
-	regs names.Scope[RegWrite],
+	_ names.Scope[*stack.Decl],
+	regs names.Scope[*RegWrite],
 ) (errs []error) {
 	err := regs.Define(w)
 	if err != nil {

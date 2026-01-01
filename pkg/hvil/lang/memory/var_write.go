@@ -1,34 +1,42 @@
 package memory
 
 import (
+	"unsafe"
+
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/stack"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
-	"unsafe"
 )
 
 type VarWrite struct {
 	tool.Node[Write]
 	names.NameResolution[struct {
-		Decl VarDecl
+		Decl *stack.Decl
 	}]
-	tool.NotImplemented[Write]
 
 	Ident string `parser:"@Ident"`
 }
 
-func (w VarWrite) ResolveNames(
-	_ names.Scope[VarDecl],
-	_ names.Scope[RegWrite],
+func (w *VarWrite) ResolveNames(
+	vars names.Scope[*stack.Decl],
+	_ names.Scope[*RegWrite],
 ) (errs []error) {
+	decl, err := vars.Find(w.Ident)
+	if err != nil {
+		return append(errs, w.Wrap(err))
+	}
+
+	w.NameResolutionPass.Decl = decl
+
 	return nil
 }
 
-func (w VarWrite) Type() types.Type {
+func (w *VarWrite) Type() types.Type {
 	return w.NameResolutionPass.Decl.Type()
 }
 
 func (w *VarWrite) Addr(vm *runtime.VirtualMachine) unsafe.Pointer {
-	return unsafe.Pointer(uintptr(1))
+	return w.NameResolutionPass.Decl.Addr(vm)
 }

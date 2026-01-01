@@ -11,14 +11,14 @@ type Program struct {
 	tool.Node[Program]
 	names.NameResolution[struct {
 		Main      *function.Function
-		Functions names.Scope[function.Function]
+		Functions names.Scope[*function.Function]
 	}]
 
-	Functions []function.Function `parser:"@@+"`
+	Functions []*function.Function `parser:"@@+"`
 }
 
 func (p *Program) ResolveNames() []error {
-	p.NameResolutionPass.Functions = names.NewRootScope[function.Function]("function")
+	p.NameResolutionPass.Functions = names.NewRootScope[*function.Function]("function")
 
 	errs := p.NameResolutionPass.Functions.DefineAll(p.Functions)
 
@@ -26,8 +26,8 @@ func (p *Program) ResolveNames() []error {
 		errs = append(errs, p.Functions[i].ResolveNames()...)
 	}
 
-	main, exists := p.NameResolutionPass.Functions.Find("main")
-	if !exists {
+	main, err := p.NameResolutionPass.Functions.Find("main")
+	if err != nil {
 		errs = append(errs, p.Errorf("no main function defined"))
 	}
 

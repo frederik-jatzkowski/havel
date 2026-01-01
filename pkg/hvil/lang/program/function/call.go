@@ -1,12 +1,14 @@
 package function
 
 import (
+	"unsafe"
+
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/stack"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
-	"unsafe"
 )
 
 type Call struct {
@@ -20,7 +22,7 @@ type Call struct {
 	Args tool.List[memory.Read] `parser:"'(' @@ ')'"`
 }
 
-func (c *Call) ResolveNames(vars names.Scope[memory.VarDecl], regs names.Scope[memory.RegWrite]) (errs []error) {
+func (c *Call) ResolveNames(vars names.Scope[*stack.Decl], regs names.Scope[*memory.RegWrite]) (errs []error) {
 	return nil
 }
 

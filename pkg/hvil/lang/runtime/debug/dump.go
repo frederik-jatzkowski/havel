@@ -2,13 +2,15 @@ package debug
 
 import (
 	"fmt"
+	"unsafe"
+
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/stack"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/typecheck"
-	"unsafe"
 )
 
 type Dump struct {
@@ -20,7 +22,7 @@ type Dump struct {
 	Param memory.Read `parser:"'dump' '(' @@ ')'"`
 }
 
-func (d *Dump) ResolveNames(vars names.Scope[memory.VarDecl], regs names.Scope[memory.RegWrite]) (errs []error) {
+func (d *Dump) ResolveNames(vars names.Scope[*stack.Decl], regs names.Scope[*memory.RegWrite]) (errs []error) {
 	return d.Param.ResolveNames(vars, regs)
 }
 
@@ -35,7 +37,6 @@ func (d *Dump) ResolveTypes(target types.Type) (errs []error) {
 }
 
 func (d *Dump) Execute(vm *runtime.VirtualMachine, _ unsafe.Pointer) (err error) {
-
 	var value any
 	switch d.TypeCheckPass.Type.Bytes() {
 	case 1:
@@ -48,8 +49,11 @@ func (d *Dump) Execute(vm *runtime.VirtualMachine, _ unsafe.Pointer) (err error)
 		value = *(*uint64)(d.Param.Addr(vm))
 	}
 
-	memKind := "register"
-	if _, ok := d.Param.(*memory.VarRead); ok {
+	memKind := "unknown"
+	switch d.Param.(type) {
+	case *memory.RegRead:
+		memKind = "register"
+	case *memory.VarRead:
 		memKind = "variable"
 	}
 

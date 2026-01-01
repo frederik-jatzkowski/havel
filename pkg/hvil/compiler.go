@@ -1,9 +1,10 @@
 package hvil
 
 import (
+	"io"
+
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/parser"
-	"io"
 )
 
 type Compiler struct {
