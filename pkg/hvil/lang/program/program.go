@@ -20,8 +20,10 @@ type Program struct {
 func (node *Program) ResolveNames() error {
 	node.NameResolutionPass.Functions = names.NewRootScope[*function.Function]("function")
 
-	if err := node.NameResolutionPass.Functions.DefineAll(node.Functions); err != nil {
-		return err
+	for _, f := range node.Functions {
+		if err := node.NameResolutionPass.Functions.Define(f); err != nil {
+			return f.Wrap(err)
+		}
 	}
 
 	for i := 0; i < len(node.Functions); i++ {

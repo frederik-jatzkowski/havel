@@ -38,8 +38,10 @@ func (node *Function) Identifier() string {
 func (node *Function) ResolveNames() error {
 	node.NameResolutionPass.Vars = names.NewRootScope[*stack.Decl]("variable")
 
-	if err := node.NameResolutionPass.Vars.DefineAll(node.Params.Items); err != nil {
-		return err
+	for _, param := range node.Params.Items {
+		if err := node.NameResolutionPass.Vars.Define(param); err != nil {
+			return param.Wrap(err)
+		}
 	}
 
 	if node.Result != nil {
@@ -48,13 +50,17 @@ func (node *Function) ResolveNames() error {
 		}
 	}
 
-	if err := node.NameResolutionPass.Vars.DefineAll(node.Locals.Items); err != nil {
-		return err
+	for _, local := range node.Locals.Items {
+		if err := node.NameResolutionPass.Vars.Define(local); err != nil {
+			return local.Wrap(err)
+		}
 	}
 
 	node.NameResolutionPass.Blocks = names.NewRootScope[*block.Block]("block")
-	if err := node.NameResolutionPass.Blocks.DefineAll(node.Blocks); err != nil {
-		return err
+	for _, b := range node.Blocks {
+		if err := node.NameResolutionPass.Blocks.Define(b); err != nil {
+			return b.Wrap(err)
+		}
 	}
 
 	for i := 0; i < len(node.Blocks); i++ {

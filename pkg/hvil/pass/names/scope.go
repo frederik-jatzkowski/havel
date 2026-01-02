@@ -38,18 +38,6 @@ func (s Scope[T]) Define(entry T) error {
 	return nil
 }
 
-// DefineAll
-// Deprecated: Define should be used to provide more contextual information
-func (s Scope[T]) DefineAll(entries []T) error {
-	for i := 0; i < len(entries); i++ {
-		if err := s.Define(entries[i]); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
 func (s Scope[T]) Find(identifier string) (T, error) {
 	result, exists := s.defs[identifier]
 	if exists {
