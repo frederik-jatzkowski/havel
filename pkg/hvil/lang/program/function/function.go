@@ -36,7 +36,7 @@ func (node *Function) Identifier() string {
 }
 
 func (node *Function) ResolveNames() error {
-	node.NameResolutionPass.Vars = names.NewRootScope[*stack.Decl]("variable")
+	node.NameResolutionPass.Vars = names.NewRootScope[*stack.Decl](names.KindVariable)
 
 	for _, param := range node.Params.Items {
 		if err := node.NameResolutionPass.Vars.Define(param); err != nil {
@@ -56,7 +56,7 @@ func (node *Function) ResolveNames() error {
 		}
 	}
 
-	node.NameResolutionPass.Blocks = names.NewRootScope[*block.Block]("block")
+	node.NameResolutionPass.Blocks = names.NewRootScope[*block.Block](names.KindBlock)
 	for _, b := range node.Blocks {
 		if err := node.NameResolutionPass.Blocks.Define(b); err != nil {
 			return b.Wrap(err)
@@ -69,7 +69,7 @@ func (node *Function) ResolveNames() error {
 		}
 	}
 
-	entry, err := node.NameResolutionPass.Blocks.Find("entry")
+	entry, err := node.NameResolutionPass.Blocks.Find(names.SpecialEntry)
 	if err != nil {
 		return node.Errorf("no entry block defined")
 	}

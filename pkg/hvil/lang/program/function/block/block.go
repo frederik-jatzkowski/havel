@@ -26,7 +26,7 @@ func (node *Block) Identifier() string {
 }
 
 func (node *Block) ResolveNames(vars names.Scope[*stack.Decl]) error {
-	node.NameResolutionPass.Regs = names.NewRootScope[*memory.RegWrite]("register")
+	node.NameResolutionPass.Regs = names.NewRootScope[*memory.RegWrite](names.KindRegister)
 
 	for _, i := range node.Instructions {
 		if err := i.ResolveNames(vars, node.NameResolutionPass.Regs); err != nil {

@@ -13,12 +13,12 @@ type ScopedObject interface {
 }
 
 type Scope[T ScopedObject] struct {
-	kind  string
+	kind  Kind
 	inner *Scope[T]
 	defs  map[string]T
 }
 
-func NewRootScope[T ScopedObject](kind string) Scope[T] {
+func NewRootScope[T ScopedObject](kind Kind) Scope[T] {
 	return Scope[T]{
 		kind:  kind,
 		inner: nil,

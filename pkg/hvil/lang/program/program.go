@@ -18,7 +18,7 @@ type Program struct {
 }
 
 func (node *Program) ResolveNames() error {
-	node.NameResolutionPass.Functions = names.NewRootScope[*function.Function]("function")
+	node.NameResolutionPass.Functions = names.NewRootScope[*function.Function](names.KindFunction)
 
 	for _, f := range node.Functions {
 		if err := node.NameResolutionPass.Functions.Define(f); err != nil {
@@ -32,7 +32,7 @@ func (node *Program) ResolveNames() error {
 		}
 	}
 
-	main, err := node.NameResolutionPass.Functions.Find("main")
+	main, err := node.NameResolutionPass.Functions.Find(names.SpecialMain)
 	if err != nil {
 		return node.Errorf("no main function defined")
 	}
