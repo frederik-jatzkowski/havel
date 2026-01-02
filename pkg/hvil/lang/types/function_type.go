@@ -16,6 +16,10 @@ func (node FunctionType) CanBeAssigned(other Type) bool {
 	return false
 }
 
+func (node FunctionType) Equals(other Type) bool {
+	return false
+}
+
 func (node FunctionType) Bytes() int {
 	return 8
 }

@@ -2,6 +2,6 @@
 func main() {
     block entry {
         $n : 4 byte = 0b1;
-        $m : byte = debug.dump($n);
+        $m : 1 byte = debug.dump($n);
     } => return;
 }

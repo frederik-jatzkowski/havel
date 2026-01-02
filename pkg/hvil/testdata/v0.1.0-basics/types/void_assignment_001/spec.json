@@ -2,7 +2,7 @@
   "compiler": {
     "errors": [
       {
-        "contains": "src.hvil:5:27: cannot assign void to byte"
+        "contains": "src.hvil:5:29: cannot assign void to 1 byte"
       }
     ]
   }

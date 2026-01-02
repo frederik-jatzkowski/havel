@@ -21,7 +21,7 @@ type Call struct {
 }
 
 func (node *Call) ResolveNames(vars names.Scope[*stack.Decl], regs names.Scope[*memory.RegWrite]) error {
-	return nil
+	return node.Operation.ResolveNames(vars, regs)
 }
 
 func (node *Call) ResolveTypes(target types.Type) error {

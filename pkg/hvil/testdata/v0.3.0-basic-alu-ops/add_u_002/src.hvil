@@ -1,0 +1,9 @@
+
+func main() {
+    block entry {
+        $a : 1 byte = 0b11111111;
+        $b : 1 byte = 0b11111111;
+        $c : 1 byte = alu.add_u($a, $b);
+        debug.dump($c);
+    } => return;
+}

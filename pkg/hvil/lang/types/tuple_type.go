@@ -27,6 +27,10 @@ func (node *TupleType) CanBeAssigned(other Type) bool {
 	return node.Bytes() == other.Bytes()
 }
 
+func (node *TupleType) Equals(other Type) bool {
+	return node.Bytes() == other.Bytes()
+}
+
 func (node *TupleType) Bytes() (size int) {
 	for _, member := range node.Members {
 		size += member.Bytes()
