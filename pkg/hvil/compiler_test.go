@@ -57,35 +57,18 @@ func TestCompiler(t *testing.T) {
 			require.NoError(t, err)
 
 			compiler := NewCompiler()
-			program, actualErrs := compiler.Compile(srcPath, bytes.NewBuffer(src))
+			program, err := compiler.Compile(srcPath, bytes.NewBuffer(src))
 
 			for _, expectedErr := range expectedOutput.Compiler.Errors {
-				found := false
-				for _, actualErr := range actualErrs {
-					if strings.Contains(actualErr.Error(), expectedErr.Contains) {
-						found = true
-						break
-					}
-				}
-
-				if !found {
-					t.Fail()
-					t.Logf("remaining error expectation: '%s'", expectedErr.Contains)
-				}
+				assert.ErrorContains(t, err, expectedErr.Contains)
 			}
 
-			if len(expectedOutput.Compiler.Errors) == 0 && len(actualErrs) > 0 {
-				t.Fail()
-				t.Log("unexpected compiler errors")
+			if len(expectedOutput.Compiler.Errors) == 0 && err != nil {
+				t.Error("unexpected compiler error")
 			}
 
-			t.Log("found errors:")
-
-			for _, err := range actualErrs {
-				t.Log(err)
-			}
-
-			if len(actualErrs) > 0 {
+			if err != nil {
+				t.Logf("found errors:\n%s", err)
 				return
 			}
 

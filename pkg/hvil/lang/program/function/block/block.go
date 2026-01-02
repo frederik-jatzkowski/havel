@@ -25,25 +25,30 @@ func (node *Block) Identifier() string {
 	return node.Name
 }
 
-func (node *Block) ResolveNames(vars names.Scope[*stack.Decl]) (errs []error) {
+func (node *Block) ResolveNames(vars names.Scope[*stack.Decl]) error {
 	node.NameResolutionPass.Regs = names.NewRootScope[*memory.RegWrite]("register")
 
 	for _, i := range node.Instructions {
-		errs = append(errs, i.ResolveNames(vars, node.NameResolutionPass.Regs)...)
+		if err := i.ResolveNames(vars, node.NameResolutionPass.Regs); err != nil {
+			return err
+		}
+
 		if reg, ok := i.Result.(*memory.RegWrite); ok {
 			node.NameResolutionPass.OrderedRegs = append(node.NameResolutionPass.OrderedRegs, reg)
 		}
 	}
 
-	return errs
+	return nil
 }
 
-func (node *Block) ResolveTypes() (errs []error) {
+func (node *Block) ResolveTypes() error {
 	for i := 0; i < len(node.Instructions); i++ {
-		errs = append(errs, node.Instructions[i].ResolveTypes()...)
+		if err := node.Instructions[i].ResolveTypes(); err != nil {
+			return err
+		}
 	}
 
-	return errs
+	return nil
 }
 
 func (node *Block) Execute(vm *runtime.VirtualMachine) (*Block, error) {

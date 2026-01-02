@@ -14,7 +14,7 @@ type Operation interface {
 	ResolveNames(
 		vars names.Scope[*stack.Decl],
 		regs names.Scope[*memory.RegWrite],
-	) (errs []error)
-	ResolveTypes(expected types.Type) (errs []error)
+	) error
+	ResolveTypes(expected types.Type) error
 	Execute(vm *runtime.VirtualMachine, result unsafe.Pointer) error
 }

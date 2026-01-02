@@ -21,17 +21,17 @@ type Instruction struct {
 func (node *Instruction) ResolveNames(
 	vars names.Scope[*stack.Decl],
 	regs names.Scope[*memory.RegWrite],
-) (errs []error) {
+) error {
 	if node.Result != nil {
-		errs = append(errs, node.Result.ResolveNames(vars, regs)...)
+		if err := node.Result.ResolveNames(vars, regs); err != nil {
+			return err
+		}
 	}
 
-	errs = append(errs, node.Operation.ResolveNames(vars, regs)...)
-
-	return errs
+	return node.Operation.ResolveNames(vars, regs)
 }
 
-func (node *Instruction) ResolveTypes() (errs []error) {
+func (node *Instruction) ResolveTypes() error {
 	if node.Result != nil {
 		return node.Operation.ResolveTypes(node.Result.Type())
 	}

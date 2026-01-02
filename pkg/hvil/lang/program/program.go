@@ -17,39 +17,47 @@ type Program struct {
 	Functions []*function.Function `parser:"@@+"`
 }
 
-func (node *Program) ResolveNames() []error {
+func (node *Program) ResolveNames() error {
 	node.NameResolutionPass.Functions = names.NewRootScope[*function.Function]("function")
 
-	errs := node.NameResolutionPass.Functions.DefineAll(node.Functions)
+	if err := node.NameResolutionPass.Functions.DefineAll(node.Functions); err != nil {
+		return err
+	}
 
 	for i := 0; i < len(node.Functions); i++ {
-		errs = append(errs, node.Functions[i].ResolveNames()...)
+		if err := node.Functions[i].ResolveNames(); err != nil {
+			return err
+		}
 	}
 
 	main, err := node.NameResolutionPass.Functions.Find("main")
 	if err != nil {
-		errs = append(errs, node.Errorf("no main function defined"))
+		return node.Errorf("no main function defined")
 	}
 
 	node.NameResolutionPass.Main = main
 
-	return errs
+	return err
 }
 
-func (node *Program) ResolveTypes() (errs []error) {
+func (node *Program) ResolveTypes() error {
 	for i := 0; i < len(node.Functions); i++ {
-		errs = append(errs, node.Functions[i].ResolveTypes()...)
+		if err := node.Functions[i].ResolveTypes(); err != nil {
+			return err
+		}
 	}
 
-	return errs
+	return nil
 }
 
-func (node *Program) ResolveAddresses() (errs []error) {
+func (node *Program) ResolveAddresses() error {
 	for i := 0; i < len(node.Functions); i++ {
-		errs = append(errs, node.Functions[i].ResolveAddresses()...)
+		if err := node.Functions[i].ResolveAddresses(); err != nil {
+			return err
+		}
 	}
 
-	return errs
+	return nil
 }
 
 func (node *Program) Execute(vm *runtime.VirtualMachine) error {

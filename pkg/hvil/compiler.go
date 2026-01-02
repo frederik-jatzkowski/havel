@@ -14,25 +14,22 @@ func NewCompiler() Compiler {
 	return Compiler{}
 }
 
-func (c Compiler) Compile(path string, src io.Reader) (program.Program, []error) {
+func (c Compiler) Compile(path string, src io.Reader) (program.Program, error) {
 	p, err := parser.Parse(path, src)
 	if err != nil {
-		return p, []error{err}
+		return p, err
 	}
 
-	errs := p.ResolveNames()
-	if len(errs) > 0 {
-		return p, errs
+	if err = p.ResolveNames(); err != nil {
+		return p, err
 	}
 
-	errs = p.ResolveTypes()
-	if len(errs) > 0 {
-		return p, errs
+	if err = p.ResolveTypes(); err != nil {
+		return p, err
 	}
 
-	errs = p.ResolveAddresses()
-	if len(errs) > 0 {
-		return p, errs
+	if err = p.ResolveAddresses(); err != nil {
+		return p, err
 	}
 
 	return p, nil

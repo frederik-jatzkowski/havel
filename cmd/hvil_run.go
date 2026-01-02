@@ -2,10 +2,13 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
+	"os"
+
+	"github.com/spf13/cobra"
+
 	"github.com/frederik-jatzkowski/havel/pkg/hvil"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
-	"github.com/spf13/cobra"
-	"os"
 )
 
 var runCmd = &cobra.Command{
@@ -20,13 +23,9 @@ var runCmd = &cobra.Command{
 
 		compiler := hvil.NewCompiler()
 
-		program, errs := compiler.Compile(filePath, file)
-		if len(errs) > 0 {
-			err = errors.New("compilation failed")
-			for _, err2 := range errs {
-				err = errors.Join(err, err2)
-			}
-			return err
+		program, err := compiler.Compile(filePath, file)
+		if err != nil {
+			return fmt.Errorf("compilation failed:\n %w", err)
 		}
 
 		vm := runtime.New(

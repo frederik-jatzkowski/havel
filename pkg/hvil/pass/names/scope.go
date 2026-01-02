@@ -26,11 +26,10 @@ func NewRootScope[T ScopedObject](kind string) Scope[T] {
 	}
 }
 
-func (s Scope[T]) Define(entry T) (err error) {
+func (s Scope[T]) Define(entry T) error {
 	identifier := entry.Identifier()
 
-	_, err = s.Find(identifier)
-	if err == nil {
+	if _, err := s.Find(identifier); err == nil {
 		return entry.Errorf("%s '%s' is redeclared", s.kind, identifier)
 	}
 
@@ -39,15 +38,16 @@ func (s Scope[T]) Define(entry T) (err error) {
 	return nil
 }
 
-func (s Scope[T]) DefineAll(entries []T) (errs []error) {
+// DefineAll
+// Deprecated: Define should be used to provide more contextual information
+func (s Scope[T]) DefineAll(entries []T) error {
 	for i := 0; i < len(entries); i++ {
-		err := s.Define(entries[i])
-		if err != nil {
-			errs = append(errs, err)
+		if err := s.Define(entries[i]); err != nil {
+			return err
 		}
 	}
 
-	return errs
+	return nil
 }
 
 func (s Scope[T]) Find(identifier string) (T, error) {

@@ -22,10 +22,10 @@ type VarWrite struct {
 func (node *VarWrite) ResolveNames(
 	vars names.Scope[*stack.Decl],
 	_ names.Scope[*RegWrite],
-) (errs []error) {
+) error {
 	decl, err := vars.Find(node.Ident)
 	if err != nil {
-		return append(errs, node.Wrap(err))
+		return node.Wrap(err)
 	}
 
 	node.NameResolutionPass.Decl = decl

@@ -30,13 +30,12 @@ func (node *RegWrite) Identifier() string {
 func (node *RegWrite) ResolveNames(
 	_ names.Scope[*stack.Decl],
 	regs names.Scope[*RegWrite],
-) (errs []error) {
-	err := regs.Define(node)
-	if err != nil {
-		errs = append(errs, err)
+) error {
+	if err := regs.Define(node); err != nil {
+		return node.Wrap(err)
 	}
 
-	return errs
+	return nil
 }
 
 func (node *RegWrite) Type() types.Type {

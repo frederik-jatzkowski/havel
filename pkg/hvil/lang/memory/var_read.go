@@ -23,10 +23,10 @@ func (node *VarRead) Identifier() string {
 	return node.NameResolutionPass.Decl.Identifier()
 }
 
-func (node *VarRead) ResolveNames(vars names.Scope[*stack.Decl], _ names.Scope[*RegWrite]) (errs []error) {
+func (node *VarRead) ResolveNames(vars names.Scope[*stack.Decl], _ names.Scope[*RegWrite]) error {
 	decl, err := vars.Find(node.Ident)
 	if err != nil {
-		return append(errs, node.Wrap(err))
+		return node.Wrap(err)
 	}
 
 	node.NameResolutionPass.Decl = decl

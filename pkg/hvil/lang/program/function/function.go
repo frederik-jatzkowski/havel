@@ -35,46 +35,55 @@ func (node *Function) Identifier() string {
 	return node.Name
 }
 
-func (node *Function) ResolveNames() (errs []error) {
+func (node *Function) ResolveNames() error {
 	node.NameResolutionPass.Vars = names.NewRootScope[*stack.Decl]("variable")
 
-	errs = node.NameResolutionPass.Vars.DefineAll(node.Params.Items)
+	if err := node.NameResolutionPass.Vars.DefineAll(node.Params.Items); err != nil {
+		return err
+	}
 
 	if node.Result != nil {
-		err := node.NameResolutionPass.Vars.Define(node.Result)
-		if err != nil {
-			errs = append(errs, err)
+		if err := node.NameResolutionPass.Vars.Define(node.Result); err != nil {
+			return node.Result.Wrap(err)
 		}
 	}
 
-	errs = append(errs, node.NameResolutionPass.Vars.DefineAll(node.Locals.Items)...)
+	if err := node.NameResolutionPass.Vars.DefineAll(node.Locals.Items); err != nil {
+		return err
+	}
 
 	node.NameResolutionPass.Blocks = names.NewRootScope[*block.Block]("block")
-	errs = append(errs, node.NameResolutionPass.Blocks.DefineAll(node.Blocks)...)
+	if err := node.NameResolutionPass.Blocks.DefineAll(node.Blocks); err != nil {
+		return err
+	}
 
 	for i := 0; i < len(node.Blocks); i++ {
-		errs = append(errs, node.Blocks[i].ResolveNames(node.NameResolutionPass.Vars)...)
+		if err := node.Blocks[i].ResolveNames(node.NameResolutionPass.Vars); err != nil {
+			return err
+		}
 	}
 
 	entry, err := node.NameResolutionPass.Blocks.Find("entry")
 	if err != nil {
-		errs = append(errs, node.Errorf("no entry block defined"))
+		return node.Errorf("no entry block defined")
 	}
 
 	node.NameResolutionPass.Entry = entry
 
-	return errs
+	return err
 }
 
-func (node *Function) ResolveTypes() (errs []error) {
+func (node *Function) ResolveTypes() error {
 	for i := 0; i < len(node.Blocks); i++ {
-		errs = append(errs, node.Blocks[i].ResolveTypes()...)
+		if err := node.Blocks[i].ResolveTypes(); err != nil {
+			return err
+		}
 	}
 
-	return errs
+	return nil
 }
 
-func (node *Function) ResolveAddresses() (errs []error) {
+func (node *Function) ResolveAddresses() error {
 	offset := 0
 	node.resolveLocalsAddresses(offset)
 	offset += node.AddressResolutionPass.VarsSize
@@ -82,7 +91,7 @@ func (node *Function) ResolveAddresses() (errs []error) {
 
 	node.AddressResolutionPass.FrameSize = offset
 
-	return errs
+	return nil
 }
 
 func (node *Function) resolveLocalsAddresses(offset int) {

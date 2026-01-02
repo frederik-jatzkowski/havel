@@ -20,11 +20,11 @@ type Call struct {
 	Operation Operation `parser:"'alu' '.' @@"`
 }
 
-func (node *Call) ResolveNames(vars names.Scope[*stack.Decl], regs names.Scope[*memory.RegWrite]) (errs []error) {
+func (node *Call) ResolveNames(vars names.Scope[*stack.Decl], regs names.Scope[*memory.RegWrite]) error {
 	return nil
 }
 
-func (node *Call) ResolveTypes(target types.Type) (errs []error) {
+func (node *Call) ResolveTypes(target types.Type) error {
 	return node.Operation.ResolveTypes(target)
 }
 

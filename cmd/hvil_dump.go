@@ -4,10 +4,11 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/frederik-jatzkowski/havel/pkg/hvil"
 
 	"github.com/spf13/cobra"
 )
@@ -33,10 +34,8 @@ var dumpCmd = &cobra.Command{
 
 			compiler := hvil.NewCompiler()
 
-			program, errs := compiler.Compile(path, file)
-			for _, err := range errs {
-				fmt.Println(err)
-			}
+			program, err := compiler.Compile(path, file)
+			cobra.CheckErr(err)
 
 			data, err := json.MarshalIndent(program, "", "  ")
 			cobra.CheckErr(err)
@@ -47,10 +46,6 @@ var dumpCmd = &cobra.Command{
 
 			_, err = astFile.Write(data)
 			cobra.CheckErr(err)
-
-			if len(errs) > 0 {
-				return nil
-			}
 
 			return nil
 		})

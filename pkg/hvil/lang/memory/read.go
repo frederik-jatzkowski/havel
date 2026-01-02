@@ -13,7 +13,7 @@ import (
 type Read interface {
 	tool.NodeLike
 	names.ScopedObject
-	ResolveNames(vars names.Scope[*stack.Decl], regs names.Scope[*RegWrite]) (errs []error)
+	ResolveNames(vars names.Scope[*stack.Decl], regs names.Scope[*RegWrite]) error
 	Type() types.Type
 	Addr(vm *runtime.VirtualMachine) unsafe.Pointer
 }

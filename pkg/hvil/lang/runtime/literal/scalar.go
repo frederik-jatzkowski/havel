@@ -22,25 +22,25 @@ type Scalar struct {
 	Value uint64 `parser:"@BitLiteral"`
 }
 
-func (node *Scalar) ResolveNames(vars names.Scope[*stack.Decl], regs names.Scope[*memory.RegWrite]) (errs []error) {
+func (node *Scalar) ResolveNames(_ names.Scope[*stack.Decl], _ names.Scope[*memory.RegWrite]) error {
 	return nil
 }
 
-func (node *Scalar) ResolveTypes(target types.Type) (errs []error) {
+func (node *Scalar) ResolveTypes(target types.Type) error {
 	_, ok := target.(*types.ScalarType)
 	if !ok {
-		return append(errs, node.Errorf("cannot assign scalar literal to %s", target))
+		return node.Errorf("cannot assign scalar literal to %s", target)
 	}
 
 	requiredBytes := (bits.Len64(node.Value) + 7) / 8
 	availableBytes := target.Bytes()
 	if requiredBytes > availableBytes {
-		errs = append(errs, node.Errorf("cannot assign scalar literal %d to %s: value too big", node.Value, target))
+		return node.Errorf("cannot assign scalar literal %d to %s: value too big", node.Value, target)
 	}
 
 	node.TypeCheckPass.Type = target
 
-	return errs
+	return nil
 }
 
 func (node *Scalar) Execute(vm *runtime.VirtualMachine, result unsafe.Pointer) error {

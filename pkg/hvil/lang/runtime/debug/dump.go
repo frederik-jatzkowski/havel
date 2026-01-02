@@ -22,21 +22,21 @@ type Dump struct {
 	Param memory.Read `parser:"'dump' '(' @@ ')'"`
 }
 
-func (node *Dump) ResolveNames(vars names.Scope[*stack.Decl], regs names.Scope[*memory.RegWrite]) (errs []error) {
+func (node *Dump) ResolveNames(vars names.Scope[*stack.Decl], regs names.Scope[*memory.RegWrite]) error {
 	return node.Param.ResolveNames(vars, regs)
 }
 
-func (node *Dump) ResolveTypes(target types.Type) (errs []error) {
+func (node *Dump) ResolveTypes(target types.Type) error {
 	if !target.CanBeAssigned(types.Void{}) {
-		errs = append(errs, node.Errorf("cannot assign void to %s", target))
+		return node.Errorf("cannot assign void to %s", target)
 	}
 
 	node.TypeCheckPass.Type = node.Param.Type()
 
-	return errs
+	return nil
 }
 
-func (node *Dump) Execute(vm *runtime.VirtualMachine, _ unsafe.Pointer) (err error) {
+func (node *Dump) Execute(vm *runtime.VirtualMachine, _ unsafe.Pointer) error {
 	var value any
 	switch node.TypeCheckPass.Type.Bytes() {
 	case 1:
@@ -59,7 +59,7 @@ func (node *Dump) Execute(vm *runtime.VirtualMachine, _ unsafe.Pointer) (err err
 
 	metaString := fmt.Sprintf("(%s %s '%s')", node.Param.Type(), memKind, node.Param.Identifier())
 
-	_, err = fmt.Fprintln(vm.Stdout, node.Pos, value, metaString)
+	_, err := fmt.Fprintln(vm.Stdout, node.Pos, value, metaString)
 
 	return err
 }

@@ -13,7 +13,7 @@ type Write interface {
 	ResolveNames(
 		vars names.Scope[*stack.Decl],
 		regs names.Scope[*RegWrite],
-	) (errs []error)
+	) error
 	Type() types.Type
 	Addr(vm *runtime.VirtualMachine) unsafe.Pointer
 }

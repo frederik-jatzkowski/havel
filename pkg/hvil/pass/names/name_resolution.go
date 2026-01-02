@@ -1,7 +1,7 @@
 package names
 
 type Resolver interface {
-	ResolveNames() []error
+	ResolveNames() error
 }
 
 type NameResolution[T any] struct {

@@ -20,11 +20,11 @@ type Call struct {
 	Operation Operation `parser:"'debug' '.' @@"`
 }
 
-func (node *Call) ResolveNames(vars names.Scope[*stack.Decl], regs names.Scope[*memory.RegWrite]) (errs []error) {
+func (node *Call) ResolveNames(vars names.Scope[*stack.Decl], regs names.Scope[*memory.RegWrite]) error {
 	return node.Operation.ResolveNames(vars, regs)
 }
 
-func (node *Call) ResolveTypes(target types.Type) (errs []error) {
+func (node *Call) ResolveTypes(target types.Type) error {
 	return node.Operation.ResolveTypes(target)
 }
 

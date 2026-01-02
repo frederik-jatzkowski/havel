@@ -23,10 +23,10 @@ func (node *RegRead) Identifier() string {
 	return node.NameResolutionPass.Decl.Identifier()
 }
 
-func (node *RegRead) ResolveNames(_ names.Scope[*stack.Decl], regs names.Scope[*RegWrite]) (errs []error) {
+func (node *RegRead) ResolveNames(_ names.Scope[*stack.Decl], regs names.Scope[*RegWrite]) error {
 	decl, err := regs.Find(node.Ident)
 	if err != nil {
-		return append(errs, node.Wrap(err))
+		return node.Wrap(err)
 	}
 
 	node.NameResolutionPass.Decl = decl
