@@ -1,9 +1,9 @@
 package terminator
 
 import (
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
+	"context"
+
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/stack"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
@@ -20,12 +20,8 @@ type Jump struct {
 
 var _ block.Terminator = (*Jump)(nil)
 
-func (node *Jump) ResolveNames(
-	_ names.Scope[*stack.Decl],
-	_ names.Scope[*memory.RegWrite],
-	blocks names.Scope[*block.Block],
-) error {
-	target, err := blocks.Find(node.Target)
+func (node *Jump) ResolveNames(ctx context.Context) error {
+	target, err := block.FromCtx(ctx, node.Target)
 	if err != nil {
 		return node.Wrap(err)
 	}

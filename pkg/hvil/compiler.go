@@ -1,6 +1,7 @@
 package hvil
 
 import (
+	"context"
 	"io"
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program"
@@ -20,7 +21,7 @@ func (c Compiler) Compile(path string, src io.Reader) (program.Program, error) {
 		return p, err
 	}
 
-	if err = p.ResolveNames(); err != nil {
+	if err = p.ResolveNames(context.Background()); err != nil {
 		return p, err
 	}
 

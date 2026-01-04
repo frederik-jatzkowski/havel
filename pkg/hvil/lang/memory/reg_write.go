@@ -1,14 +1,13 @@
 package memory
 
 import (
+	"context"
 	"unsafe"
 
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/stack"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/address"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
 )
 
 type RegWrite struct {
@@ -27,11 +26,8 @@ func (node *RegWrite) Identifier() string {
 	return node.Ident
 }
 
-func (node *RegWrite) ResolveNames(
-	_ names.Scope[*stack.Decl],
-	regs names.Scope[*RegWrite],
-) error {
-	if err := regs.Define(node); err != nil {
+func (node *RegWrite) ResolveNames(ctx context.Context) error {
+	if err := DefineRegisterInCtx(ctx, node); err != nil {
 		return node.Wrap(err)
 	}
 

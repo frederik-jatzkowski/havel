@@ -1,6 +1,7 @@
 package memory
 
 import (
+	"context"
 	"unsafe"
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/stack"
@@ -23,8 +24,8 @@ func (node *VarRead) Identifier() string {
 	return node.NameResolutionPass.Decl.Identifier()
 }
 
-func (node *VarRead) ResolveNames(vars names.Scope[*stack.Decl], _ names.Scope[*RegWrite]) error {
-	decl, err := vars.Find(node.Ident)
+func (node *VarRead) ResolveNames(ctx context.Context) error {
+	decl, err := stack.FromCtx(ctx, node.Ident)
 	if err != nil {
 		return node.Wrap(err)
 	}

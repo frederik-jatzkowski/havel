@@ -1,14 +1,13 @@
 package alu
 
 import (
+	"context"
 	"unsafe"
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/stack"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/typecheck"
 )
 
@@ -23,12 +22,12 @@ type LessThanUnsigned struct {
 	Right memory.Read `parser:"@@ ')'"`
 }
 
-func (node *LessThanUnsigned) ResolveNames(vars names.Scope[*stack.Decl], regs names.Scope[*memory.RegWrite]) error {
-	if err := node.Left.ResolveNames(vars, regs); err != nil {
+func (node *LessThanUnsigned) ResolveNames(ctx context.Context) error {
+	if err := node.Left.ResolveNames(ctx); err != nil {
 		return err
 	}
 
-	if err := node.Right.ResolveNames(vars, regs); err != nil {
+	if err := node.Right.ResolveNames(ctx); err != nil {
 		return err
 	}
 

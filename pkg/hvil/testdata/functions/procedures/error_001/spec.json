@@ -1,0 +1,12 @@
+{
+  "compiler": {
+    "errors": [
+      {
+        "contains": "src.hvil:9:10: condition must be 1 byte but was 2 byte"
+      }
+    ]
+  },
+  "execution": {
+    "stdout_lines": []
+  }
+}

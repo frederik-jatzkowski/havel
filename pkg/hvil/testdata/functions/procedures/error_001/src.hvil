@@ -1,0 +1,6 @@
+
+func main() {
+    block entry {
+        local.invalid();
+    } return;
+}

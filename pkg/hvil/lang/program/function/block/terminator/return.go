@@ -1,12 +1,11 @@
 package terminator
 
 import (
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
+	"context"
+
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/stack"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
 )
 
 type Return struct {
@@ -17,11 +16,7 @@ type Return struct {
 
 var _ block.Terminator = (*Return)(nil)
 
-func (node *Return) ResolveNames(
-	_ names.Scope[*stack.Decl],
-	_ names.Scope[*memory.RegWrite],
-	_ names.Scope[*block.Block],
-) error {
+func (node *Return) ResolveNames(_ context.Context) error {
 	return nil
 }
 

@@ -6,13 +6,13 @@ import (
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block/instruction"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block/terminator"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime/alu"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime/debug"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime/literal"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime/local"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/token"
 
@@ -27,7 +27,7 @@ var parser = participle.MustBuild[program.Program](
 	participle.Union[block.Terminator](&terminator.Return{}, &terminator.Jump{}, &terminator.Conditional{}),
 	participle.Union[memory.Write](&memory.RegWrite{}, &memory.VarWrite{}),
 	participle.Union[memory.Read](&memory.RegRead{}, &memory.VarRead{}),
-	participle.Union[instruction.Operation](&literal.Scalar{}, &alu.Call{}, &function.Call{}, &debug.Call{}),
+	participle.Union[instruction.Operation](&literal.Scalar{}, &alu.Call{}, &local.Call{}, &debug.Call{}),
 	participle.Union[alu.Operation](&alu.AddUnsigned{}, &alu.LessThanUnsigned{}),
 	participle.Union[debug.Operation](&debug.Dump{}),
 )

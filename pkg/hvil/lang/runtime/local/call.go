@@ -1,9 +1,10 @@
-package function
+package local
 
 import (
 	"unsafe"
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/stack"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
@@ -14,7 +15,7 @@ import (
 type Call struct {
 	tool.Node[Call]
 	names.NameResolution[struct {
-		Decl *Function
+		Decl *function.Function
 	}]
 	tool.NotImplemented[Call]
 
@@ -27,9 +28,9 @@ func (node *Call) ResolveNames(vars names.Scope[*stack.Decl], regs names.Scope[*
 }
 
 func (node *Call) ResolveTypes(target types.Type) error {
-	return node.Errorf("not implemented")
+	return nil
 }
 
 func (node *Call) Execute(vm *runtime.VirtualMachine, result unsafe.Pointer) error {
-	return node.Errorf("not implemented")
+	return nil
 }

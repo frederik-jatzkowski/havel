@@ -1,9 +1,10 @@
 package terminator
 
 import (
+	"context"
+
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/stack"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
@@ -23,26 +24,22 @@ type Conditional struct {
 
 var _ block.Terminator = (*Conditional)(nil)
 
-func (node *Conditional) ResolveNames(
-	vars names.Scope[*stack.Decl],
-	regs names.Scope[*memory.RegWrite],
-	blocks names.Scope[*block.Block],
-) error {
-	thenTarget, err := blocks.Find(node.Then)
+func (node *Conditional) ResolveNames(ctx context.Context) error {
+	thenTarget, err := block.FromCtx(ctx, node.Then)
 	if err != nil {
 		return node.Wrap(err)
 	}
 
 	node.NameResolutionPass.Then = thenTarget
 
-	elseTarget, err := blocks.Find(node.Else)
+	elseTarget, err := block.FromCtx(ctx, node.Else)
 	if err != nil {
 		return node.Wrap(err)
 	}
 
 	node.NameResolutionPass.Else = elseTarget
 
-	return node.Condition.ResolveNames(vars, regs)
+	return node.Condition.ResolveNames(ctx)
 }
 
 func (node *Conditional) ResolveTypes() error {

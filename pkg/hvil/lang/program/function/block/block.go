@@ -1,9 +1,10 @@
 package block
 
 import (
+	"context"
+
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block/instruction"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/stack"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
@@ -25,20 +26,21 @@ func (node *Block) Identifier() string {
 	return node.Name
 }
 
-func (node *Block) ResolveNames(vars names.Scope[*stack.Decl], blocks names.Scope[*Block]) error {
+func (node *Block) ResolveNames(ctx context.Context) error {
 	node.NameResolutionPass.Regs = names.NewRootScope[*memory.RegWrite](names.KindRegister)
+	ctx = memory.WithRegisterScope(ctx, node.NameResolutionPass.Regs)
 
 	for _, i := range node.Instructions {
-		if err := i.ResolveNames(vars, node.NameResolutionPass.Regs); err != nil {
+		if err := i.ResolveNames(ctx); err != nil {
 			return err
 		}
 
-		if reg, ok := i.Result.(*memory.RegWrite); ok {
+		if reg, ok := i.Result().(*memory.RegWrite); ok {
 			node.NameResolutionPass.OrderedRegs = append(node.NameResolutionPass.OrderedRegs, reg)
 		}
 	}
 
-	return node.Terminator.ResolveNames(vars, node.NameResolutionPass.Regs, blocks)
+	return node.Terminator.ResolveNames(ctx)
 }
 
 func (node *Block) ResolveTypes() error {

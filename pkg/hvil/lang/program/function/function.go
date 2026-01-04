@@ -1,6 +1,8 @@
 package function
 
 import (
+	"context"
+
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/stack"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
@@ -35,8 +37,9 @@ func (node *Function) Identifier() string {
 	return node.Name
 }
 
-func (node *Function) ResolveNames() error {
+func (node *Function) ResolveNames(ctx context.Context) error {
 	node.NameResolutionPass.Vars = names.NewRootScope[*stack.Decl](names.KindVariable)
+	ctx = stack.WithScope(ctx, node.NameResolutionPass.Vars)
 
 	for _, param := range node.Params.Items {
 		if err := node.NameResolutionPass.Vars.Define(param); err != nil {
@@ -57,6 +60,8 @@ func (node *Function) ResolveNames() error {
 	}
 
 	node.NameResolutionPass.Blocks = names.NewRootScope[*block.Block](names.KindBlock)
+	ctx = block.WithScope(ctx, node.NameResolutionPass.Blocks)
+
 	for _, b := range node.Blocks {
 		if err := node.NameResolutionPass.Blocks.Define(b); err != nil {
 			return b.Wrap(err)
@@ -64,10 +69,7 @@ func (node *Function) ResolveNames() error {
 	}
 
 	for i := 0; i < len(node.Blocks); i++ {
-		if err := node.Blocks[i].ResolveNames(
-			node.NameResolutionPass.Vars,
-			node.NameResolutionPass.Blocks,
-		); err != nil {
+		if err := node.Blocks[i].ResolveNames(ctx); err != nil {
 			return err
 		}
 	}

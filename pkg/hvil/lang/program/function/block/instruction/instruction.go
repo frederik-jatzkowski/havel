@@ -1,39 +1,35 @@
 package instruction
 
 import (
+	"context"
 	"unsafe"
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/stack"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
 )
 
 type Instruction struct {
 	tool.Node[Instruction]
 
-	Result    memory.Write `parser:"(@@ '=')?"`
-	Operation Operation    `parser:"@@ ';'"`
+	ResultWrite memory.Write `parser:"(@@ '=')?"`
+	Operation   Operation    `parser:"@@ ';'"`
 }
 
-func (node *Instruction) ResolveNames(
-	vars names.Scope[*stack.Decl],
-	regs names.Scope[*memory.RegWrite],
-) error {
-	if node.Result != nil {
-		if err := node.Result.ResolveNames(vars, regs); err != nil {
+func (node *Instruction) ResolveNames(ctx context.Context) error {
+	if node.ResultWrite != nil {
+		if err := node.ResultWrite.ResolveNames(ctx); err != nil {
 			return err
 		}
 	}
 
-	return node.Operation.ResolveNames(vars, regs)
+	return node.Operation.ResolveNames(ctx)
 }
 
 func (node *Instruction) ResolveTypes() error {
-	if node.Result != nil {
-		return node.Operation.ResolveTypes(node.Result.Type())
+	if node.ResultWrite != nil {
+		return node.Operation.ResolveTypes(node.ResultWrite.Type())
 	}
 
 	return node.Operation.ResolveTypes(types.Void{})
@@ -41,9 +37,13 @@ func (node *Instruction) ResolveTypes() error {
 
 func (node *Instruction) Execute(vm *runtime.VirtualMachine) error {
 	var result unsafe.Pointer
-	if node.Result != nil {
-		result = node.Result.Addr(vm)
+	if node.ResultWrite != nil {
+		result = node.ResultWrite.Addr(vm)
 	}
 
 	return node.Operation.Execute(vm, result)
+}
+
+func (node *Instruction) Result() memory.Write {
+	return node.ResultWrite
 }

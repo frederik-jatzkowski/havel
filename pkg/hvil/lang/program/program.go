@@ -1,6 +1,8 @@
 package program
 
 import (
+	"context"
+
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
@@ -17,8 +19,9 @@ type Program struct {
 	Functions []*function.Function `parser:"@@+"`
 }
 
-func (node *Program) ResolveNames() error {
+func (node *Program) ResolveNames(ctx context.Context) error {
 	node.NameResolutionPass.Functions = names.NewRootScope[*function.Function](names.KindFunction)
+	ctx = function.WithScope(ctx, node.NameResolutionPass.Functions)
 
 	for _, f := range node.Functions {
 		if err := node.NameResolutionPass.Functions.Define(f); err != nil {
@@ -27,7 +30,7 @@ func (node *Program) ResolveNames() error {
 	}
 
 	for i := 0; i < len(node.Functions); i++ {
-		if err := node.Functions[i].ResolveNames(); err != nil {
+		if err := node.Functions[i].ResolveNames(ctx); err != nil {
 			return err
 		}
 	}

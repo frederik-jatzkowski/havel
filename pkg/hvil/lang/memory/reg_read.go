@@ -1,9 +1,9 @@
 package memory
 
 import (
+	"context"
 	"unsafe"
 
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/stack"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
@@ -23,8 +23,8 @@ func (node *RegRead) Identifier() string {
 	return node.NameResolutionPass.Decl.Identifier()
 }
 
-func (node *RegRead) ResolveNames(_ names.Scope[*stack.Decl], regs names.Scope[*RegWrite]) error {
-	decl, err := regs.Find(node.Ident)
+func (node *RegRead) ResolveNames(ctx context.Context) error {
+	decl, err := RegisterFromCtx(ctx, node.Ident)
 	if err != nil {
 		return node.Wrap(err)
 	}

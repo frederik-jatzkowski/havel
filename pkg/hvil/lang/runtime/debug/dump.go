@@ -1,15 +1,14 @@
 package debug
 
 import (
+	"context"
 	"fmt"
 	"unsafe"
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/stack"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/typecheck"
 )
 
@@ -22,8 +21,8 @@ type Dump struct {
 	Param memory.Read `parser:"'dump' '(' @@ ')'"`
 }
 
-func (node *Dump) ResolveNames(vars names.Scope[*stack.Decl], regs names.Scope[*memory.RegWrite]) error {
-	return node.Param.ResolveNames(vars, regs)
+func (node *Dump) ResolveNames(ctx context.Context) error {
+	return node.Param.ResolveNames(ctx)
 }
 
 func (node *Dump) ResolveTypes(target types.Type) error {

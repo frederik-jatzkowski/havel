@@ -1,15 +1,13 @@
 package alu
 
 import (
+	"context"
 	"unsafe"
 
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block/instruction"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/stack"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
 )
 
 type Operation instruction.Operation
@@ -20,8 +18,8 @@ type Call struct {
 	Operation Operation `parser:"'alu' '.' @@"`
 }
 
-func (node *Call) ResolveNames(vars names.Scope[*stack.Decl], regs names.Scope[*memory.RegWrite]) error {
-	return node.Operation.ResolveNames(vars, regs)
+func (node *Call) ResolveNames(ctx context.Context) error {
+	return node.Operation.ResolveNames(ctx)
 }
 
 func (node *Call) ResolveTypes(target types.Type) error {
