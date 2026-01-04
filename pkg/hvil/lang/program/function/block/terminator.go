@@ -13,5 +13,6 @@ type Terminator interface {
 		regs names.Scope[*memory.RegWrite],
 		blocks names.Scope[*Block],
 	) error
+	ResolveTypes() error
 	Execute(vm *runtime.VirtualMachine) (*Block, error)
 }

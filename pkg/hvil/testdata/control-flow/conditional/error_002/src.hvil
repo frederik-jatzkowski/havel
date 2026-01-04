@@ -1,0 +1,18 @@
+
+func main() {
+    declare (
+        n : 4 byte
+    );
+
+    block entry {
+        $check : 1 byte = 0b1;
+    } => if $check then a else exit;
+
+    block print {
+        debug.dump(n);
+    } => exit;
+
+    block exit {
+        debug.dump(n);
+    } => return;
+}

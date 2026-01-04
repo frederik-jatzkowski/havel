@@ -1,0 +1,12 @@
+{
+  "compiler": {
+    "errors": [
+      {
+        "contains": "src.hvil:9:10: block 'a' not found"
+      }
+    ]
+  },
+  "execution": {
+    "stdout_lines": []
+  }
+}

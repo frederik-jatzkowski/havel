@@ -25,6 +25,10 @@ func (node *Return) ResolveNames(
 	return nil
 }
 
+func (node *Return) ResolveTypes() error {
+	return nil
+}
+
 func (node *Return) Execute(vm *runtime.VirtualMachine) (*block.Block, error) {
 	// there is no next block after a return statement
 	return nil, nil

@@ -48,7 +48,7 @@ func (node *Block) ResolveTypes() error {
 		}
 	}
 
-	return nil
+	return node.Terminator.ResolveTypes()
 }
 
 func (node *Block) Execute(vm *runtime.VirtualMachine) (*Block, error) {

@@ -35,6 +35,10 @@ func (node *Jump) ResolveNames(
 	return nil
 }
 
+func (node *Jump) ResolveTypes() error {
+	return nil
+}
+
 func (node *Jump) Execute(vm *runtime.VirtualMachine) (*block.Block, error) {
 	return node.NameResolutionPass.Target, nil
 }
