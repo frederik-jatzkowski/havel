@@ -32,7 +32,7 @@ func (node *Instruction) ResolveTypes() error {
 		return node.Operation.ResolveTypes(node.ResultWrite.Type())
 	}
 
-	return node.Operation.ResolveTypes(types.Void{})
+	return node.Operation.ResolveTypes(&types.Void{})
 }
 
 func (node *Instruction) Execute(vm *runtime.VirtualMachine) error {

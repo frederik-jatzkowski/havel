@@ -1,6 +1,7 @@
 package types
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
@@ -25,7 +26,20 @@ func (node *ScalarType) CanBeAssigned(other Type) bool {
 }
 
 func (node *ScalarType) Equals(other Type) bool {
-	return node.Bytes() == other.Bytes()
+	return node.EqualsDetailed(other) == nil
+}
+
+func (node *ScalarType) EqualsDetailed(other Type) error {
+	otherScalar, ok := other.(*ScalarType)
+	if !ok {
+		return fmt.Errorf("%s is not a scalar type", other)
+	}
+
+	if node.Bytes() != otherScalar.Bytes() {
+		return fmt.Errorf("expected %d bytes, got %d", node.Bytes(), otherScalar.Bytes())
+	}
+
+	return nil
 }
 
 func (node *ScalarType) Bytes() int {

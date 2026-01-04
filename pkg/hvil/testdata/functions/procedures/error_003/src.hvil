@@ -1,0 +1,11 @@
+
+func main() {
+    block entry {
+        $a : 1 byte = 0b1;
+        local.print($a);
+    } return;
+}
+
+func print(a : 2 byte) {
+    block entry {} return;
+}

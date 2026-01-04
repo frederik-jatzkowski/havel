@@ -81,7 +81,7 @@ func TestCompiler(t *testing.T) {
 
 			actualLines := strings.Split(stdout.String(), "\n")
 			for i, expectedLine := range expectedOutput.Execution.StdoutLines {
-				if i >= len(actualLines)-1 {
+				if i > len(actualLines)-1 {
 					t.Errorf("expected %d lines but got %d", len(expectedOutput.Execution.StdoutLines), len(actualLines))
 					continue
 				}

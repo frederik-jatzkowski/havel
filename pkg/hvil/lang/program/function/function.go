@@ -7,6 +7,7 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/stack"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/address"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
 )
@@ -38,6 +39,8 @@ func (node *Function) Identifier() string {
 }
 
 func (node *Function) ResolveNames(ctx context.Context) error {
+	ctx = WithCurrent(ctx, node)
+
 	node.NameResolutionPass.Vars = names.NewRootScope[*stack.Decl](names.KindVariable)
 	ctx = stack.WithScope(ctx, node.NameResolutionPass.Vars)
 
@@ -94,11 +97,32 @@ func (node *Function) ResolveTypes() error {
 	return nil
 }
 
+func (node *Function) Signature() *types.FunctionType {
+	signature := &types.FunctionType{
+		Parameters: tool.List[types.Type]{
+			Items: make([]types.Type, 0, len(node.Params.Items)),
+		},
+	}
+
+	for _, item := range node.Params.Items {
+		signature.Parameters.Items = append(signature.Parameters.Items, item.Type())
+	}
+
+	if node.Result == nil {
+		signature.ReturnValue = &types.Void{}
+	} else {
+		signature.ReturnValue = node.Result.Type()
+	}
+
+	return signature
+}
+
 func (node *Function) ResolveAddresses() error {
 	offset := 0
 	node.resolveLocalsAddresses(offset)
 	offset += node.AddressResolutionPass.VarsSize
 	node.resolveRegisterAddresses(offset)
+	offset += node.AddressResolutionPass.RegsSize
 
 	node.AddressResolutionPass.FrameSize = offset
 

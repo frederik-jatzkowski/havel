@@ -70,5 +70,9 @@ func (node *Program) Execute(vm *runtime.VirtualMachine) error {
 		Name: node.NameResolutionPass.Main.Name,
 	})
 
-	return node.NameResolutionPass.Main.Execute(vm)
+	if err := node.NameResolutionPass.Main.Execute(vm); err != nil {
+		return err
+	}
+
+	return nil
 }

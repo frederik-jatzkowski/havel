@@ -1,0 +1,10 @@
+
+func main() {
+    block entry {
+        local.print();
+    } return;
+}
+
+func print(a : 1 byte) {
+    block entry {} return;
+}

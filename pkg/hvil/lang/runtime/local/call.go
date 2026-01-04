@@ -1,21 +1,26 @@
 package local
 
 import (
+	"context"
 	"unsafe"
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/stack"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/typecheck"
 )
 
 type Call struct {
 	tool.Node[Call]
 	names.NameResolution[struct {
-		Decl *function.Function
+		Current *function.Function
+		Called  *function.Function
+	}]
+	typecheck.TypeCheck[struct {
+		Signature *types.FunctionType
 	}]
 	tool.NotImplemented[Call]
 
@@ -23,14 +28,62 @@ type Call struct {
 	Args tool.List[memory.Read] `parser:"'(' @@ ')'"`
 }
 
-func (node *Call) ResolveNames(vars names.Scope[*stack.Decl], regs names.Scope[*memory.RegWrite]) error {
+func (node *Call) ResolveNames(ctx context.Context) error {
+	decl, err := function.FromCtx(ctx, node.Name)
+	if err != nil {
+		return node.Wrap(err)
+	}
+
+	node.NameResolutionPass.Called = decl
+
+	for _, item := range node.Args.Items {
+		if err := item.ResolveNames(ctx); err != nil {
+			return err
+		}
+	}
+
+	node.NameResolutionPass.Current, err = function.CurrentFromContext(ctx)
+	if err != nil {
+		return node.Wrap(err)
+	}
+
 	return nil
 }
 
 func (node *Call) ResolveTypes(target types.Type) error {
+	node.calculateSignature(target)
+
+	if err := node.TypeCheckPass.Signature.EqualsDetailed(node.NameResolutionPass.Called.Signature()); err != nil {
+		return node.Wrap(err)
+	}
+
 	return nil
 }
 
+func (node *Call) calculateSignature(target types.Type) {
+	node.TypeCheckPass.Signature = &types.FunctionType{
+		Parameters: tool.List[types.Type]{
+			Items: make([]types.Type, 0, len(node.Args.Items)),
+		},
+	}
+
+	for _, item := range node.Args.Items {
+		node.TypeCheckPass.Signature.Parameters.Items = append(node.TypeCheckPass.Signature.Parameters.Items, item.Type())
+	}
+
+	node.TypeCheckPass.Signature.ReturnValue = target
+}
+
 func (node *Call) Execute(vm *runtime.VirtualMachine, result unsafe.Pointer) error {
+	prevStackPtr := vm.StackPointer
+
+	vm.StackPointer += node.NameResolutionPass.Current.AddressResolutionPass.FrameSize
+
+	if err := node.NameResolutionPass.Called.Execute(vm); err != nil {
+		return err
+	}
+
+	vm.StackPointer = prevStackPtr
+
 	return nil
 }

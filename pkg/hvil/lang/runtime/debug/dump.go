@@ -26,7 +26,7 @@ func (node *Dump) ResolveNames(ctx context.Context) error {
 }
 
 func (node *Dump) ResolveTypes(target types.Type) error {
-	if !target.CanBeAssigned(types.Void{}) {
+	if !target.CanBeAssigned(&types.Void{}) {
 		return node.Errorf("cannot assign void to %s", target)
 	}
 

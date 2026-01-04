@@ -2,7 +2,7 @@
   "compiler": {
     "errors": [
       {
-        "contains": "src.hvil:4:9: function 'invalid' not found"
+        "contains": "src.hvil:5:9: function parameter 0 mismatch: expected 1 byte, got 2 byte"
       }
     ]
   },
