@@ -7,7 +7,7 @@ func main() {
     block entry {
         n = 0b0;
         debug.dump(n);
-    } => increment;
+    } goto increment;
 
     block increment {
         debug.dump(n);
@@ -19,9 +19,9 @@ func main() {
 
         $check : 1 byte = alu.lt_u(n, $five);
         debug.dump($check);
-    } => if $check then increment else exit;
+    } if $check then increment else exit;
 
     block exit {
         debug.dump(n);
-    } => return;
+    } return;
 }

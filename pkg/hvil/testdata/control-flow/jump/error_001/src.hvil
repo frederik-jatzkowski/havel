@@ -7,9 +7,9 @@ func main() {
     block entry {
         debug.dump(n);
         n = 0b1;
-    } => invalid;
+    } goto invalid;
 
     block exit {
         debug.dump(n);
-    } => return;
+    } return;
 }

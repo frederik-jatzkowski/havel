@@ -2,7 +2,7 @@
   "compiler": {
     "errors": [
       {
-        "contains": "src.hvil:6:6: unexpected token \"=>\" (expected \"}\" \"=>\" Terminator \";\")"
+        "contains": "unexpected token \"return\" (expected \"}\" Terminator \";\")"
       }
     ]
   }

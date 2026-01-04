@@ -6,13 +6,13 @@ func main() {
 
     block entry {
         $check : 1 byte = 0b1;
-    } => if $check then print else a;
+    } if $check then print else a;
 
     block print {
         debug.dump(n);
-    } => exit;
+    } goto exit;
 
     block exit {
         debug.dump(n);
-    } => return;
+    } return;
 }

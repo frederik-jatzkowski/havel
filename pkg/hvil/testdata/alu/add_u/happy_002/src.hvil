@@ -5,5 +5,5 @@ func main() {
         $b : 1 byte = 0b11111111;
         $c : 1 byte = alu.add_u($a, $b);
         debug.dump($c);
-    } => return;
+    } return;
 }

@@ -3,5 +3,5 @@ func main() {
     block entry {
         $n : 4 byte = 0b1;
         debug.never_a_debug_operation($n);
-    } => return;
+    } return;
 }

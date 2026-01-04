@@ -6,5 +6,5 @@ func main() {
         $m : 2 byte = 0b10;
         debug.dump($m);
         $x : byte = 0b1010101;
-    } => return;
+    } return;
 }

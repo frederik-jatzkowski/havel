@@ -18,7 +18,7 @@ type Block struct {
 
 	Name         string                    `parser:"'block':Keyword @Ident '{'"`
 	Instructions []instruction.Instruction `parser:"@@*"`
-	Terminator   Terminator                `parser:"'}' '=>' @@ ';'"`
+	Terminator   Terminator                `parser:"'}' @@ ';'"`
 }
 
 func (node *Block) Identifier() string {

@@ -8,11 +8,11 @@ func main() {
         debug.dump(n);
         $a : 1 byte = 0b1;
         debug.dump($a);
-    } => exit;
+    } goto exit;
 
     block exit {
         debug.dump(n);
         $a : 1 byte = 0b1;
         debug.dump($a);
-    } => return;
+    } return;
 }

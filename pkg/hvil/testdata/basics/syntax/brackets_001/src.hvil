@@ -3,4 +3,4 @@ func main() {
     block entry {
         $n : 4 byte = 0b1;
         debug.dump($n);
-    } => return;
+    } return;

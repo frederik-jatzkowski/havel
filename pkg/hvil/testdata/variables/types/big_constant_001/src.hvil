@@ -7,5 +7,5 @@ func main() {
     block entry {
         n = 0b100000000000000000000000000000000;
         debug.dump(n);
-    } => return;
+    } return;
 }

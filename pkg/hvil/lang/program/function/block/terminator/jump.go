@@ -15,7 +15,7 @@ type Jump struct {
 		Target *block.Block
 	}]
 
-	Target string `parser:"@Ident"`
+	Target string `parser:"'goto':Keyword @Ident"`
 }
 
 var _ block.Terminator = (*Jump)(nil)
