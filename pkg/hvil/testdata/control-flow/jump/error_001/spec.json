@@ -1,0 +1,12 @@
+{
+  "compiler": {
+    "errors": [
+      {
+        "contains": "src.hvil:10:10: block 'invalid' not found"
+      }
+    ]
+  },
+  "execution": {
+    "stdout_lines": []
+  }
+}

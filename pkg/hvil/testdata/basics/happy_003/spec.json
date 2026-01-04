@@ -1,0 +1,13 @@
+{
+  "compiler": {
+    "errors": []
+  },
+  "execution": {
+    "stdout_lines": [
+      "src.hvil:8:15 0 (4 byte variable 'n')",
+      "src.hvil:10:15 1 (1 byte register 'a')",
+      "src.hvil:14:15 0 (4 byte variable 'n')",
+      "src.hvil:16:15 1 (1 byte register 'a')"
+    ]
+  }
+}

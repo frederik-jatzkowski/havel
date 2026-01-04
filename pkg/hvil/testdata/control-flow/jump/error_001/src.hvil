@@ -1,0 +1,15 @@
+
+func main() {
+    declare (
+        n : 4 byte
+    );
+
+    block entry {
+        debug.dump(n);
+        n = 0b1;
+    } => invalid;
+
+    block exit {
+        debug.dump(n);
+    } => return;
+}

@@ -64,7 +64,10 @@ func (node *Function) ResolveNames() error {
 	}
 
 	for i := 0; i < len(node.Blocks); i++ {
-		if err := node.Blocks[i].ResolveNames(node.NameResolutionPass.Vars); err != nil {
+		if err := node.Blocks[i].ResolveNames(
+			node.NameResolutionPass.Vars,
+			node.NameResolutionPass.Blocks,
+		); err != nil {
 			return err
 		}
 	}

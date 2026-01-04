@@ -80,12 +80,13 @@ func TestCompiler(t *testing.T) {
 			require.NoError(t, err)
 
 			actualLines := strings.Split(stdout.String(), "\n")
-			for i, actualLine := range actualLines {
-				if i == len(actualLines)-1 {
+			for i, expectedLine := range expectedOutput.Execution.StdoutLines {
+				if i >= len(actualLines)-1 {
+					t.Errorf("expected %d lines but got %d", len(expectedOutput.Execution.StdoutLines), len(actualLines))
 					continue
 				}
 
-				assert.Contains(t, actualLine, expectedOutput.Execution.StdoutLines[i])
+				assert.Contains(t, actualLines[i], expectedLine)
 			}
 		})
 
