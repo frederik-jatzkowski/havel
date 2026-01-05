@@ -75,9 +75,26 @@ func (node *Call) calculateSignature(target types.Type) {
 }
 
 func (node *Call) Execute(vm *runtime.VirtualMachine, result unsafe.Pointer) error {
+	newStackPointer := vm.StackPointer + node.NameResolutionPass.Current.AddressResolutionPass.FrameSize
+	newStackSize := newStackPointer + node.NameResolutionPass.Called.AddressResolutionPass.FrameSize
+	if len(vm.Stack) < newStackSize {
+		return node.Errorf("stack overflow")
+	}
+
 	prevStackPtr := vm.StackPointer
 
-	vm.StackPointer += node.NameResolutionPass.Current.AddressResolutionPass.FrameSize
+	sourceAddresses := make([]unsafe.Pointer, len(node.Args.Items))
+	for i, arg := range node.Args.Items {
+		sourceAddresses[i] = arg.Addr(vm)
+	}
+
+	vm.StackPointer = newStackPointer
+
+	for i, param := range node.NameResolutionPass.Called.Params.Items {
+		length := param.Type().Bytes()
+		addr := param.Addr(vm)
+		copy(unsafe.Slice((*byte)(addr), length), unsafe.Slice((*byte)(sourceAddresses[i]), length))
+	}
 
 	if err := node.NameResolutionPass.Called.Execute(vm); err != nil {
 		return err

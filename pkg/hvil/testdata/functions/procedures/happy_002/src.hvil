@@ -1,0 +1,15 @@
+
+func main() {
+    block entry {
+        $two : 1 byte = 0b10;
+        $one : 1 byte = 0b1;
+        local.print($one);
+        debug.dump($two);
+    } return;
+}
+
+func print(value : 1 byte) {
+    block entry {
+        debug.dump(value);
+    } return;
+}

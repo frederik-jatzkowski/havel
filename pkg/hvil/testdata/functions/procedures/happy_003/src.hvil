@@ -1,0 +1,23 @@
+
+func main() {
+    block entry {
+        $one : 1 byte = 0b1;
+        local.print_chain($one);
+    } return;
+}
+
+func print_chain(a : 1 byte) {
+    block entry {
+        debug.dump(a);
+        $five : 1 byte = 0b101;
+        $check : 1 byte = alu.lt_u(a, $five);
+    } if $check then next else exit;
+
+    block next {
+        $one : 1 byte = 0b1;
+        $inc : 1 byte = alu.add_u(a, $one);
+        local.print_chain($inc);
+    } return;
+
+    block exit {} return;
+}

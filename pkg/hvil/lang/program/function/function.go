@@ -21,7 +21,7 @@ type Function struct {
 	}]
 	address.Resolution[struct {
 		FrameSize  int
-		ArgsSize   int
+		ParamsSize int
 		ReturnSize int
 		VarsSize   int
 		RegsSize   int
@@ -119,6 +119,8 @@ func (node *Function) Signature() *types.FunctionType {
 
 func (node *Function) ResolveAddresses() error {
 	offset := 0
+	node.resolveParamsAddresses(offset)
+	offset += node.AddressResolutionPass.ParamsSize
 	node.resolveLocalsAddresses(offset)
 	offset += node.AddressResolutionPass.VarsSize
 	node.resolveRegisterAddresses(offset)
@@ -127,6 +129,14 @@ func (node *Function) ResolveAddresses() error {
 	node.AddressResolutionPass.FrameSize = offset
 
 	return nil
+}
+
+func (node *Function) resolveParamsAddresses(offset int) {
+	for _, decl := range node.Params.Items {
+		size := decl.Type().Bytes()
+		decl.AddressResolutionPass.RelAddr = offset + node.AddressResolutionPass.ParamsSize
+		node.AddressResolutionPass.ParamsSize += size
+	}
 }
 
 func (node *Function) resolveLocalsAddresses(offset int) {

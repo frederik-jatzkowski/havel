@@ -1,0 +1,16 @@
+
+func main() {
+    block entry {
+        $two : 1 byte = 0b10;
+        $one : 1 byte = 0b1;
+        local.print_sum($one, $two);
+        debug.dump($two);
+    } return;
+}
+
+func print_sum(a : 1 byte, b : 1 byte) {
+    block entry {
+        $sum : 1 byte = alu.add_u(a, b);
+        debug.dump($sum);
+    } return;
+}
