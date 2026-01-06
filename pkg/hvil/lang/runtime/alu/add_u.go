@@ -11,8 +11,8 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/typecheck"
 )
 
-type AddUnsigned struct {
-	tool.Node[AddUnsigned]
+type AddU struct {
+	tool.Node[AddU]
 	typecheck.TypeCheck[struct {
 		Type  types.Type
 		Bytes int
@@ -22,7 +22,7 @@ type AddUnsigned struct {
 	Right memory.Read `parser:"@@ ')'"`
 }
 
-func (node *AddUnsigned) ResolveNames(ctx context.Context) error {
+func (node *AddU) ResolveNames(ctx context.Context) error {
 	if err := node.Left.ResolveNames(ctx); err != nil {
 		return err
 	}
@@ -34,9 +34,14 @@ func (node *AddUnsigned) ResolveNames(ctx context.Context) error {
 	return nil
 }
 
-func (node *AddUnsigned) ResolveTypes(target types.Type) error {
+func (node *AddU) ResolveTypes(target types.Type) error {
 	left := node.Left.Type()
 	right := node.Right.Type()
+
+	_, ok := left.(*types.ScalarType)
+	if !ok {
+		return node.Errorf("operands must be a scalar type but was %s", left)
+	}
 
 	if !left.Equals(right) {
 		return node.Errorf("cannot add %s and %s", left, right)
@@ -51,7 +56,7 @@ func (node *AddUnsigned) ResolveTypes(target types.Type) error {
 	return nil
 }
 
-func (node *AddUnsigned) Execute(vm *runtime.VirtualMachine, result unsafe.Pointer) error {
+func (node *AddU) Execute(vm *runtime.VirtualMachine, result unsafe.Pointer) error {
 	switch node.TypeCheckPass.Type.Bytes() {
 	case 1:
 		*(*byte)(result) = *(*byte)(node.Left.Addr(vm)) + *(*byte)(node.Right.Addr(vm))

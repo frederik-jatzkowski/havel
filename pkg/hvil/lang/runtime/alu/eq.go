@@ -11,18 +11,18 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/typecheck"
 )
 
-type LtU struct {
-	tool.Node[LtU]
+type EQ struct {
+	tool.Node[EQ]
 	typecheck.TypeCheck[struct {
 		Type  types.Type
 		Bytes int
 	}]
 
-	Left  memory.Read `parser:"'lt_u' '(' @@ ','"`
+	Left  memory.Read `parser:"'eq' '(' @@ ','"`
 	Right memory.Read `parser:"@@ ')'"`
 }
 
-func (node *LtU) ResolveNames(ctx context.Context) error {
+func (node *EQ) ResolveNames(ctx context.Context) error {
 	if err := node.Left.ResolveNames(ctx); err != nil {
 		return err
 	}
@@ -34,7 +34,7 @@ func (node *LtU) ResolveNames(ctx context.Context) error {
 	return nil
 }
 
-func (node *LtU) ResolveTypes(target types.Type) error {
+func (node *EQ) ResolveTypes(target types.Type) error {
 	left := node.Left.Type()
 	right := node.Right.Type()
 
@@ -58,16 +58,16 @@ func (node *LtU) ResolveTypes(target types.Type) error {
 	return nil
 }
 
-func (node *LtU) Execute(vm *runtime.VirtualMachine, result unsafe.Pointer) error {
+func (node *EQ) Execute(vm *runtime.VirtualMachine, result unsafe.Pointer) error {
 	switch node.TypeCheckPass.Type.Bytes() {
 	case 1:
-		*(*bool)(result) = *(*byte)(node.Left.Addr(vm)) < *(*byte)(node.Right.Addr(vm))
+		*(*bool)(result) = *(*byte)(node.Left.Addr(vm)) == *(*byte)(node.Right.Addr(vm))
 	case 2:
-		*(*bool)(result) = *(*uint16)(node.Left.Addr(vm)) < *(*uint16)(node.Right.Addr(vm))
+		*(*bool)(result) = *(*uint16)(node.Left.Addr(vm)) == *(*uint16)(node.Right.Addr(vm))
 	case 4:
-		*(*bool)(result) = *(*uint32)(node.Left.Addr(vm)) < *(*uint32)(node.Right.Addr(vm))
+		*(*bool)(result) = *(*uint32)(node.Left.Addr(vm)) == *(*uint32)(node.Right.Addr(vm))
 	case 8:
-		*(*bool)(result) = *(*uint64)(node.Left.Addr(vm)) < *(*uint64)(node.Right.Addr(vm))
+		*(*bool)(result) = *(*uint64)(node.Left.Addr(vm)) == *(*uint64)(node.Right.Addr(vm))
 	}
 
 	return nil

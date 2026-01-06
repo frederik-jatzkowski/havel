@@ -1,0 +1,9 @@
+{
+  "compiler": {
+    "errors": [
+      {
+        "contains": "src.hvil:4:34: unexpected token"
+      }
+    ]
+  }
+}

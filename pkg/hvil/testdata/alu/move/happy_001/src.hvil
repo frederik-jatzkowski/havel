@@ -1,0 +1,8 @@
+
+func main() {
+    block entry {
+        $a : 1 byte = 0b101;
+        $b : 1 byte = alu.move($a);
+        debug.dump($b);
+    } return;
+}

@@ -28,7 +28,13 @@ var parser = participle.MustBuild[program.Program](
 	participle.Union[memory.Write](&memory.RegWrite{}, &memory.VarWrite{}),
 	participle.Union[memory.Read](&memory.RegRead{}, &memory.VarRead{}),
 	participle.Union[instruction.Operation](&literal.Scalar{}, &alu.Call{}, &local.Call{}, &debug.Call{}),
-	participle.Union[alu.Operation](&alu.AddUnsigned{}, &alu.LessThanUnsigned{}),
+	participle.Union[alu.Operation](
+		&alu.Move{},
+		&alu.AddU{},
+		&alu.SubU{},
+		&alu.EQ{},
+		&alu.LtU{},
+	),
 	participle.Union[debug.Operation](&debug.Dump{}),
 )
 

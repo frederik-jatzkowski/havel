@@ -11,18 +11,18 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/typecheck"
 )
 
-type LtU struct {
-	tool.Node[LtU]
+type SubU struct {
+	tool.Node[SubU]
 	typecheck.TypeCheck[struct {
 		Type  types.Type
 		Bytes int
 	}]
 
-	Left  memory.Read `parser:"'lt_u' '(' @@ ','"`
+	Left  memory.Read `parser:"'sub_u' '(' @@ ','"`
 	Right memory.Read `parser:"@@ ')'"`
 }
 
-func (node *LtU) ResolveNames(ctx context.Context) error {
+func (node *SubU) ResolveNames(ctx context.Context) error {
 	if err := node.Left.ResolveNames(ctx); err != nil {
 		return err
 	}
@@ -34,7 +34,7 @@ func (node *LtU) ResolveNames(ctx context.Context) error {
 	return nil
 }
 
-func (node *LtU) ResolveTypes(target types.Type) error {
+func (node *SubU) ResolveTypes(target types.Type) error {
 	left := node.Left.Type()
 	right := node.Right.Type()
 
@@ -44,13 +44,11 @@ func (node *LtU) ResolveTypes(target types.Type) error {
 	}
 
 	if !left.Equals(right) {
-		return node.Errorf("cannot compare %s and %s", left, right)
+		return node.Errorf("cannot add %s and %s", left, right)
 	}
 
-	result := &types.ScalarType{Size: 1}
-
-	if !target.CanBeAssigned(result) {
-		return node.Errorf("cannot assign %s result to %s", result, target)
+	if !target.CanBeAssigned(left) {
+		return node.Errorf("cannot assign %s result to %s", left, target)
 	}
 
 	node.TypeCheckPass.Type = left
@@ -58,16 +56,16 @@ func (node *LtU) ResolveTypes(target types.Type) error {
 	return nil
 }
 
-func (node *LtU) Execute(vm *runtime.VirtualMachine, result unsafe.Pointer) error {
+func (node *SubU) Execute(vm *runtime.VirtualMachine, result unsafe.Pointer) error {
 	switch node.TypeCheckPass.Type.Bytes() {
 	case 1:
-		*(*bool)(result) = *(*byte)(node.Left.Addr(vm)) < *(*byte)(node.Right.Addr(vm))
+		*(*byte)(result) = *(*byte)(node.Left.Addr(vm)) - *(*byte)(node.Right.Addr(vm))
 	case 2:
-		*(*bool)(result) = *(*uint16)(node.Left.Addr(vm)) < *(*uint16)(node.Right.Addr(vm))
+		*(*uint16)(result) = *(*uint16)(node.Left.Addr(vm)) - *(*uint16)(node.Right.Addr(vm))
 	case 4:
-		*(*bool)(result) = *(*uint32)(node.Left.Addr(vm)) < *(*uint32)(node.Right.Addr(vm))
+		*(*uint32)(result) = *(*uint32)(node.Left.Addr(vm)) - *(*uint32)(node.Right.Addr(vm))
 	case 8:
-		*(*bool)(result) = *(*uint64)(node.Left.Addr(vm)) < *(*uint64)(node.Right.Addr(vm))
+		*(*uint64)(result) = *(*uint64)(node.Left.Addr(vm)) - *(*uint64)(node.Right.Addr(vm))
 	}
 
 	return nil

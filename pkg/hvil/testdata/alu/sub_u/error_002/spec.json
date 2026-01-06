@@ -1,0 +1,9 @@
+{
+  "compiler": {
+    "errors": [
+      {
+        "contains": "src.hvil:6:27: cannot add 2 byte and 4 byte"
+      }
+    ]
+  }
+}
