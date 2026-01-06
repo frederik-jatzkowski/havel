@@ -147,7 +147,7 @@ func (node *Function) resolveResultAddress(offset int) {
 	}
 
 	size := node.Result.Type().Bytes()
-	node.Result.AddressResolutionPass.RelAddr = offset + size
+	node.Result.AddressResolutionPass.RelAddr = offset
 	node.AddressResolutionPass.ResultSize = size
 }
 
