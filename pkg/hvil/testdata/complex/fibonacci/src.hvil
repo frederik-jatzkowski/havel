@@ -1,0 +1,46 @@
+
+func main() {
+    block entry {
+        $n : 8 byte = 0b1011101;
+        debug.dump($n);
+
+        $fib_n : 8 byte = local.fib($n);
+        debug.dump($fib_n);
+    } return;
+}
+
+// fib returns the n-ths fibonacci number
+func fib(n : 8 byte) -> (result : 8 byte) {
+    declare (
+        counter : 8 byte,
+        next_fib : 8 byte
+    );
+
+    block entry {
+        counter = 0b1;
+        result = 0b1;
+        next_fib = 0b1;
+    } goto loop_head;
+
+    block loop_head {
+        $check : 1 byte = alu.eq(counter, n);
+    } if $check then exit else loop_body;
+
+    block loop_body {
+        $new_fib : 8 byte = alu.add_u(result, next_fib);
+
+        result = alu.move(next_fib);
+        next_fib = alu.move($new_fib);
+
+        counter = local.inc(counter);
+    } goto loop_head;
+
+    block exit {} return;
+}
+
+func inc(value : 8 byte) -> (result : 8 byte) {
+    block entry {
+        $one : 8 byte = 0b1;
+        result = alu.add_u(value, $one);
+    } return;
+}

@@ -1,0 +1,11 @@
+{
+  "compiler": {
+    "errors": []
+  },
+  "execution": {
+    "stdout_lines": [
+      "src.hvil:5:15 93 (8 byte register 'n')",
+      "src.hvil:8:15 12200160415121876738 (8 byte register 'fib_n')"
+    ]
+  }
+}
