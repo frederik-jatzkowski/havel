@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/spf13/cobra"
 
@@ -11,42 +12,56 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 )
 
-var runCmd = &cobra.Command{
-	Use:   "run",
-	Short: "Compiles a HVIL file and executes it.",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		filePath := args[0]
-		file, err := os.Open(filePath)
-		if err != nil {
-			return err
-		}
+func NewHvilRunCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "run",
+		Short: "Compiles a HVIL file and executes it.",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			filePath := args[0]
+			file, err := os.Open(filePath)
+			if err != nil {
+				return err
+			}
 
-		compiler := hvil.NewCompiler()
+			compiler := hvil.NewCompiler()
 
-		program, err := compiler.Compile(filePath, file)
-		if err != nil {
-			return fmt.Errorf("compilation failed:\n %w", err)
-		}
+			program, err := compiler.Compile(filePath, file)
+			if err != nil {
+				return fmt.Errorf("compilation failed:\n %w", err)
+			}
 
-		vm := runtime.New(
-			1024,
-			os.Stdin,
-			os.Stdout,
-			os.Stderr,
-		)
-
-		err = program.Execute(vm)
-		if err != nil {
-			return errors.Join(
-				errors.New("runtime error"),
-				err,
+			vm := runtime.New(
+				1024,
+				os.Stdin,
+				os.Stdout,
+				os.Stderr,
 			)
-		}
 
-		return nil
-	},
-}
+			timing, err := cmd.Flags().GetBool("timings")
+			cobra.CheckErr(err)
 
-func init() {
-	hvilCmd.AddCommand(runCmd)
+			start := time.Now()
+
+			err = program.Execute(vm)
+			if err != nil {
+				return errors.Join(
+					errors.New("runtime error"),
+					err,
+				)
+			}
+
+			if timing {
+				fmt.Printf(
+					"\nprogram execution took %d ns\n",
+					time.Since(start).Nanoseconds(),
+				)
+			}
+
+			return nil
+		},
+	}
+
+	cmd.Flags().Bool("timings", false, "Prints timing information.")
+
+	return cmd
 }

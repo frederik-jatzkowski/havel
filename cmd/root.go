@@ -7,16 +7,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var rootCmd = &cobra.Command{
-	Use: "havel",
-}
-
-func init() {
-	rootCmd.AddCommand(hvilCmd)
-}
-
 func Execute() {
-	if err := rootCmd.Execute(); err != nil {
+	cmd := &cobra.Command{
+		Use: "havel",
+	}
+
+	cmd.AddCommand(NewHvilCmd())
+
+	if err := cmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
