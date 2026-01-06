@@ -10,6 +10,6 @@ var Tokenizer = lexer.MustStateful(lexer.Rules{
 		{Name: "Keyword", Pattern: `func|declare|block|return|if|then|else|goto`},
 		{Name: "BitLiteral", Pattern: `0b[10]+`},
 		{Name: "Ident", Pattern: `[a-z][_a-z0-9]*`},
-		{Name: "Special", Pattern: `\(|\)|{|}|=>|:|\[|\]|,|;|\?|\$|=|\.`},
+		{Name: "Special", Pattern: `\(|\)|{|}|->|=>|:|\[|\]|,|;|\?|\$|=|\.`},
 	},
 })

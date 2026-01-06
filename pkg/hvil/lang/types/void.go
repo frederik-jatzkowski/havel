@@ -1,6 +1,10 @@
 package types
 
-import "github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
+import (
+	"fmt"
+
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
+)
 
 type Void struct {
 	tool.Node[Void]
@@ -10,8 +14,12 @@ func (node *Void) String() string {
 	return "void"
 }
 
-func (node *Void) CanBeAssigned(other Type) bool {
-	return node.Equals(other)
+func (node *Void) CanBeAssigned(_ Type) bool {
+	return true
+}
+
+func (node *Void) CanBeAssignedDetailed(_ Type) error {
+	return nil
 }
 
 func (node *Void) Equals(other Type) bool {
@@ -21,7 +29,7 @@ func (node *Void) Equals(other Type) bool {
 func (node *Void) EqualsDetailed(other Type) error {
 	_, ok := other.(*Void)
 	if !ok {
-		return node.Errorf("%s is not void", other)
+		return fmt.Errorf("%s is not void", other)
 	}
 
 	return nil

@@ -1,0 +1,10 @@
+
+func main() {
+    block entry {
+        $dice : 1 byte = local.throw_dice();
+    } return;
+}
+
+func throw_dice() {
+    block entry {} return;
+}

@@ -1,0 +1,13 @@
+
+func main() {
+    block entry {
+        local.throw_dice();
+    } return;
+}
+
+func throw_dice() -> (result : 1 byte) {
+    block entry {
+        result = 0b101010;
+        debug.dump(result);
+    } return;
+}

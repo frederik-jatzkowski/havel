@@ -22,14 +22,14 @@ type Function struct {
 	address.Resolution[struct {
 		FrameSize  int
 		ParamsSize int
-		ReturnSize int
+		ResultSize int
 		VarsSize   int
 		RegsSize   int
 	}]
 
 	Name   string                 `parser:"'func':Keyword @Ident"`
 	Params tool.List[*stack.Decl] `parser:"'(' @@ ')'"`
-	Result *stack.Decl            `parser:"( '=>' '(' @@ ')' )?"`
+	Result *stack.Decl            `parser:"( '->' '(' @@ ')' )?"`
 	Locals tool.List[*stack.Decl] `parser:"'{' ( 'declare':Keyword '(' @@ ')' ';' )?"`
 	Blocks []*block.Block         `parser:"@@+  '}'"`
 }
@@ -121,6 +121,8 @@ func (node *Function) ResolveAddresses() error {
 	offset := 0
 	node.resolveParamsAddresses(offset)
 	offset += node.AddressResolutionPass.ParamsSize
+	node.resolveResultAddress(offset)
+	offset += node.AddressResolutionPass.ResultSize
 	node.resolveLocalsAddresses(offset)
 	offset += node.AddressResolutionPass.VarsSize
 	node.resolveRegisterAddresses(offset)
@@ -137,6 +139,16 @@ func (node *Function) resolveParamsAddresses(offset int) {
 		decl.AddressResolutionPass.RelAddr = offset + node.AddressResolutionPass.ParamsSize
 		node.AddressResolutionPass.ParamsSize += size
 	}
+}
+
+func (node *Function) resolveResultAddress(offset int) {
+	if node.Result == nil {
+		return
+	}
+
+	size := node.Result.Type().Bytes()
+	node.Result.AddressResolutionPass.RelAddr = offset + size
+	node.AddressResolutionPass.ResultSize = size
 }
 
 func (node *Function) resolveLocalsAddresses(offset int) {

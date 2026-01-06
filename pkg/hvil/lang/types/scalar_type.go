@@ -22,7 +22,11 @@ func (node *ScalarType) MarshalText() ([]byte, error) {
 }
 
 func (node *ScalarType) CanBeAssigned(other Type) bool {
-	return node.Bytes() == other.Bytes()
+	return node.Equals(other)
+}
+
+func (node *ScalarType) CanBeAssignedDetailed(other Type) error {
+	return node.EqualsDetailed(other)
 }
 
 func (node *ScalarType) Equals(other Type) bool {

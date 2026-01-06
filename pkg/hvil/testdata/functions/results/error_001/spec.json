@@ -1,0 +1,12 @@
+{
+  "compiler": {
+    "errors": [
+      {
+        "contains": "src.hvil:4:26: function return value mismatch: expected 2 bytes, got 1"
+      }
+    ]
+  },
+  "execution": {
+    "stdout_lines": []
+  }
+}

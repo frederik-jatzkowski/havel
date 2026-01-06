@@ -1,0 +1,12 @@
+{
+  "compiler": {
+    "errors": [
+      {
+        "contains": "src.hvil:4:26: function return value mismatch: void is not a scalar type"
+      }
+    ]
+  },
+  "execution": {
+    "stdout_lines": []
+  }
+}

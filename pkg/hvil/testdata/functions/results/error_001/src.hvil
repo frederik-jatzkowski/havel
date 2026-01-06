@@ -1,0 +1,13 @@
+
+func main() {
+    block entry {
+        $dice : 2 byte = local.throw_dice();
+        debug.dump($dice);
+    } return;
+}
+
+func throw_dice() -> (result : 1 byte) {
+    block entry {
+        result = 0b101010;
+    } return;
+}

@@ -28,6 +28,10 @@ func (node *TupleType) CanBeAssigned(other Type) bool {
 	return node.Equals(other)
 }
 
+func (node *TupleType) CanBeAssignedDetailed(other Type) error {
+	return node.EqualsDetailed(other)
+}
+
 func (node *TupleType) Equals(other Type) bool {
 	return node.EqualsDetailed(other) == nil
 }

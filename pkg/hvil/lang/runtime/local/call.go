@@ -53,7 +53,7 @@ func (node *Call) ResolveNames(ctx context.Context) error {
 func (node *Call) ResolveTypes(target types.Type) error {
 	node.calculateSignature(target)
 
-	if err := node.TypeCheckPass.Signature.EqualsDetailed(node.NameResolutionPass.Called.Signature()); err != nil {
+	if err := node.TypeCheckPass.Signature.CanBeAssignedDetailed(node.NameResolutionPass.Called.Signature()); err != nil {
 		return node.Wrap(err)
 	}
 
@@ -98,6 +98,12 @@ func (node *Call) Execute(vm *runtime.VirtualMachine, result unsafe.Pointer) err
 
 	if err := node.NameResolutionPass.Called.Execute(vm); err != nil {
 		return err
+	}
+
+	if node.NameResolutionPass.Called.Result != nil && result != nil {
+		length := node.NameResolutionPass.Called.Result.Type().Bytes()
+		sourceAddr := node.NameResolutionPass.Called.Result.Addr(vm)
+		copy(unsafe.Slice((*byte)(result), length), unsafe.Slice((*byte)(sourceAddr), length))
 	}
 
 	vm.StackPointer = prevStackPtr
