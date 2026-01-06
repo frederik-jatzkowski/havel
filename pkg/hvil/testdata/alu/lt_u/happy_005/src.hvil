@@ -1,0 +1,8 @@
+func main() {
+    block entry {
+        $a : 8 byte = 0b11110000;
+        $b : 8 byte = 0b11111111;
+        $c : 1 byte = alu.lt_u($a, $b);
+        debug.dump($c);
+    } return;
+}

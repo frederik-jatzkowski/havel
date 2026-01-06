@@ -1,0 +1,9 @@
+{
+  "compiler": {
+    "errors": [
+      {
+        "contains": "src.hvil:5:27: cannot assign 1 byte result to 4 byte"
+      }
+    ]
+  }
+}
