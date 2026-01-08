@@ -1,0 +1,9 @@
+{
+  "execution": {
+    "errors": [
+      {
+        "contains": "src.hvil:6:27: division by zero"
+      }
+    ]
+  }
+}

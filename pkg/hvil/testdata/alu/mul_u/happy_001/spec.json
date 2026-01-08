@@ -1,0 +1,10 @@
+{
+  "compiler": {
+    "errors": []
+  },
+  "execution": {
+    "stdout_lines": [
+      "src.hvil:7:15 10 (4 byte register 'c')"
+    ]
+  }
+}

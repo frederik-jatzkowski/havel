@@ -1,0 +1,9 @@
+{
+  "compiler": {
+    "errors": [
+      {
+        "contains": "src.hvil:6:27: cannot take 4 byte modulo 2 byte"
+      }
+    ]
+  }
+}

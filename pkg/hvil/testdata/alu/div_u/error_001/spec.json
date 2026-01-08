@@ -1,0 +1,9 @@
+{
+  "compiler": {
+    "errors": [
+      {
+        "contains": "src.hvil:6:27: cannot divide 4 byte by 2 byte"
+      }
+    ]
+  }
+}

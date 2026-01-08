@@ -1,0 +1,9 @@
+{
+  "compiler": {
+    "errors": [
+      {
+        "contains": "src.hvil:6:27: cannot multiply 2 byte and 4 byte"
+      }
+    ]
+  }
+}

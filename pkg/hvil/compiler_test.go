@@ -18,15 +18,16 @@ import (
 )
 
 func TestCompiler(t *testing.T) {
-	type ExpectedCompilerError struct {
+	type ExpectedError struct {
 		Contains string `json:"contains"`
 	}
 	type ExpectedOutput struct {
 		Compiler struct {
-			Errors []ExpectedCompilerError `json:"errors"`
+			Errors []ExpectedError `json:"errors"`
 		} `json:"compiler"`
 		Execution struct {
-			StdoutLines []string `json:"stdout_lines"`
+			StdoutLines []string        `json:"stdout_lines"`
+			Errors      []ExpectedError `json:"errors"`
 		} `json:"execution"`
 	}
 
@@ -77,7 +78,18 @@ func TestCompiler(t *testing.T) {
 			vm := runtime.New(1024, bytes.NewBuffer(nil), stdout, io.Discard)
 
 			err = program.Execute(vm)
-			require.NoError(t, err)
+
+			if len(expectedOutput.Execution.Errors) == 0 && err != nil {
+				require.NoError(t, err)
+			}
+
+			if len(expectedOutput.Execution.Errors) > 0 && err == nil {
+				require.Error(t, err)
+			}
+
+			for _, expectedErr := range expectedOutput.Execution.Errors {
+				assert.ErrorContains(t, err, expectedErr.Contains)
+			}
 
 			actualLines := strings.Split(stdout.String(), "\n")
 			for i, expectedLine := range expectedOutput.Execution.StdoutLines {
