@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/spf13/cobra"
 
@@ -11,10 +12,10 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 )
 
-func NewHvilRunCmd() *cobra.Command {
+func NewHvilBenchCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "run",
-		Short: "Compiles a HVIL file and executes it.",
+		Use:   "bench",
+		Short: "Compiles a HVIL file and executes it n times. Averages the runtimes.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			filePath := args[0]
 			file, err := os.Open(filePath)
@@ -36,17 +37,31 @@ func NewHvilRunCmd() *cobra.Command {
 				os.Stderr,
 			)
 
-			err = program.Execute(vm)
-			if err != nil {
-				return errors.Join(
-					errors.New("runtime error"),
-					err,
-				)
+			n, err := cmd.Flags().GetInt("executions")
+			cobra.CheckErr(err)
+
+			start := time.Now()
+
+			for range n {
+				err = program.Execute(vm)
+				if err != nil {
+					return errors.Join(
+						errors.New("runtime error"),
+						err,
+					)
+				}
 			}
+
+			fmt.Printf(
+				"\nprogram execution took %d ns\n",
+				time.Since(start).Nanoseconds()/int64(n),
+			)
 
 			return nil
 		},
 	}
+
+	cmd.Flags().IntP("executions", "n", 1000, "Number of executions for benchmarking.")
 
 	return cmd
 }
