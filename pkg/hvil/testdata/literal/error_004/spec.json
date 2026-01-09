@@ -1,0 +1,9 @@
+{
+  "compiler": {
+    "errors": [
+      {
+        "contains": "value out of range"
+      }
+    ]
+  }
+}

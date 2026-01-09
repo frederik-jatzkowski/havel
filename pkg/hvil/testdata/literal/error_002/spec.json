@@ -1,0 +1,9 @@
+{
+  "compiler": {
+    "errors": [
+      {
+        "contains": "src.hvil:4:23: cannot assign scalar literal 65536 to 2 byte: value too big"
+      }
+    ]
+  }
+}

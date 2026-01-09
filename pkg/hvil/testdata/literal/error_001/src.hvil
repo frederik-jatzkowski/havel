@@ -1,0 +1,7 @@
+
+func main() {
+    block entry {
+        $n : 1 byte = 0b100000000;
+        debug.dump($n);
+    } return;
+}

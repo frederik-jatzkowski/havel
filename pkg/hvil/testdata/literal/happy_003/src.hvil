@@ -3,8 +3,5 @@ func main() {
     block entry {
         $n : 4 byte = 0b1;
         debug.dump($n);
-        $m : 2 byte = 0b10;
-        debug.dump($m);
-        $x : byte = 0b1010101;
     } return;
 }
