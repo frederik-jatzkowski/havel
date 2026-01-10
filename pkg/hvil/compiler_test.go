@@ -150,6 +150,8 @@ func TestCompiler_OnVirtualMachine(t *testing.T) {
 				err = json.Unmarshal(expectedErrsData, &expectedOutput)
 				require.NoError(t, err)
 
+				t.Log("Source:\n" + string(src))
+
 				compiler := NewCompiler()
 				program, err := compiler.Compile(srcPath, bytes.NewBuffer(src))
 

@@ -9,8 +9,10 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/typecheck"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
+	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/bytecode"
 )
 
 type EQ struct {
@@ -18,6 +20,9 @@ type EQ struct {
 	typecheck.TypeCheck[struct {
 		Type  types.Type
 		Bytes int
+	}]
+	registeralloc.RegisterAllocation[struct {
+		Result architecture.Register
 	}]
 
 	Left  memory.Read `parser:"'eq' '(' @@ ','"`
@@ -61,13 +66,27 @@ func (node *EQ) ResolveTypes(target types.Type) error {
 }
 
 func (node *EQ) SetResultRegister(r architecture.Register) {
-	//TODO implement me
-	panic("implement me")
+	node.RegisterAllocationPass.Result = r
 }
 
 func (node *EQ) GenerateVirtualMachineAssembly(p *assembly.P) error {
-	//TODO implement me
-	panic("implement me")
+	if err := node.Left.GenerateVirtualMachineAssembly(p); err != nil {
+		return err
+	}
+
+	if err := node.Right.GenerateVirtualMachineAssembly(p); err != nil {
+		return err
+	}
+
+	p.AddI3R(
+		bytecode.OPAluEq,
+		node.RegisterAllocationPass.Result.(bytecode.R),
+		node.Left.Register().(bytecode.R),
+		node.Right.Register().(bytecode.R),
+		node.Position(),
+	)
+
+	return nil
 }
 
 func (node *EQ) Execute(vm *runtime.VirtualMachine, result unsafe.Pointer) error {

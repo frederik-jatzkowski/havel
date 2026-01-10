@@ -9,8 +9,10 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/typecheck"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
+	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/bytecode"
 )
 
 type SubU struct {
@@ -18,6 +20,9 @@ type SubU struct {
 	typecheck.TypeCheck[struct {
 		Type  types.Type
 		Bytes int
+	}]
+	registeralloc.RegisterAllocation[struct {
+		Result architecture.Register
 	}]
 
 	Left  memory.Read `parser:"'sub_u' '(' @@ ','"`
@@ -59,13 +64,39 @@ func (node *SubU) ResolveTypes(target types.Type) error {
 }
 
 func (node *SubU) SetResultRegister(r architecture.Register) {
-	//TODO implement me
-	panic("implement me")
+	node.RegisterAllocationPass.Result = r
 }
 
 func (node *SubU) GenerateVirtualMachineAssembly(p *assembly.P) error {
-	//TODO implement me
-	panic("implement me")
+	if err := node.Left.GenerateVirtualMachineAssembly(p); err != nil {
+		return err
+	}
+
+	if err := node.Right.GenerateVirtualMachineAssembly(p); err != nil {
+		return err
+	}
+
+	var op bytecode.OP
+	switch node.TypeCheckPass.Type.Bytes() {
+	case 1:
+		op = bytecode.OPAluSubU1
+	case 2:
+		op = bytecode.OPAluSubU2
+	case 4:
+		op = bytecode.OPAluSubU4
+	case 8:
+		op = bytecode.OPAluSubU8
+	}
+
+	p.AddI3R(
+		op,
+		node.RegisterAllocationPass.Result.(bytecode.R),
+		node.Left.Register().(bytecode.R),
+		node.Right.Register().(bytecode.R),
+		node.Position(),
+	)
+
+	return nil
 }
 
 func (node *SubU) Execute(vm *runtime.VirtualMachine, result unsafe.Pointer) error {

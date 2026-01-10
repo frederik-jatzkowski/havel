@@ -9,8 +9,10 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/typecheck"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
+	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/bytecode"
 )
 
 type Move struct {
@@ -18,6 +20,9 @@ type Move struct {
 	typecheck.TypeCheck[struct {
 		Type  types.Type
 		Bytes int
+	}]
+	registeralloc.RegisterAllocation[struct {
+		Result architecture.Register
 	}]
 
 	Arg memory.Read `parser:"'move' '(' @@ ')'"`
@@ -40,13 +45,22 @@ func (node *Move) ResolveTypes(target types.Type) error {
 }
 
 func (node *Move) SetResultRegister(r architecture.Register) {
-	//TODO implement me
-	panic("implement me")
+	node.RegisterAllocationPass.Result = r
 }
 
 func (node *Move) GenerateVirtualMachineAssembly(p *assembly.P) error {
-	//TODO implement me
-	panic("implement me")
+	if err := node.Arg.GenerateVirtualMachineAssembly(p); err != nil {
+		return err
+	}
+
+	p.AddI2R(
+		bytecode.OPAluMove,
+		node.RegisterAllocationPass.Result.(bytecode.R),
+		node.Arg.Register().(bytecode.R),
+		node.Position(),
+	)
+
+	return nil
 }
 
 func (node *Move) Execute(vm *runtime.VirtualMachine, result unsafe.Pointer) error {
