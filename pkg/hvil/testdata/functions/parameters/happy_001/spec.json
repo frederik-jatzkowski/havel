@@ -4,8 +4,8 @@
   },
   "execution": {
     "stdout_lines": [
-      "src.hvil:14:15 3 (1 byte register 'sum')",
-      "src.hvil:7:15 2 (1 byte register 'two')"
+      "src.hvil:14:15 register content: 3",
+      "src.hvil:7:15 register content: 2"
     ]
   }
 }

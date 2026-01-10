@@ -4,8 +4,8 @@
   },
   "execution": {
     "stdout_lines": [
-      "src.hvil:8:15 0 (4 byte variable 'n')",
-      "src.hvil:13:15 1 (4 byte variable 'n')"
+      "src.hvil:8:15 register content: 0",
+      "src.hvil:13:15 register content: 1"
     ]
   }
 }

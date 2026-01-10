@@ -4,6 +4,7 @@ import (
 	"context"
 	"unsafe"
 
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
@@ -11,6 +12,7 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/typecheck"
+	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
 )
 
 type Call struct {
@@ -72,6 +74,16 @@ func (node *Call) calculateSignature(target types.Type) {
 	}
 
 	node.TypeCheckPass.Signature.ReturnValue = target
+}
+
+func (node *Call) SetResultRegister(r architecture.Register) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (node *Call) GenerateVirtualMachineAssembly(p *assembly.P) error {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (node *Call) Execute(vm *runtime.VirtualMachine, result unsafe.Pointer) error {

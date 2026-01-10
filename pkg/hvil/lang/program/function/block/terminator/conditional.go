@@ -9,6 +9,7 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
+	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
 )
 
 type Conditional struct {
@@ -50,6 +51,11 @@ func (node *Conditional) ResolveTypes() error {
 	}
 
 	return nil
+}
+
+func (node *Conditional) GenerateVirtualMachineAssembly(p *assembly.P, isMain bool) error {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (node *Conditional) Execute(vm *runtime.VirtualMachine) (*block.Block, error) {

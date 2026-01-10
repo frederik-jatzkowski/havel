@@ -4,11 +4,13 @@ import (
 	"context"
 	"unsafe"
 
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/typecheck"
+	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
 )
 
 type Move struct {
@@ -35,6 +37,16 @@ func (node *Move) ResolveTypes(target types.Type) error {
 	node.TypeCheckPass.Type = target
 
 	return nil
+}
+
+func (node *Move) SetResultRegister(r architecture.Register) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (node *Move) GenerateVirtualMachineAssembly(p *assembly.P) error {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (node *Move) Execute(vm *runtime.VirtualMachine, result unsafe.Pointer) error {

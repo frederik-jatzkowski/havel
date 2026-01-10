@@ -5,11 +5,14 @@ import (
 	"fmt"
 	"unsafe"
 
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/typecheck"
+	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
+	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/bytecode"
 )
 
 type Dump struct {
@@ -35,6 +38,18 @@ func (node *Dump) ResolveTypes(target types.Type) error {
 	return nil
 }
 
+func (node *Dump) SetResultRegister(r architecture.Register) {
+	panic(fmt.Sprintf("target register assigned to %T, which returns void", node))
+}
+
+func (node *Dump) GenerateVirtualMachineAssembly(p *assembly.P) error {
+	regRead := node.Param.(*memory.RegRead)
+
+	p.AddI1R(bytecode.OPDebugDump, regRead.Register().(bytecode.R), node.Position())
+
+	return nil
+}
+
 func (node *Dump) Execute(vm *runtime.VirtualMachine, _ unsafe.Pointer) error {
 	var value any
 	switch node.TypeCheckPass.Type.Bytes() {
@@ -48,17 +63,7 @@ func (node *Dump) Execute(vm *runtime.VirtualMachine, _ unsafe.Pointer) error {
 		value = *(*uint64)(node.Param.Addr(vm))
 	}
 
-	memKind := "unknown"
-	switch node.Param.(type) {
-	case *memory.RegRead:
-		memKind = "register"
-	case *memory.VarRead:
-		memKind = "variable"
-	}
-
-	metaString := fmt.Sprintf("(%s %s '%s')", node.Param.Type(), memKind, node.Param.Identifier())
-
-	_, err := fmt.Fprintln(vm.Stdout, node.Pos, value, metaString)
+	_, err := fmt.Fprintf(vm.Stdout, "%s register content: %d\n", node.Position(), value)
 
 	return err
 }

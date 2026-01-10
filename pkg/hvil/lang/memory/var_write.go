@@ -4,11 +4,13 @@ import (
 	"context"
 	"unsafe"
 
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/stack"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
+	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
 )
 
 type VarWrite struct {
@@ -29,6 +31,16 @@ func (node *VarWrite) ResolveNames(ctx context.Context) error {
 	node.NameResolutionPass.Decl = decl
 
 	return nil
+}
+
+func (node *VarWrite) GenerateVirtualMachineAssembly(p *assembly.P) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (node *VarWrite) Register() architecture.Register {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (node *VarWrite) Type() types.Type {

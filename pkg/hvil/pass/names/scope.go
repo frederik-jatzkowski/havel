@@ -3,6 +3,8 @@ package names
 import (
 	"encoding/json"
 	"fmt"
+	"iter"
+	"maps"
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 )
@@ -13,16 +15,14 @@ type ScopedObject interface {
 }
 
 type Scope[T ScopedObject] struct {
-	kind  Kind
-	inner *Scope[T]
-	defs  map[string]T
+	kind Kind
+	defs map[string]T
 }
 
 func NewRootScope[T ScopedObject](kind Kind) Scope[T] {
 	return Scope[T]{
-		kind:  kind,
-		inner: nil,
-		defs:  make(map[string]T),
+		kind: kind,
+		defs: make(map[string]T),
 	}
 }
 
@@ -44,19 +44,11 @@ func (s Scope[T]) Find(identifier string) (T, error) {
 		return result, nil
 	}
 
-	if s.inner != nil {
-		return s.inner.Find(identifier)
-	}
-
 	return result, fmt.Errorf("%s '%s' not found", s.kind, identifier)
 }
 
-func (s Scope[T]) NewChild() Scope[T] {
-	return Scope[T]{
-		kind:  s.kind,
-		inner: &s,
-		defs:  make(map[string]T),
-	}
+func (s Scope[T]) All() iter.Seq[T] {
+	return maps.Values(s.defs)
 }
 
 func (s Scope[T]) MarshalJSON() ([]byte, error) {

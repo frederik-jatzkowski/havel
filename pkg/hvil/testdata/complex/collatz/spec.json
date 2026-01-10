@@ -4,17 +4,17 @@
   },
   "execution": {
     "stdout_lines": [
-      "src.hvil:12:15 13 (8 byte variable 'n')",
-      "src.hvil:12:15 40 (8 byte variable 'n')",
-      "src.hvil:12:15 20 (8 byte variable 'n')",
-      "src.hvil:12:15 10 (8 byte variable 'n')",
-      "src.hvil:12:15 5 (8 byte variable 'n')",
-      "src.hvil:12:15 16 (8 byte variable 'n')",
-      "src.hvil:12:15 8 (8 byte variable 'n')",
-      "src.hvil:12:15 4 (8 byte variable 'n')",
-      "src.hvil:12:15 2 (8 byte variable 'n')",
-      "src.hvil:12:15 1 (8 byte variable 'n')",
-      "src.hvil:6:15 10 (8 byte register 'steps')"
+      "src.hvil:12:15 register content: 13",
+      "src.hvil:12:15 register content: 40",
+      "src.hvil:12:15 register content: 20",
+      "src.hvil:12:15 register content: 10",
+      "src.hvil:12:15 register content: 5",
+      "src.hvil:12:15 register content: 16",
+      "src.hvil:12:15 register content: 8",
+      "src.hvil:12:15 register content: 4",
+      "src.hvil:12:15 register content: 2",
+      "src.hvil:12:15 register content: 1",
+      "src.hvil:6:15 register content: 10"
     ]
   }
 }

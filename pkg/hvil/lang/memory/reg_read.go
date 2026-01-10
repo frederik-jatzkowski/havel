@@ -4,10 +4,12 @@ import (
 	"context"
 	"unsafe"
 
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
+	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
 )
 
 type RegRead struct {
@@ -32,6 +34,14 @@ func (node *RegRead) ResolveNames(ctx context.Context) error {
 	node.NameResolutionPass.Decl = decl
 
 	return nil
+}
+
+func (node *RegRead) GenerateVirtualMachineAssembly(p *assembly.P) error {
+	return nil
+}
+
+func (node *RegRead) Register() architecture.Register {
+	return node.NameResolutionPass.Decl.Register()
 }
 
 func (node *RegRead) Type() types.Type {

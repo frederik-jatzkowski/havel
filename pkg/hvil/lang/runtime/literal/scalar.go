@@ -5,16 +5,22 @@ import (
 	"math/bits"
 	"unsafe"
 
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/typecheck"
+	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
 )
 
 type Scalar struct {
 	tool.Node[Scalar]
 	typecheck.TypeCheck[struct {
 		Type types.Type
+	}]
+	registeralloc.RegisterAllocation[struct {
+		Target architecture.Register
 	}]
 
 	Value uint64 `parser:"@BitLiteral"`
@@ -37,6 +43,16 @@ func (node *Scalar) ResolveTypes(target types.Type) error {
 	}
 
 	node.TypeCheckPass.Type = target
+
+	return nil
+}
+
+func (node *Scalar) SetResultRegister(r architecture.Register) {
+	node.RegisterAllocationPass.Target = r
+}
+
+func (node *Scalar) GenerateVirtualMachineAssembly(p *assembly.P) error {
+	p.AddLit(node.RegisterAllocationPass.Target, node.TypeCheckPass.Type.Bytes(), node.Value, node.Position())
 
 	return nil
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
+	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
 )
 
 type Instruction struct {
@@ -42,6 +43,20 @@ func (node *Instruction) Execute(vm *runtime.VirtualMachine) error {
 	}
 
 	return node.Operation.Execute(vm, result)
+}
+
+func (node *Instruction) GenerateVirtualMachineAssembly(p *assembly.P) error {
+	if err := node.Operation.GenerateVirtualMachineAssembly(p); err != nil {
+		return err
+	}
+
+	if node.ResultWrite != nil {
+		if err := node.Result().GenerateVirtualMachineAssembly(p); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (node *Instruction) Result() memory.Write {

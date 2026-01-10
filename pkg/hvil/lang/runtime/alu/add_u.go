@@ -4,11 +4,15 @@ import (
 	"context"
 	"unsafe"
 
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/typecheck"
+	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
+	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/bytecode"
 )
 
 type AddU struct {
@@ -16,6 +20,9 @@ type AddU struct {
 	typecheck.TypeCheck[struct {
 		Type  types.Type
 		Bytes int
+	}]
+	registeralloc.RegisterAllocation[struct {
+		Result architecture.Register
 	}]
 
 	Left  memory.Read `parser:"'add_u' '(' @@ ','"`
@@ -52,6 +59,42 @@ func (node *AddU) ResolveTypes(target types.Type) error {
 	}
 
 	node.TypeCheckPass.Type = left
+
+	return nil
+}
+
+func (node *AddU) SetResultRegister(r architecture.Register) {
+	node.RegisterAllocationPass.Result = r
+}
+
+func (node *AddU) GenerateVirtualMachineAssembly(p *assembly.P) error {
+	if err := node.Left.GenerateVirtualMachineAssembly(p); err != nil {
+		return err
+	}
+
+	if err := node.Right.GenerateVirtualMachineAssembly(p); err != nil {
+		return err
+	}
+
+	var op bytecode.OP
+	switch node.TypeCheckPass.Type.Bytes() {
+	case 1:
+		op = bytecode.OPAluAddU1
+	case 2:
+		op = bytecode.OPAluAddU2
+	case 4:
+		op = bytecode.OPAluAddU4
+	case 8:
+		op = bytecode.OPAluAddU8
+	}
+
+	p.AddI3R(
+		op,
+		node.RegisterAllocationPass.Result.(bytecode.R),
+		node.Left.Register().(bytecode.R),
+		node.Right.Register().(bytecode.R),
+		node.Position(),
+	)
 
 	return nil
 }

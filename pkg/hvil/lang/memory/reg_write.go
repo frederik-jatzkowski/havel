@@ -4,16 +4,22 @@ import (
 	"context"
 	"unsafe"
 
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/address"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
+	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
 )
 
 type RegWrite struct {
 	tool.Node[RegWrite]
 	address.Resolution[struct {
 		RelAddr int
+	}]
+	registeralloc.RegisterAllocation[struct {
+		Register architecture.Register
 	}]
 
 	Ident   string     `parser:"'$' @Ident"`
@@ -32,6 +38,14 @@ func (node *RegWrite) ResolveNames(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+func (node *RegWrite) GenerateVirtualMachineAssembly(p *assembly.P) error {
+	return nil
+}
+
+func (node *RegWrite) Register() architecture.Register {
+	return node.RegisterAllocationPass.Register
 }
 
 func (node *RegWrite) Type() types.Type {

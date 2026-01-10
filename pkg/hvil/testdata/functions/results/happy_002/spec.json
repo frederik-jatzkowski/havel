@@ -4,7 +4,7 @@
   },
   "execution": {
     "stdout_lines": [
-      "src.hvil:11:15 42 (1 byte variable 'result')"
+      "src.hvil:11:15 register content: 42"
     ]
   }
 }

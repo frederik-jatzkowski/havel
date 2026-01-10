@@ -6,6 +6,8 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
+	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
+	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/bytecode"
 )
 
 type Return struct {
@@ -21,6 +23,20 @@ func (node *Return) ResolveNames(_ context.Context) error {
 }
 
 func (node *Return) ResolveTypes() error {
+	return nil
+}
+
+func (node *Return) GenerateVirtualMachineAssembly(p *assembly.P, isMain bool) error {
+	if isMain {
+		// exit code 0
+		tmp := bytecode.R(255)
+		p.AddLit(tmp, 1, 0, node.Position())
+		p.AddI1R(bytecode.OPExit, tmp, node.Position())
+	} else {
+		//TODO implement me
+		panic("implement me")
+	}
+
 	return nil
 }
 

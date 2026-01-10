@@ -4,11 +4,13 @@ import (
 	"context"
 	"unsafe"
 
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/typecheck"
+	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
 )
 
 type MulU struct {
@@ -54,6 +56,16 @@ func (node *MulU) ResolveTypes(target types.Type) error {
 	node.TypeCheckPass.Type = left
 
 	return nil
+}
+
+func (node *MulU) SetResultRegister(r architecture.Register) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (node *MulU) GenerateVirtualMachineAssembly(p *assembly.P) error {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (node *MulU) Execute(vm *runtime.VirtualMachine, result unsafe.Pointer) error {

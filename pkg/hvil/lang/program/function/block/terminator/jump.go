@@ -7,6 +7,7 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
+	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
 )
 
 type Jump struct {
@@ -33,6 +34,11 @@ func (node *Jump) ResolveNames(ctx context.Context) error {
 
 func (node *Jump) ResolveTypes() error {
 	return nil
+}
+
+func (node *Jump) GenerateVirtualMachineAssembly(p *assembly.P, isMain bool) error {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (node *Jump) Execute(vm *runtime.VirtualMachine) (*block.Block, error) {

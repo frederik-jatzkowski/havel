@@ -3,10 +3,13 @@ package program
 import (
 	"context"
 
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
+	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine"
+	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
 )
 
 type Program struct {
@@ -58,6 +61,36 @@ func (node *Program) ResolveTypes() error {
 func (node *Program) ResolveAddresses() error {
 	for i := 0; i < len(node.Functions); i++ {
 		if err := node.Functions[i].ResolveAddresses(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (node *Program) GenerateVirtualMachineAssembly() (*assembly.P, error) {
+	if err := node.allocateRegisters(virtualmachine.NewArchitecture()); err != nil {
+		return nil, err
+	}
+
+	p := assembly.NewP()
+
+	return p, node.generateVirtualMachineAssembly(p)
+}
+
+func (node *Program) allocateRegisters(arch architecture.Architecture) error {
+	for i := 0; i < len(node.Functions); i++ {
+		if err := node.Functions[i].AllocateRegisters(arch); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (node *Program) generateVirtualMachineAssembly(p *assembly.P) error {
+	for i := 0; i < len(node.Functions); i++ {
+		if err := node.Functions[i].GenerateVirtualMachineAssembly(p); err != nil {
 			return err
 		}
 	}

@@ -4,10 +4,10 @@
   },
   "execution": {
     "stdout_lines": [
-      "src.hvil:8:15 0 (4 byte variable 'n')",
-      "src.hvil:10:15 1 (1 byte register 'a')",
-      "src.hvil:14:15 0 (4 byte variable 'n')",
-      "src.hvil:16:15 1 (1 byte register 'a')"
+      "src.hvil:8:15 register content: 0",
+      "src.hvil:10:15 register content: 1",
+      "src.hvil:14:15 register content: 0",
+      "src.hvil:16:15 register content: 1"
     ]
   }
 }
