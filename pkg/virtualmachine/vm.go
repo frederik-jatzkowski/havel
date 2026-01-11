@@ -54,19 +54,19 @@ func (vm *VM) execI(p *bytecode.P) error {
 		vm.done = true
 		vm.exitCode = int(vm.registers[r1])
 		vm.pc++
-	case bytecode.OPLit1:
+	case bytecode.OPLit8:
 		r1, r2, _ := i.Regs()
 		vm.registers[r1] = uint64(r2)
 		vm.pc++
-	case bytecode.OPLit2:
+	case bytecode.OPLit16:
 		r1, r2, r3 := i.Regs()
 		vm.registers[r1] = (uint64(r2) << 8) | uint64(r3)
 		vm.pc++
-	case bytecode.OPLit4:
+	case bytecode.OPLit32:
 		r1, _, _ := i.Regs()
 		vm.registers[r1] = uint64(*(*uint32)(unsafe.Pointer(&p.Instructions[vm.pc+1])))
 		vm.pc += 2
-	case bytecode.OPLit8:
+	case bytecode.OPLit64:
 		r1, _, _ := i.Regs()
 		vm.registers[r1] = *(*uint64)(unsafe.Pointer(&p.Instructions[vm.pc+1]))
 		vm.pc += 3
@@ -76,104 +76,104 @@ func (vm *VM) execI(p *bytecode.P) error {
 			panic(err)
 		}
 		vm.pc++
-	case bytecode.OPAluAddU1:
+	case bytecode.OPAluAddU8:
 		r1, r2, r3 := i.Regs()
 		vm.registers[r1] = uint64(uint8(vm.registers[r2]) + uint8(vm.registers[r3]))
 		vm.pc++
-	case bytecode.OPAluAddU2:
+	case bytecode.OPAluAddU16:
 		r1, r2, r3 := i.Regs()
 		vm.registers[r1] = uint64(uint16(vm.registers[r2]) + uint16(vm.registers[r3]))
 		vm.pc++
-	case bytecode.OPAluAddU4:
+	case bytecode.OPAluAddU32:
 		r1, r2, r3 := i.Regs()
 		vm.registers[r1] = uint64(uint32(vm.registers[r2]) + uint32(vm.registers[r3]))
 		vm.pc++
-	case bytecode.OPAluAddU8:
+	case bytecode.OPAluAddU64:
 		r1, r2, r3 := i.Regs()
 		vm.registers[r1] = vm.registers[r2] + vm.registers[r3]
 		vm.pc++
-	case bytecode.OPAluSubU1:
+	case bytecode.OPAluSubU8:
 		r1, r2, r3 := i.Regs()
 		vm.registers[r1] = uint64(uint8(vm.registers[r2]) - uint8(vm.registers[r3]))
 		vm.pc++
-	case bytecode.OPAluSubU2:
+	case bytecode.OPAluSubU16:
 		r1, r2, r3 := i.Regs()
 		vm.registers[r1] = uint64(uint16(vm.registers[r2]) - uint16(vm.registers[r3]))
 		vm.pc++
-	case bytecode.OPAluSubU4:
+	case bytecode.OPAluSubU32:
 		r1, r2, r3 := i.Regs()
 		vm.registers[r1] = uint64(uint32(vm.registers[r2]) - uint32(vm.registers[r3]))
 		vm.pc++
-	case bytecode.OPAluSubU8:
+	case bytecode.OPAluSubU64:
 		r1, r2, r3 := i.Regs()
 		vm.registers[r1] = vm.registers[r2] - vm.registers[r3]
 		vm.pc++
-	case bytecode.OPAluMulU1:
+	case bytecode.OPAluMulU8:
 		r1, r2, r3 := i.Regs()
 		vm.registers[r1] = uint64(uint8(vm.registers[r2]) * uint8(vm.registers[r3]))
 		vm.pc++
-	case bytecode.OPAluMulU2:
+	case bytecode.OPAluMulU16:
 		r1, r2, r3 := i.Regs()
 		vm.registers[r1] = uint64(uint16(vm.registers[r2]) * uint16(vm.registers[r3]))
 		vm.pc++
-	case bytecode.OPAluMulU4:
+	case bytecode.OPAluMulU32:
 		r1, r2, r3 := i.Regs()
 		vm.registers[r1] = uint64(uint32(vm.registers[r2]) * uint32(vm.registers[r3]))
 		vm.pc++
-	case bytecode.OPAluMulU8:
+	case bytecode.OPAluMulU64:
 		r1, r2, r3 := i.Regs()
 		vm.registers[r1] = vm.registers[r2] * vm.registers[r3]
-		vm.pc++
-	case bytecode.OPAluDivU1:
-		r1, r2, r3 := i.Regs()
-		if vm.registers[r3] == 0 {
-			return fmt.Errorf("%s: division by zero\n", p.Positions[vm.pc])
-		}
-		vm.registers[r1] = uint64(uint8(vm.registers[r2]) / uint8(vm.registers[r3]))
-		vm.pc++
-	case bytecode.OPAluDivU2:
-		r1, r2, r3 := i.Regs()
-		if vm.registers[r3] == 0 {
-			return fmt.Errorf("%s: division by zero\n", p.Positions[vm.pc])
-		}
-		vm.registers[r1] = uint64(uint16(vm.registers[r2]) / uint16(vm.registers[r3]))
-		vm.pc++
-	case bytecode.OPAluDivU4:
-		r1, r2, r3 := i.Regs()
-		if vm.registers[r3] == 0 {
-			return fmt.Errorf("%s: division by zero\n", p.Positions[vm.pc])
-		}
-		vm.registers[r1] = uint64(uint32(vm.registers[r2]) / uint32(vm.registers[r3]))
 		vm.pc++
 	case bytecode.OPAluDivU8:
 		r1, r2, r3 := i.Regs()
 		if vm.registers[r3] == 0 {
 			return fmt.Errorf("%s: division by zero\n", p.Positions[vm.pc])
 		}
+		vm.registers[r1] = uint64(uint8(vm.registers[r2]) / uint8(vm.registers[r3]))
+		vm.pc++
+	case bytecode.OPAluDivU16:
+		r1, r2, r3 := i.Regs()
+		if vm.registers[r3] == 0 {
+			return fmt.Errorf("%s: division by zero\n", p.Positions[vm.pc])
+		}
+		vm.registers[r1] = uint64(uint16(vm.registers[r2]) / uint16(vm.registers[r3]))
+		vm.pc++
+	case bytecode.OPAluDivU32:
+		r1, r2, r3 := i.Regs()
+		if vm.registers[r3] == 0 {
+			return fmt.Errorf("%s: division by zero\n", p.Positions[vm.pc])
+		}
+		vm.registers[r1] = uint64(uint32(vm.registers[r2]) / uint32(vm.registers[r3]))
+		vm.pc++
+	case bytecode.OPAluDivU64:
+		r1, r2, r3 := i.Regs()
+		if vm.registers[r3] == 0 {
+			return fmt.Errorf("%s: division by zero\n", p.Positions[vm.pc])
+		}
 		vm.registers[r1] = vm.registers[r2] / vm.registers[r3]
 		vm.pc++
-	case bytecode.OPAluModU1:
+	case bytecode.OPAluModU8:
 		r1, r2, r3 := i.Regs()
 		if vm.registers[r3] == 0 {
 			return fmt.Errorf("%s: division by zero\n", p.Positions[vm.pc])
 		}
 		vm.registers[r1] = uint64(uint8(vm.registers[r2]) % uint8(vm.registers[r3]))
 		vm.pc++
-	case bytecode.OPAluModU2:
+	case bytecode.OPAluModU16:
 		r1, r2, r3 := i.Regs()
 		if vm.registers[r3] == 0 {
 			return fmt.Errorf("%s: division by zero\n", p.Positions[vm.pc])
 		}
 		vm.registers[r1] = uint64(uint16(vm.registers[r2]) % uint16(vm.registers[r3]))
 		vm.pc++
-	case bytecode.OPAluModU4:
+	case bytecode.OPAluModU32:
 		r1, r2, r3 := i.Regs()
 		if vm.registers[r3] == 0 {
 			return fmt.Errorf("%s: division by zero\n", p.Positions[vm.pc])
 		}
 		vm.registers[r1] = uint64(uint32(vm.registers[r2]) % uint32(vm.registers[r3]))
 		vm.pc++
-	case bytecode.OPAluModU8:
+	case bytecode.OPAluModU64:
 		r1, r2, r3 := i.Regs()
 		if vm.registers[r3] == 0 {
 			return fmt.Errorf("%s: division by zero\n", p.Positions[vm.pc])
@@ -194,42 +194,42 @@ func (vm *VM) execI(p *bytecode.P) error {
 		r1, r2, _ := i.Regs()
 		vm.registers[r1] = vm.registers[r2]
 		vm.pc++
-	case bytecode.OPStoreI1:
+	case bytecode.OPStoreStack8:
 		r1, _, _ := i.Regs()
 		_, offset := i.Uint16()
 		vm.stack[vm.sp+int(offset)] = uint8(vm.registers[r1])
 		vm.pc++
-	case bytecode.OPStoreI2:
+	case bytecode.OPStoreStack16:
 		r1, _, _ := i.Regs()
 		_, offset := i.Uint16()
 		*(*uint16)(unsafe.Pointer(&vm.stack[vm.sp+int(offset)])) = uint16(vm.registers[r1])
 		vm.pc++
-	case bytecode.OPStoreI4:
+	case bytecode.OPStoreStack32:
 		r1, _, _ := i.Regs()
 		_, offset := i.Uint16()
 		*(*uint32)(unsafe.Pointer(&vm.stack[vm.sp+int(offset)])) = uint32(vm.registers[r1])
 		vm.pc++
-	case bytecode.OPStoreI8:
+	case bytecode.OPStoreStack64:
 		r1, _, _ := i.Regs()
 		_, offset := i.Uint16()
 		*(*uint64)(unsafe.Pointer(&vm.stack[vm.sp+int(offset)])) = vm.registers[r1]
 		vm.pc++
-	case bytecode.OPLoadI1:
+	case bytecode.OPLoadStack8:
 		r1, _, _ := i.Regs()
 		_, offset := i.Uint16()
 		vm.registers[r1] = uint64(vm.stack[vm.sp+int(offset)])
 		vm.pc++
-	case bytecode.OPLoadI2:
+	case bytecode.OPLoadStack16:
 		r1, _, _ := i.Regs()
 		_, offset := i.Uint16()
 		vm.registers[r1] = uint64(*(*uint16)(unsafe.Pointer(&vm.stack[vm.sp+int(offset)])))
 		vm.pc++
-	case bytecode.OPLoadI4:
+	case bytecode.OPLoadStack32:
 		r1, _, _ := i.Regs()
 		_, offset := i.Uint16()
 		vm.registers[r1] = uint64(*(*uint32)(unsafe.Pointer(&vm.stack[vm.sp+int(offset)])))
 		vm.pc++
-	case bytecode.OPLoadI8:
+	case bytecode.OPLoadStack64:
 		r1, _, _ := i.Regs()
 		_, offset := i.Uint16()
 		vm.registers[r1] = *(*uint64)(unsafe.Pointer(&vm.stack[vm.sp+int(offset)]))

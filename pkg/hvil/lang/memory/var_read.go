@@ -57,13 +57,13 @@ func (node *VarRead) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	var op bytecode.OP
 	switch node.NameResolutionPass.Decl.Type().Bytes() {
 	case 1:
-		op = bytecode.OPLoadI1
+		op = bytecode.OPLoadStack8
 	case 2:
-		op = bytecode.OPLoadI2
+		op = bytecode.OPLoadStack16
 	case 4:
-		op = bytecode.OPLoadI4
+		op = bytecode.OPLoadStack32
 	case 8:
-		op = bytecode.OPLoadI8
+		op = bytecode.OPLoadStack64
 	}
 
 	p.AddI1RLit(op, node.Register().(bytecode.R), uint16(node.NameResolutionPass.Decl.AddressResolutionPass.RelAddr), node.Position())

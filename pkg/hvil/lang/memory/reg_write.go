@@ -67,13 +67,13 @@ func (node *RegWrite) GenerateVirtualMachineAssembly(p *assembly.P) error {
 		var op bytecode.OP
 		switch node.RegType.Bytes() {
 		case 1:
-			op = bytecode.OPStoreI1
+			op = bytecode.OPStoreStack8
 		case 2:
-			op = bytecode.OPStoreI2
+			op = bytecode.OPStoreStack16
 		case 4:
-			op = bytecode.OPStoreI4
+			op = bytecode.OPStoreStack32
 		case 8:
-			op = bytecode.OPStoreI8
+			op = bytecode.OPStoreStack64
 		}
 
 		p.AddI1RLit(op, node.Register().(bytecode.R), uint16(node.AddressResolutionPass.RelAddr), node.Position())

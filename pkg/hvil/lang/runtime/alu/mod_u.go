@@ -93,13 +93,13 @@ func (node *ModU) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	var op bytecode.OP
 	switch node.TypeCheckPass.Type.Bytes() {
 	case 1:
-		op = bytecode.OPAluModU1
-	case 2:
-		op = bytecode.OPAluModU2
-	case 4:
-		op = bytecode.OPAluModU4
-	case 8:
 		op = bytecode.OPAluModU8
+	case 2:
+		op = bytecode.OPAluModU16
+	case 4:
+		op = bytecode.OPAluModU32
+	case 8:
+		op = bytecode.OPAluModU64
 	}
 
 	p.AddI3R(

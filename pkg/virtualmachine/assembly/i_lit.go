@@ -33,19 +33,19 @@ var _ I = &lit{}
 func (i *lit) ByteCode() []bytecode.I {
 	switch i.size {
 	case 1:
-		return []bytecode.I{*(*bytecode.I)(unsafe.Pointer(&[4]byte{byte(bytecode.OPLit1), byte(i.target), uint8(i.value), 0}))}
+		return []bytecode.I{*(*bytecode.I)(unsafe.Pointer(&[4]byte{byte(bytecode.OPLit8), byte(i.target), uint8(i.value), 0}))}
 	case 2:
-		buf := [4]byte{byte(bytecode.OPLit2), byte(i.target), 0, 0}
+		buf := [4]byte{byte(bytecode.OPLit16), byte(i.target), 0, 0}
 		*(*uint16)(unsafe.Pointer(&buf[3])) = uint16(i.value)
 
 		return []bytecode.I{*(*bytecode.I)(unsafe.Pointer(&buf))}
 	case 4:
-		bc := []bytecode.I{*(*bytecode.I)(unsafe.Pointer(&[4]byte{byte(bytecode.OPLit4), byte(i.target), 0, 0})), 0}
+		bc := []bytecode.I{*(*bytecode.I)(unsafe.Pointer(&[4]byte{byte(bytecode.OPLit32), byte(i.target), 0, 0})), 0}
 		*(*uint32)(unsafe.Pointer(&bc[1])) = uint32(i.value)
 
 		return bc
 	case 8:
-		bc := []bytecode.I{*(*bytecode.I)(unsafe.Pointer(&[4]byte{byte(bytecode.OPLit8), byte(i.target), 0, 0})), 0, 0}
+		bc := []bytecode.I{*(*bytecode.I)(unsafe.Pointer(&[4]byte{byte(bytecode.OPLit64), byte(i.target), 0, 0})), 0, 0}
 		*(*uint64)(unsafe.Pointer(&bc[1])) = i.value
 
 		return bc
@@ -55,5 +55,5 @@ func (i *lit) ByteCode() []bytecode.I {
 }
 
 func (i *lit) String() string {
-	return fmt.Sprintf("  lit_%d %s %d", i.size, i.target, i.value)
+	return fmt.Sprintf("  lit%d %s %d", i.size*8, i.target, i.value)
 }
