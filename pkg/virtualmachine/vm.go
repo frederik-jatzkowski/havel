@@ -9,10 +9,11 @@ import (
 )
 
 type VM struct {
-	pc        int
+	pc, sp    int
 	done      bool
 	exitCode  int
-	registers [256]uint64
+	registers [32]uint64
+	stack     []byte
 
 	stdin          io.Reader
 	stdout, stderr io.Writer
@@ -27,6 +28,7 @@ func New(
 		stdin:  stdin,
 		stdout: stdout,
 		stderr: stderr,
+		stack:  make([]byte, stackSize),
 	}
 }
 
@@ -191,6 +193,46 @@ func (vm *VM) execI(p *bytecode.P) error {
 	case bytecode.OPAluMove:
 		r1, r2, _ := i.Regs()
 		vm.registers[r1] = vm.registers[r2]
+		vm.pc++
+	case bytecode.OPStoreI1:
+		r1, _, _ := i.Regs()
+		_, offset := i.Uint16()
+		vm.stack[vm.sp+int(offset)] = uint8(vm.registers[r1])
+		vm.pc++
+	case bytecode.OPStoreI2:
+		r1, _, _ := i.Regs()
+		_, offset := i.Uint16()
+		*(*uint16)(unsafe.Pointer(&vm.stack[vm.sp+int(offset)])) = uint16(vm.registers[r1])
+		vm.pc++
+	case bytecode.OPStoreI4:
+		r1, _, _ := i.Regs()
+		_, offset := i.Uint16()
+		*(*uint32)(unsafe.Pointer(&vm.stack[vm.sp+int(offset)])) = uint32(vm.registers[r1])
+		vm.pc++
+	case bytecode.OPStoreI8:
+		r1, _, _ := i.Regs()
+		_, offset := i.Uint16()
+		*(*uint64)(unsafe.Pointer(&vm.stack[vm.sp+int(offset)])) = vm.registers[r1]
+		vm.pc++
+	case bytecode.OPLoadI1:
+		r1, _, _ := i.Regs()
+		_, offset := i.Uint16()
+		vm.registers[r1] = uint64(vm.stack[vm.sp+int(offset)])
+		vm.pc++
+	case bytecode.OPLoadI2:
+		r1, _, _ := i.Regs()
+		_, offset := i.Uint16()
+		vm.registers[r1] = uint64(*(*uint16)(unsafe.Pointer(&vm.stack[vm.sp+int(offset)])))
+		vm.pc++
+	case bytecode.OPLoadI4:
+		r1, _, _ := i.Regs()
+		_, offset := i.Uint16()
+		vm.registers[r1] = uint64(*(*uint32)(unsafe.Pointer(&vm.stack[vm.sp+int(offset)])))
+		vm.pc++
+	case bytecode.OPLoadI8:
+		r1, _, _ := i.Regs()
+		_, offset := i.Uint16()
+		vm.registers[r1] = *(*uint64)(unsafe.Pointer(&vm.stack[vm.sp+int(offset)]))
 		vm.pc++
 	default:
 		panic(fmt.Sprintf("invalid opcode: %d (%s)", i.OP(), i.OP()))

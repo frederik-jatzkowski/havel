@@ -34,6 +34,14 @@ package bytecode
 //		alu_mod_u_8,
 //		alu_lt_u,
 //		alu_eq,
-//		alu_move
+//		alu_move,
+//		store_i_1,
+//		store_i_2,
+//		store_i_4,
+//		store_i_8,
+//		load_i_1,
+//		load_i_2,
+//		load_i_4,
+//		load_i_8
 //	)
 type OP byte

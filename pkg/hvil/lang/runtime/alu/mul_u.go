@@ -63,6 +63,20 @@ func (node *MulU) ResolveTypes(target types.Type) error {
 	return nil
 }
 
+func (node *MulU) AllocateRegisters(arch architecture.Architecture) ([]architecture.Register, error) {
+	leftRegs, err := node.Left.AllocateRegisters(arch)
+	if err != nil {
+		return nil, err
+	}
+
+	rightRegs, err := node.Right.AllocateRegisters(arch)
+	if err != nil {
+		return nil, err
+	}
+
+	return append(leftRegs, rightRegs...), nil
+}
+
 func (node *MulU) SetResultRegister(r architecture.Register) {
 	node.RegisterAllocationPass.Result = r
 }

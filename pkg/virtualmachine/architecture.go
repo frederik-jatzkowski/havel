@@ -16,16 +16,16 @@ type Architecture struct {
 
 func NewArchitecture() *Architecture {
 	arch := &Architecture{}
-	for i := range 256 {
+	for i := range 32 {
 		r := bytecode.R(i)
 		switch {
 		case i < 8:
 			arch.argRegisters = append(arch.argRegisters, r)
-		case i <= 16:
+		case i < 16:
 			arch.resultRegisters = append(arch.resultRegisters, r)
-		case i <= 248:
+		case i < 24:
 			arch.generalPurposeRegisters = append(arch.generalPurposeRegisters, r)
-		default:
+		case i < 32:
 			arch.scratchRegisters = append(arch.scratchRegisters, r)
 		}
 	}
@@ -47,8 +47,16 @@ func (a *Architecture) GetGeneralPurposeRegister() (architecture.Register, bool)
 	return a.pop(&a.generalPurposeRegisters)
 }
 
+func (a *Architecture) ReturnGeneralPurposeRegisters(r ...architecture.Register) {
+	a.push(&a.generalPurposeRegisters, r)
+}
+
 func (a *Architecture) GetScratchRegister() (architecture.Register, bool) {
 	return a.pop(&a.scratchRegisters)
+}
+
+func (a *Architecture) ReturnScratchRegisters(r ...architecture.Register) {
+	a.push(&a.scratchRegisters, r)
 }
 
 func (a *Architecture) pop(registers *[]bytecode.R) (architecture.Register, bool) {
@@ -62,11 +70,13 @@ func (a *Architecture) pop(registers *[]bytecode.R) (architecture.Register, bool
 	return r, true
 }
 
-func (a *Architecture) push(registers *[]bytecode.R, archR architecture.Register) {
-	r, ok := archR.(bytecode.R)
-	if !ok {
-		panic(fmt.Sprintf("invalid architecture register type: %T", archR))
-	}
+func (a *Architecture) push(registers *[]bytecode.R, archRs []architecture.Register) {
+	for _, archR := range archRs {
+		r, ok := archR.(bytecode.R)
+		if !ok {
+			panic(fmt.Sprintf("invalid architecture register type: %T", archR))
+		}
 
-	*registers = append(*registers, r)
+		*registers = append(*registers, r)
+	}
 }

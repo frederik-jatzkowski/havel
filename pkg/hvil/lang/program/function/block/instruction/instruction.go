@@ -4,6 +4,7 @@ import (
 	"context"
 	"unsafe"
 
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
@@ -45,13 +46,35 @@ func (node *Instruction) Execute(vm *runtime.VirtualMachine) error {
 	return node.Operation.Execute(vm, result)
 }
 
+func (node *Instruction) AllocateRegisters(arch architecture.Architecture) ([]architecture.Register, error) {
+	regs, err := node.Operation.AllocateRegisters(arch)
+	if err != nil {
+		return nil, err
+	}
+
+	defer arch.ReturnScratchRegisters(regs...)
+
+	if node.ResultWrite == nil {
+		return nil, nil
+	}
+
+	resultRegs, err := node.ResultWrite.AllocateRegisters(arch)
+	if err != nil {
+		return nil, err
+	}
+
+	node.Operation.SetResultRegister(node.ResultWrite.Register())
+
+	return resultRegs, nil
+}
+
 func (node *Instruction) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	if err := node.Operation.GenerateVirtualMachineAssembly(p); err != nil {
 		return err
 	}
 
 	if node.ResultWrite != nil {
-		if err := node.Result().GenerateVirtualMachineAssembly(p); err != nil {
+		if err := node.ResultWrite.GenerateVirtualMachineAssembly(p); err != nil {
 			return err
 		}
 	}

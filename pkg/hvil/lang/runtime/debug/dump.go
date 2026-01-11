@@ -38,14 +38,20 @@ func (node *Dump) ResolveTypes(target types.Type) error {
 	return nil
 }
 
+func (node *Dump) AllocateRegisters(arch architecture.Architecture) ([]architecture.Register, error) {
+	return node.Param.AllocateRegisters(arch)
+}
+
 func (node *Dump) SetResultRegister(r architecture.Register) {
 	panic(fmt.Sprintf("target register assigned to %T, which returns void", node))
 }
 
 func (node *Dump) GenerateVirtualMachineAssembly(p *assembly.P) error {
-	regRead := node.Param.(*memory.RegRead)
+	if err := node.Param.GenerateVirtualMachineAssembly(p); err != nil {
+		return err
+	}
 
-	p.AddI1R(bytecode.OPDebugDump, regRead.Register().(bytecode.R), node.Position())
+	p.AddI1R(bytecode.OPDebugDump, node.Param.Register().(bytecode.R), node.Position())
 
 	return nil
 }

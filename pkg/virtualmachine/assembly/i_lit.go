@@ -6,7 +6,6 @@ import (
 
 	"github.com/alecthomas/participle/v2/lexer"
 
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/bytecode"
 )
 
@@ -16,8 +15,8 @@ type lit struct {
 	value  uint64
 }
 
-func (p *P) AddLit(target architecture.Register, size int, value uint64, pos lexer.Position) {
-	p.Instructions = append(p.Instructions, &lit{target.(bytecode.R), size, value})
+func (p *P) AddLit(target bytecode.R, size int, value uint64, pos lexer.Position) {
+	p.Instructions = append(p.Instructions, &lit{target, size, value})
 
 	switch size {
 	case 1, 2:

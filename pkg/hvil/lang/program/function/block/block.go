@@ -2,7 +2,6 @@ package block
 
 import (
 	"context"
-	"errors"
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
@@ -57,24 +56,21 @@ func (node *Block) ResolveTypes() error {
 }
 
 func (node *Block) AllocateRegisters(arch architecture.Architecture) error {
+	registers := make([]architecture.Register, 0, len(node.Instructions))
 	for i := range node.Instructions {
-		instr := &node.Instructions[i]
-
-		regWrite, ok := instr.Result().(*memory.RegWrite)
-		if !ok {
-			continue
+		regs, err := node.Instructions[i].AllocateRegisters(arch)
+		if err != nil {
+			return err
 		}
 
-		r, ok := arch.GetGeneralPurposeRegister()
-		if !ok {
-			return errors.New("no general purpose registers remaining")
-		}
-
-		regWrite.RegisterAllocationPass.Register = r
-		instr.Operation.SetResultRegister(r)
+		registers = append(registers, regs...)
 	}
 
-	return nil
+	for _, reg := range registers {
+		arch.ReturnGeneralPurposeRegisters(reg)
+	}
+
+	return node.Terminator.AllocateRegisters(arch)
 }
 
 func (node *Block) GenerateVirtualMachineAssembly(p *assembly.P, isMain bool) error {

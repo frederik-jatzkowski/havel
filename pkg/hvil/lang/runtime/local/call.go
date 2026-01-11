@@ -76,6 +76,11 @@ func (node *Call) calculateSignature(target types.Type) {
 	node.TypeCheckPass.Signature.ReturnValue = target
 }
 
+func (node *Call) AllocateRegisters(arch architecture.Architecture) ([]architecture.Register, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (node *Call) SetResultRegister(r architecture.Register) {
 	//TODO implement me
 	panic("implement me")

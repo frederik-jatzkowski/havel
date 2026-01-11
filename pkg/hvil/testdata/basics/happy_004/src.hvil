@@ -1,0 +1,17 @@
+
+func main() {
+    block entry {
+        $n0 : 4 byte = 0b1;
+        $n1 : 4 byte = 0b1;
+        $n2 : 4 byte = alu.add_u($n0, $n1);
+        $n3 : 4 byte = alu.add_u($n0, $n2);
+        $n4 : 4 byte = alu.add_u($n0, $n3);
+        $n5 : 4 byte = alu.add_u($n0, $n4);
+        $n6 : 4 byte = alu.add_u($n0, $n5);
+        $n7 : 4 byte = alu.add_u($n0, $n6);
+        $n8 : 4 byte = alu.add_u($n0, $n7);
+        $n9 : 4 byte = alu.add_u($n0, $n8);
+        $n10 : 4 byte = alu.add_u($n0, $n9);
+        debug.dump($n10);
+    } return;
+}

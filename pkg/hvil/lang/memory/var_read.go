@@ -10,13 +10,18 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
+	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/bytecode"
 )
 
 type VarRead struct {
 	tool.Node[VarRead]
 	names.NameResolution[struct {
 		Decl *stack.Decl
+	}]
+	registeralloc.RegisterAllocation[struct {
+		Register architecture.Register
 	}]
 
 	Ident string `parser:"@Ident"`
@@ -37,14 +42,37 @@ func (node *VarRead) ResolveNames(ctx context.Context) error {
 	return nil
 }
 
+func (node *VarRead) AllocateRegisters(arch architecture.Architecture) ([]architecture.Register, error) {
+	reg, ok := arch.GetScratchRegister()
+	if !ok {
+		return nil, node.Errorf("cannot allocate variable load register")
+	}
+
+	node.RegisterAllocationPass.Register = reg
+
+	return []architecture.Register{reg}, nil
+}
+
 func (node *VarRead) GenerateVirtualMachineAssembly(p *assembly.P) error {
-	//TODO implement me
-	panic("implement me")
+	var op bytecode.OP
+	switch node.NameResolutionPass.Decl.Type().Bytes() {
+	case 1:
+		op = bytecode.OPLoadI1
+	case 2:
+		op = bytecode.OPLoadI2
+	case 4:
+		op = bytecode.OPLoadI4
+	case 8:
+		op = bytecode.OPLoadI8
+	}
+
+	p.AddI1RLit(op, node.Register().(bytecode.R), uint16(node.NameResolutionPass.Decl.AddressResolutionPass.RelAddr), node.Position())
+
+	return nil
 }
 
 func (node *VarRead) Register() architecture.Register {
-	//TODO implement me
-	panic("implement me")
+	return node.RegisterAllocationPass.Register
 }
 
 func (node *VarRead) Type() types.Type {

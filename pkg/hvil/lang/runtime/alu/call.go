@@ -28,6 +28,10 @@ func (node *Call) ResolveTypes(target types.Type) error {
 	return node.Operation.ResolveTypes(target)
 }
 
+func (node *Call) AllocateRegisters(arch architecture.Architecture) ([]architecture.Register, error) {
+	return node.Operation.AllocateRegisters(arch)
+}
+
 func (node *Call) SetResultRegister(r architecture.Register) {
 	node.Operation.SetResultRegister(r)
 }

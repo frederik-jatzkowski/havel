@@ -3,6 +3,7 @@ package terminator
 import (
 	"context"
 
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
@@ -34,6 +35,11 @@ func (node *Jump) ResolveNames(ctx context.Context) error {
 
 func (node *Jump) ResolveTypes() error {
 	return nil
+}
+
+func (node *Jump) AllocateRegisters(arch architecture.Architecture) error {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (node *Jump) GenerateVirtualMachineAssembly(p *assembly.P, isMain bool) error {

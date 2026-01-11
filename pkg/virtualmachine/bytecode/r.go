@@ -9,3 +9,7 @@ type R byte
 func (r R) String() string {
 	return fmt.Sprintf("r%d", r)
 }
+
+func (r R) RegisterName() string {
+	return fmt.Sprintf("r%d", r)
+}

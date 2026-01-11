@@ -11,6 +11,7 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/address"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
+	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/bytecode"
 )
 
 type RegWrite struct {
@@ -20,6 +21,7 @@ type RegWrite struct {
 	}]
 	registeralloc.RegisterAllocation[struct {
 		Register architecture.Register
+		Spilled  bool
 	}]
 
 	Ident   string     `parser:"'$' @Ident"`
@@ -40,7 +42,43 @@ func (node *RegWrite) ResolveNames(ctx context.Context) error {
 	return nil
 }
 
+func (node *RegWrite) AllocateRegisters(arch architecture.Architecture) ([]architecture.Register, error) {
+	reg, ok := arch.GetGeneralPurposeRegister()
+	if !ok {
+		node.RegisterAllocationPass.Spilled = true
+		reg, ok := arch.GetScratchRegister()
+		if !ok {
+			return nil, node.Errorf("cannot allocate spill register")
+		}
+
+		node.RegisterAllocationPass.Register = reg
+		arch.ReturnScratchRegisters(reg)
+
+		return nil, nil
+	}
+
+	node.RegisterAllocationPass.Register = reg
+
+	return []architecture.Register{reg}, nil
+}
+
 func (node *RegWrite) GenerateVirtualMachineAssembly(p *assembly.P) error {
+	if node.RegisterAllocationPass.Spilled {
+		var op bytecode.OP
+		switch node.RegType.Bytes() {
+		case 1:
+			op = bytecode.OPStoreI1
+		case 2:
+			op = bytecode.OPStoreI2
+		case 4:
+			op = bytecode.OPStoreI4
+		case 8:
+			op = bytecode.OPStoreI8
+		}
+
+		p.AddI1RLit(op, node.Register().(bytecode.R), uint16(node.AddressResolutionPass.RelAddr), node.Position())
+	}
+
 	return nil
 }
 

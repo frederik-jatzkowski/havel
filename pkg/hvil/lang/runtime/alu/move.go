@@ -44,6 +44,10 @@ func (node *Move) ResolveTypes(target types.Type) error {
 	return nil
 }
 
+func (node *Move) AllocateRegisters(arch architecture.Architecture) ([]architecture.Register, error) {
+	return node.Arg.AllocateRegisters(arch)
+}
+
 func (node *Move) SetResultRegister(r architecture.Register) {
 	node.RegisterAllocationPass.Result = r
 }

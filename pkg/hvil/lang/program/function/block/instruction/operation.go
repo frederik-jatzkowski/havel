@@ -13,6 +13,7 @@ import (
 type Operation interface {
 	names.Resolver
 	ResolveTypes(expected types.Type) error
+	AllocateRegisters(arch architecture.Architecture) ([]architecture.Register, error)
 	SetResultRegister(r architecture.Register)
 	codegen.VirtualMachine
 	Execute(vm *runtime.VirtualMachine, result unsafe.Pointer) error

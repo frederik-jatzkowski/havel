@@ -3,6 +3,7 @@ package terminator
 import (
 	"context"
 
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
@@ -51,6 +52,11 @@ func (node *Conditional) ResolveTypes() error {
 	}
 
 	return nil
+}
+
+func (node *Conditional) AllocateRegisters(arch architecture.Architecture) error {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (node *Conditional) GenerateVirtualMachineAssembly(p *assembly.P, isMain bool) error {

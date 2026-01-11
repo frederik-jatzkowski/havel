@@ -1,3 +1,5 @@
 package architecture
 
-type Register interface{}
+type Register interface {
+	RegisterName() string
+}
