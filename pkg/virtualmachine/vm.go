@@ -55,7 +55,16 @@ func (vm *VM) execI(p *bytecode.P) error {
 		vm.done = true
 		vm.exitCode = int(vm.registers[r1])
 		vm.pc++
-	case bytecode.OPJump:
+	case bytecode.OPJumpRelative:
+		_, offset := i.Int16()
+		vm.pc += int(offset)
+	case bytecode.OPJumpRelativeIf:
+		r1, _, _ := i.Regs()
+		if vm.registers[r1]&1 == 0 {
+			vm.pc++
+			break
+		}
+
 		_, offset := i.Int16()
 		vm.pc += int(offset)
 	case bytecode.OPLit8:

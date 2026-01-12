@@ -13,6 +13,7 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
+	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/bytecode"
 )
 
 type Conditional struct {
@@ -65,13 +66,19 @@ func (node *Conditional) ResolveTypes() error {
 }
 
 func (node *Conditional) AllocateRegisters(arch architecture.Architecture) error {
-	//TODO implement me
-	panic("implement me")
+	_, err := node.Condition.AllocateRegisters(arch)
+	return err
 }
 
 func (node *Conditional) GenerateVirtualMachineAssembly(p *assembly.P) error {
-	//TODO implement me
-	panic("implement me")
+	if err := node.Condition.GenerateVirtualMachineAssembly(p); err != nil {
+		return node.Wrap(err)
+	}
+
+	p.AddJumpToLabelIf(node.Condition.Register().(bytecode.R), node.NameResolutionPass.Then.FullyQualifiedIdentifier(), node.Position())
+	p.AddJumpToLabel(node.NameResolutionPass.Else.FullyQualifiedIdentifier(), node.Position())
+
+	return nil
 }
 
 func (node *Conditional) Execute(vm *runtime.VirtualMachine) (function.Block, error) {

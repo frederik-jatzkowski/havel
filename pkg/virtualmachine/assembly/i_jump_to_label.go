@@ -31,7 +31,7 @@ func (i *jumpToLabel) ByteCode(index int, labels map[string]int) []bytecode.I {
 		panic(fmt.Sprintf("jump target out of range: %d", offset))
 	}
 
-	buf := [4]byte{byte(bytecode.OPJump), 0, 0, 0}
+	buf := [4]byte{byte(bytecode.OPJumpRelative), 0, 0, 0}
 	*(*int16)(unsafe.Pointer(&buf[2])) = int16(offset)
 
 	return []bytecode.I{*(*bytecode.I)(unsafe.Pointer(&buf))}
