@@ -17,9 +17,8 @@ import (
 type Block struct {
 	tool.Node[Block]
 	names.NameResolution[struct {
-		Regs        names.Scope[*memory.RegWrite]
-		OrderedRegs []*memory.RegWrite
-		Function    *function.Function
+		Regs     names.Scope[*memory.RegWrite]
+		Function *function.Function
 	}]
 
 	Name         string                    `parser:"'block':Keyword @Ident '{'"`
@@ -42,10 +41,6 @@ func (node *Block) ResolveNames(ctx context.Context) error {
 	for _, i := range node.Instructions {
 		if err := i.ResolveNames(ctx); err != nil {
 			return err
-		}
-
-		if reg, ok := i.Result().(*memory.RegWrite); ok {
-			node.NameResolutionPass.OrderedRegs = append(node.NameResolutionPass.OrderedRegs, reg)
 		}
 	}
 
