@@ -4,9 +4,12 @@ import (
 	"context"
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool/contexttool"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/bytecode"
@@ -14,6 +17,9 @@ import (
 
 type Return struct {
 	tool.Node[Return]
+	names.NameResolution[struct {
+		IsMain bool
+	}]
 	registeralloc.RegisterAllocation[struct {
 		ExitCode architecture.Register
 	}]
@@ -23,7 +29,15 @@ type Return struct {
 
 var _ block.Terminator = (*Return)(nil)
 
-func (node *Return) ResolveNames(_ context.Context) error {
+func (node *Return) ResolveNames(ctx context.Context) error {
+
+	fn, err := contexttool.CurrentFromContext[*function.Function](ctx)
+	if err != nil {
+		return node.Wrap(err)
+	}
+
+	node.NameResolutionPass.IsMain = fn.Identifier() == names.SpecialMain
+
 	return nil
 }
 
@@ -44,8 +58,8 @@ func (node *Return) AllocateRegisters(arch architecture.Architecture) error {
 	return nil
 }
 
-func (node *Return) GenerateVirtualMachineAssembly(p *assembly.P, isMain bool) error {
-	if isMain {
+func (node *Return) GenerateVirtualMachineAssembly(p *assembly.P) error {
+	if node.NameResolutionPass.IsMain {
 		// exit code 0
 		p.AddLit(node.RegisterAllocationPass.ExitCode.(bytecode.R), 1, 0, node.Position())
 		p.AddI1R(bytecode.OPExit, node.RegisterAllocationPass.ExitCode.(bytecode.R), node.Position())
@@ -57,7 +71,7 @@ func (node *Return) GenerateVirtualMachineAssembly(p *assembly.P, isMain bool) e
 	return nil
 }
 
-func (node *Return) Execute(vm *runtime.VirtualMachine) (*block.Block, error) {
+func (node *Return) Execute(vm *runtime.VirtualMachine) (function.Block, error) {
 	// there is no next block after a return statement
 	return nil, nil
 }

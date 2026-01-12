@@ -5,9 +5,11 @@ import (
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block/instruction"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool/contexttool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
 )
@@ -17,6 +19,7 @@ type Block struct {
 	names.NameResolution[struct {
 		Regs        names.Scope[*memory.RegWrite]
 		OrderedRegs []*memory.RegWrite
+		Function    *function.Function
 	}]
 
 	Name         string                    `parser:"'block':Keyword @Ident '{'"`
@@ -26,6 +29,10 @@ type Block struct {
 
 func (node *Block) Identifier() string {
 	return node.Name
+}
+
+func (node *Block) FullyQualifiedIdentifier() string {
+	return node.NameResolutionPass.Function.Identifier() + "." + node.Identifier()
 }
 
 func (node *Block) ResolveNames(ctx context.Context) error {
@@ -42,7 +49,18 @@ func (node *Block) ResolveNames(ctx context.Context) error {
 		}
 	}
 
+	fn, err := contexttool.CurrentFromContext[*function.Function](ctx)
+	if err != nil {
+		return node.Wrap(err)
+	}
+
+	node.NameResolutionPass.Function = fn
+
 	return node.Terminator.ResolveNames(ctx)
+}
+
+func (node *Block) RegisterScope() names.Scope[*memory.RegWrite] {
+	return node.NameResolutionPass.Regs
 }
 
 func (node *Block) ResolveTypes() error {
@@ -73,17 +91,19 @@ func (node *Block) AllocateRegisters(arch architecture.Architecture) error {
 	return node.Terminator.AllocateRegisters(arch)
 }
 
-func (node *Block) GenerateVirtualMachineAssembly(p *assembly.P, isMain bool) error {
+func (node *Block) GenerateVirtualMachineAssembly(p *assembly.P) error {
+	p.AddLabel(node.FullyQualifiedIdentifier(), node.Position())
+
 	for i := range node.Instructions {
 		if err := node.Instructions[i].GenerateVirtualMachineAssembly(p); err != nil {
 			return err
 		}
 	}
 
-	return node.Terminator.GenerateVirtualMachineAssembly(p, isMain)
+	return node.Terminator.GenerateVirtualMachineAssembly(p)
 }
 
-func (node *Block) Execute(vm *runtime.VirtualMachine) (*Block, error) {
+func (node *Block) Execute(vm *runtime.VirtualMachine) (function.Block, error) {
 	for _, i := range node.Instructions {
 		err := i.Execute(vm)
 		if err != nil {

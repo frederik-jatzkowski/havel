@@ -30,7 +30,20 @@ func (p *P) AddLit(target bytecode.R, size int, value uint64, pos lexer.Position
 
 var _ I = &lit{}
 
-func (i *lit) ByteCode() []bytecode.I {
+func (i *lit) ByteCodeLen() int {
+	switch i.size {
+	case 1, 2:
+		return 1
+	case 4:
+		return 2
+	case 8:
+		return 3
+	}
+
+	return 0
+}
+
+func (i *lit) ByteCode(_ int, _ map[string]int) []bytecode.I {
 	switch i.size {
 	case 1:
 		return []bytecode.I{*(*bytecode.I)(unsafe.Pointer(&[4]byte{byte(bytecode.OPLit8), byte(i.target), uint8(i.value), 0}))}

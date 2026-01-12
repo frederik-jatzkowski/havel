@@ -22,7 +22,11 @@ func (p *P) AddI1RLit(op bytecode.OP, r1 bytecode.R, lit uint16, pos lexer.Posit
 
 var _ I = &i1RLit{}
 
-func (i *i1RLit) ByteCode() []bytecode.I {
+func (i *i1RLit) ByteCodeLen() int {
+	return 1
+}
+
+func (i *i1RLit) ByteCode(_ int, _ map[string]int) []bytecode.I {
 	buf := [4]byte{byte(i.op), byte(i.r1), 0, 0}
 	*(*uint16)(unsafe.Pointer(&buf[2])) = i.lit
 

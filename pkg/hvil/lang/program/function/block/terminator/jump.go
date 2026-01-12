@@ -4,9 +4,11 @@ import (
 	"context"
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool/contexttool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
 )
@@ -14,7 +16,9 @@ import (
 type Jump struct {
 	tool.Node[Jump]
 	names.NameResolution[struct {
-		Target *block.Block
+		IsMain   bool
+		Target   function.Block
+		Function *function.Function
 	}]
 
 	Target string `parser:"'goto':Keyword @Ident"`
@@ -23,12 +27,20 @@ type Jump struct {
 var _ block.Terminator = (*Jump)(nil)
 
 func (node *Jump) ResolveNames(ctx context.Context) error {
-	target, err := block.FromCtx(ctx, node.Target)
+	target, err := contexttool.FromCtx[function.Block](ctx, node.Target)
 	if err != nil {
 		return node.Wrap(err)
 	}
 
 	node.NameResolutionPass.Target = target
+
+	fn, err := contexttool.CurrentFromContext[*function.Function](ctx)
+	if err != nil {
+		return node.Wrap(err)
+	}
+
+	node.NameResolutionPass.Function = fn
+	node.NameResolutionPass.IsMain = fn.Identifier() == names.SpecialMain
 
 	return nil
 }
@@ -38,15 +50,15 @@ func (node *Jump) ResolveTypes() error {
 }
 
 func (node *Jump) AllocateRegisters(arch architecture.Architecture) error {
-	//TODO implement me
-	panic("implement me")
+	return nil
 }
 
-func (node *Jump) GenerateVirtualMachineAssembly(p *assembly.P, isMain bool) error {
-	//TODO implement me
-	panic("implement me")
+func (node *Jump) GenerateVirtualMachineAssembly(p *assembly.P) error {
+	p.AddJumpToLabel(node.NameResolutionPass.Target.FullyQualifiedIdentifier(), node.Position())
+
+	return nil
 }
 
-func (node *Jump) Execute(vm *runtime.VirtualMachine) (*block.Block, error) {
+func (node *Jump) Execute(vm *runtime.VirtualMachine) (function.Block, error) {
 	return node.NameResolutionPass.Target, nil
 }

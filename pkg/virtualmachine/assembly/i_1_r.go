@@ -21,7 +21,11 @@ func (p *P) AddI1R(op bytecode.OP, r1 bytecode.R, pos lexer.Position) {
 
 var _ I = &i1R{}
 
-func (i *i1R) ByteCode() []bytecode.I {
+func (i *i1R) ByteCodeLen() int {
+	return 1
+}
+
+func (i *i1R) ByteCode(_ int, _ map[string]int) []bytecode.I {
 	return []bytecode.I{
 		*(*bytecode.I)(unsafe.Pointer(&[4]byte{byte(i.op), byte(i.r1), 0, 0})),
 	}

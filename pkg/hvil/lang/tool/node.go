@@ -10,6 +10,7 @@ type NodeLike interface {
 	fmt.Stringer
 	Position() lexer.Position
 	Errorf(format string, a ...any) error
+	Wrap(err error) error
 }
 
 type Node[TKind any] struct {

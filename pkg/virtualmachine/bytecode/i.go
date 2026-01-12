@@ -25,3 +25,8 @@ func (i I) Uint16() (uint16, uint16) {
 	arr := *(*[2]uint16)(unsafe.Pointer(&i))
 	return arr[0], arr[1]
 }
+
+func (i I) Int16() (int16, int16) {
+	arr := *(*[2]int16)(unsafe.Pointer(&i))
+	return arr[0], arr[1]
+}

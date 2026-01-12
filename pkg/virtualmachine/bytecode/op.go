@@ -7,6 +7,7 @@ package bytecode
 //
 //		unknown,
 //		exit,
+//		jump,
 //		lit8,
 //		lit16,
 //		lit32,

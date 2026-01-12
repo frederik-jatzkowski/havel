@@ -4,10 +4,10 @@ import (
 	"context"
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/stack"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool/contexttool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/address"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
@@ -17,8 +17,8 @@ import (
 type Function struct {
 	tool.Node[Function]
 	names.NameResolution[struct {
-		Entry  *block.Block
-		Blocks names.Scope[*block.Block]
+		Entry  Block
+		Blocks names.Scope[Block]
 		Vars   names.Scope[*stack.Decl]
 	}]
 	address.Resolution[struct {
@@ -33,7 +33,7 @@ type Function struct {
 	Params tool.List[*stack.Decl] `parser:"'(' @@ ')'"`
 	Result *stack.Decl            `parser:"( '->' '(' @@ ')' )?"`
 	Locals tool.List[*stack.Decl] `parser:"'{' ( 'declare':Keyword '(' @@ ')' ';' )?"`
-	Blocks []*block.Block         `parser:"@@+  '}'"`
+	Blocks []Block                `parser:"@@+  '}'"`
 }
 
 func (node *Function) Identifier() string {
@@ -41,7 +41,7 @@ func (node *Function) Identifier() string {
 }
 
 func (node *Function) ResolveNames(ctx context.Context) error {
-	ctx = WithCurrent(ctx, node)
+	ctx = contexttool.WithCurrent(ctx, node)
 
 	node.NameResolutionPass.Vars = names.NewRootScope[*stack.Decl](names.KindVariable)
 	ctx = stack.WithScope(ctx, node.NameResolutionPass.Vars)
@@ -64,8 +64,8 @@ func (node *Function) ResolveNames(ctx context.Context) error {
 		}
 	}
 
-	node.NameResolutionPass.Blocks = names.NewRootScope[*block.Block](names.KindBlock)
-	ctx = block.WithScope(ctx, node.NameResolutionPass.Blocks)
+	node.NameResolutionPass.Blocks = names.NewRootScope[Block](names.KindBlock)
+	ctx = contexttool.WithScope(ctx, node.NameResolutionPass.Blocks)
 
 	for _, b := range node.Blocks {
 		if err := node.NameResolutionPass.Blocks.Define(b); err != nil {
@@ -164,7 +164,7 @@ func (node *Function) resolveLocalsAddresses(offset int) {
 func (node *Function) resolveRegisterAddresses(offset int) {
 	for i := 0; i < len(node.Blocks); i++ {
 		blockRegSize := 0
-		for _, reg := range node.Blocks[i].NameResolutionPass.OrderedRegs {
+		for reg := range node.Blocks[i].RegisterScope().All() {
 			reg.AddressResolutionPass.RelAddr = offset + blockRegSize
 			blockRegSize += reg.Type().Bytes()
 		}
@@ -184,9 +184,8 @@ func (node *Function) AllocateRegisters(arch architecture.Architecture) error {
 }
 
 func (node *Function) GenerateVirtualMachineAssembly(p *assembly.P) error {
-	isMain := node.Name == names.SpecialMain
 	for i := 0; i < len(node.Blocks); i++ {
-		if err := node.Blocks[i].GenerateVirtualMachineAssembly(p, isMain); err != nil {
+		if err := node.Blocks[i].GenerateVirtualMachineAssembly(p); err != nil {
 			return err
 		}
 	}

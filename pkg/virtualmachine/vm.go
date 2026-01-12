@@ -48,12 +48,16 @@ func (vm *VM) Execute(p *bytecode.P) error {
 
 func (vm *VM) execI(p *bytecode.P) error {
 	i := p.Instructions[vm.pc]
-	switch i.OP() {
+	op := i.OP()
+	switch op {
 	case bytecode.OPExit:
 		r1, _, _ := i.Regs()
 		vm.done = true
 		vm.exitCode = int(vm.registers[r1])
 		vm.pc++
+	case bytecode.OPJump:
+		_, offset := i.Int16()
+		vm.pc += int(offset)
 	case bytecode.OPLit8:
 		r1, r2, _ := i.Regs()
 		vm.registers[r1] = uint64(r2)

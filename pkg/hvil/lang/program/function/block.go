@@ -1,18 +1,21 @@
-package block
+package function
 
 import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/codegen"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
 )
 
-type Terminator interface {
+type Block interface {
+	names.ScopedObject
 	names.Resolver
 	codegen.VirtualMachine
 
+	FullyQualifiedIdentifier() string
+	RegisterScope() names.Scope[*memory.RegWrite]
 	ResolveTypes() error
 	AllocateRegisters(arch architecture.Architecture) error
-	Execute(vm *runtime.VirtualMachine) (function.Block, error)
+	Execute(vm *runtime.VirtualMachine) (Block, error)
 }

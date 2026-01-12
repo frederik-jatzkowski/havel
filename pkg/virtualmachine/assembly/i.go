@@ -8,5 +8,6 @@ import (
 
 type I interface {
 	fmt.Stringer
-	ByteCode() []bytecode.I
+	ByteCodeLen() int
+	ByteCode(i int, labels map[string]int) []bytecode.I
 }

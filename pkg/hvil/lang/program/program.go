@@ -7,6 +7,7 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool/contexttool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
@@ -24,7 +25,7 @@ type Program struct {
 
 func (node *Program) ResolveNames(ctx context.Context) error {
 	node.NameResolutionPass.Functions = names.NewRootScope[*function.Function](names.KindFunction)
-	ctx = function.WithScope(ctx, node.NameResolutionPass.Functions)
+	ctx = contexttool.WithScope(ctx, node.NameResolutionPass.Functions)
 
 	for _, f := range node.Functions {
 		if err := node.NameResolutionPass.Functions.Define(f); err != nil {

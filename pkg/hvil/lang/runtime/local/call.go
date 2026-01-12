@@ -9,6 +9,7 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool/contexttool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/typecheck"
@@ -31,7 +32,7 @@ type Call struct {
 }
 
 func (node *Call) ResolveNames(ctx context.Context) error {
-	decl, err := function.FromCtx(ctx, node.Name)
+	decl, err := contexttool.FromCtx[*function.Function](ctx, node.Name)
 	if err != nil {
 		return node.Wrap(err)
 	}
@@ -44,7 +45,7 @@ func (node *Call) ResolveNames(ctx context.Context) error {
 		}
 	}
 
-	node.NameResolutionPass.Current, err = function.CurrentFromContext(ctx)
+	node.NameResolutionPass.Current, err = contexttool.CurrentFromContext[*function.Function](ctx)
 	if err != nil {
 		return node.Wrap(err)
 	}

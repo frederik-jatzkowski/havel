@@ -5,9 +5,11 @@ import (
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool/contexttool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
@@ -16,7 +18,8 @@ import (
 type Conditional struct {
 	tool.Node[Conditional]
 	names.NameResolution[struct {
-		Then, Else *block.Block
+		IsMain     bool
+		Then, Else function.Block
 	}]
 
 	Condition memory.Read `parser:"'if':Keyword @@"`
@@ -27,19 +30,26 @@ type Conditional struct {
 var _ block.Terminator = (*Conditional)(nil)
 
 func (node *Conditional) ResolveNames(ctx context.Context) error {
-	thenTarget, err := block.FromCtx(ctx, node.Then)
+	thenTarget, err := contexttool.FromCtx[function.Block](ctx, node.Then)
 	if err != nil {
 		return node.Wrap(err)
 	}
 
 	node.NameResolutionPass.Then = thenTarget
 
-	elseTarget, err := block.FromCtx(ctx, node.Else)
+	elseTarget, err := contexttool.FromCtx[function.Block](ctx, node.Else)
 	if err != nil {
 		return node.Wrap(err)
 	}
 
 	node.NameResolutionPass.Else = elseTarget
+
+	fn, err := contexttool.CurrentFromContext[*function.Function](ctx)
+	if err != nil {
+		return node.Wrap(err)
+	}
+
+	node.NameResolutionPass.IsMain = fn.Identifier() == names.SpecialMain
 
 	return node.Condition.ResolveNames(ctx)
 }
@@ -59,12 +69,12 @@ func (node *Conditional) AllocateRegisters(arch architecture.Architecture) error
 	panic("implement me")
 }
 
-func (node *Conditional) GenerateVirtualMachineAssembly(p *assembly.P, isMain bool) error {
+func (node *Conditional) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (node *Conditional) Execute(vm *runtime.VirtualMachine) (*block.Block, error) {
+func (node *Conditional) Execute(vm *runtime.VirtualMachine) (function.Block, error) {
 	cond := *(*byte)(node.Condition.Addr(vm))
 	if cond > 0 {
 		return node.NameResolutionPass.Then, nil

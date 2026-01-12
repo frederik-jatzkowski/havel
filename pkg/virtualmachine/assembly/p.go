@@ -27,11 +27,27 @@ func (p *P) String() string {
 }
 
 func (p *P) Assemble() (*bytecode.P, error) {
+	labelMap := make(map[string]int)
+	i := 0
+	for _, instr := range p.Instructions {
+
+		l, ok := instr.(*label)
+		if !ok {
+			i += instr.ByteCodeLen()
+			continue
+		}
+
+		labelMap[l.name] = i
+	}
+
 	byteCode := &bytecode.P{
 		Positions: p.Positions,
 	}
+
+	i = 0
 	for _, instr := range p.Instructions {
-		byteCode.Instructions = append(byteCode.Instructions, instr.ByteCode()...)
+		byteCode.Instructions = append(byteCode.Instructions, instr.ByteCode(i, labelMap)...)
+		i += instr.ByteCodeLen()
 	}
 
 	return byteCode, nil
