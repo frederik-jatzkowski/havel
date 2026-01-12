@@ -76,6 +76,8 @@ func (node *Program) GenerateVirtualMachineAssembly() (*assembly.P, error) {
 
 	p := assembly.NewP()
 
+	p.AddJumpToLabel("main.entry", node.Position())
+
 	return p, node.generateVirtualMachineAssembly(p)
 }
 

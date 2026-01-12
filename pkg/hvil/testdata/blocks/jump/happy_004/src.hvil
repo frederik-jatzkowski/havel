@@ -1,0 +1,16 @@
+
+func main() {
+    declare (
+        n : 4 byte
+    );
+
+    block exit {
+        debug.dump(n);
+    } return;
+
+    block set_n {
+        n = 0b1;
+    } goto exit;
+
+    block entry {} goto set_n;
+}
