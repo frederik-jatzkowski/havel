@@ -52,7 +52,6 @@ func (node *Return) AllocateRegisters(arch architecture.Architecture) error {
 	}
 
 	arch.ReturnScratchRegisters(r)
-
 	node.RegisterAllocationPass.ExitCode = r
 
 	return nil
@@ -64,8 +63,7 @@ func (node *Return) GenerateVirtualMachineAssembly(p *assembly.P) error {
 		p.AddLit(node.RegisterAllocationPass.ExitCode.(bytecode.R), 1, 0, node.Position())
 		p.AddI1R(bytecode.OPExit, node.RegisterAllocationPass.ExitCode.(bytecode.R), node.Position())
 	} else {
-		//TODO implement me
-		panic("implement me")
+		p.AddI1RLit(bytecode.OPLoadStack64, bytecode.PC, 0, node.Position())
 	}
 
 	return nil

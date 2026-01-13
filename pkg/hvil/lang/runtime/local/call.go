@@ -2,30 +2,38 @@ package local
 
 import (
 	"context"
+	"fmt"
 	"unsafe"
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool/contexttool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/typecheck"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
+	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/bytecode"
 )
 
 type Call struct {
 	tool.Node[Call]
 	names.NameResolution[struct {
 		Current *function.Function
+		Block   *block.Block
 		Called  *function.Function
 	}]
 	typecheck.TypeCheck[struct {
 		Signature *types.FunctionType
 	}]
-	tool.NotImplemented[Call]
+	registeralloc.RegisterAllocation[struct {
+		Temp   architecture.Register
+		Result architecture.Register
+	}]
 
 	Name string                 `parser:"'local' '.' @Ident"`
 	Args tool.List[memory.Read] `parser:"'(' @@ ')'"`
@@ -46,6 +54,11 @@ func (node *Call) ResolveNames(ctx context.Context) error {
 	}
 
 	node.NameResolutionPass.Current, err = contexttool.CurrentFromContext[*function.Function](ctx)
+	if err != nil {
+		return node.Wrap(err)
+	}
+
+	node.NameResolutionPass.Block, err = contexttool.CurrentFromContext[*block.Block](ctx)
 	if err != nil {
 		return node.Wrap(err)
 	}
@@ -78,18 +91,59 @@ func (node *Call) calculateSignature(target types.Type) {
 }
 
 func (node *Call) AllocateRegisters(arch architecture.Architecture) ([]architecture.Register, error) {
-	//TODO implement me
-	panic("implement me")
+	temp, ok := arch.GetScratchRegister()
+	if !ok {
+		return nil, node.Wrap(fmt.Errorf("failed to allocate register"))
+	}
+
+	node.RegisterAllocationPass.Temp = temp
+
+	return []architecture.Register{temp}, nil
 }
 
 func (node *Call) SetResultRegister(r architecture.Register) {
-	//TODO implement me
-	panic("implement me")
+	node.RegisterAllocationPass.Result = r
 }
 
 func (node *Call) GenerateVirtualMachineAssembly(p *assembly.P) error {
-	//TODO implement me
-	panic("implement me")
+	for regWrite := range node.NameResolutionPass.Block.RegisterScope().All() {
+		op, err := bytecode.StoreStackForSize(regWrite.Type().Bytes())
+		if err != nil {
+			return node.Wrap(err)
+		}
+
+		p.AddI1RLit(op, regWrite.Register().(bytecode.R), uint16(regWrite.AddressResolutionPass.RelAddr), node.Position())
+	}
+
+	frameSize := node.NameResolutionPass.Current.AddressResolutionPass.FrameSize
+
+	temp := node.RegisterAllocationPass.Temp.(bytecode.R)
+
+	// advance stack pointer
+	p.AddI1RLit(bytecode.OPStoreStack64, bytecode.SP, uint16(frameSize+8), node.Position())
+	p.AddLit(temp, 2, uint64(frameSize), node.Position())
+	p.AddI3R(bytecode.OPAluAddU64, bytecode.SP, bytecode.SP, node.RegisterAllocationPass.Temp.(bytecode.R), node.Position())
+
+	// prepare return address
+	p.AddLit(temp, 1, 2, node.Position())
+	p.AddI3R(bytecode.OPAluAddU64, temp, bytecode.PC, temp, node.Position())
+	p.AddI1RLit(bytecode.OPStoreStack64, temp, 0, node.Position())
+
+	p.AddJumpToLabel(node.NameResolutionPass.Called.NameResolutionPass.Entry.FullyQualifiedIdentifier(), node.Position())
+
+	// restore stack pointer
+	p.AddI1RLit(bytecode.OPLoadStack64, bytecode.SP, 8, node.Position())
+
+	for regWrite := range node.NameResolutionPass.Block.RegisterScope().All() {
+		op, err := bytecode.LoadStackForSize(regWrite.Type().Bytes())
+		if err != nil {
+			return node.Wrap(err)
+		}
+
+		p.AddI1RLit(op, regWrite.Register().(bytecode.R), uint16(regWrite.AddressResolutionPass.RelAddr), node.Position())
+	}
+
+	return nil
 }
 
 func (node *Call) Execute(vm *runtime.VirtualMachine, result unsafe.Pointer) error {

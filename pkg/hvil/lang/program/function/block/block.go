@@ -2,6 +2,8 @@ package block
 
 import (
 	"context"
+	"fmt"
+	"math"
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
@@ -10,6 +12,7 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool/contexttool"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/address"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
 )
@@ -19,6 +22,9 @@ type Block struct {
 	names.NameResolution[struct {
 		Regs     names.Scope[*memory.RegWrite]
 		Function *function.Function
+	}]
+	address.Resolution[struct {
+		SpillAddressMap map[*memory.RegWrite]uint16
 	}]
 
 	Name         string                    `parser:"'block':Keyword @Ident '{'"`
@@ -37,6 +43,7 @@ func (node *Block) FullyQualifiedIdentifier() string {
 func (node *Block) ResolveNames(ctx context.Context) error {
 	node.NameResolutionPass.Regs = names.NewRootScope[*memory.RegWrite](names.KindRegister)
 	ctx = memory.WithRegisterScope(ctx, node.NameResolutionPass.Regs)
+	ctx = contexttool.WithCurrent(ctx, node)
 
 	for _, i := range node.Instructions {
 		if err := i.ResolveNames(ctx); err != nil {
@@ -52,6 +59,21 @@ func (node *Block) ResolveNames(ctx context.Context) error {
 	node.NameResolutionPass.Function = fn
 
 	return node.Terminator.ResolveNames(ctx)
+}
+
+func (node *Block) ResolveAddresses(offset int) int {
+	node.AddressResolutionPass.SpillAddressMap = make(map[*memory.RegWrite]uint16)
+	blockRegSize := 0
+	for reg := range node.RegisterScope().All() {
+		reg.AddressResolutionPass.RelAddr = offset + blockRegSize
+		if reg.AddressResolutionPass.RelAddr > math.MaxUint16 {
+			panic(fmt.Sprintf("address out of range: %d", reg.AddressResolutionPass.RelAddr))
+		}
+
+		blockRegSize += reg.Type().Bytes()
+	}
+
+	return blockRegSize
 }
 
 func (node *Block) RegisterScope() names.Scope[*memory.RegWrite] {

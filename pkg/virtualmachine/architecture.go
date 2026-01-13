@@ -19,6 +19,8 @@ func NewArchitecture() *Architecture {
 	for i := range 32 {
 		r := bytecode.R(i)
 		switch {
+		case i < 2:
+			// reserved for pc and sp
 		case i < 8:
 			arch.argRegisters = append(arch.argRegisters, r)
 		case i < 16:

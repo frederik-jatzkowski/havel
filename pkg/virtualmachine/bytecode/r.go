@@ -6,10 +6,22 @@ import (
 
 type R byte
 
+const (
+	PC R = 0
+	SP R = 1
+)
+
 func (r R) String() string {
-	return fmt.Sprintf("r%d", r)
+	return r.RegisterName()
 }
 
 func (r R) RegisterName() string {
-	return fmt.Sprintf("r%d", r)
+	switch r {
+	case PC:
+		return "pc"
+	case SP:
+		return "sp"
+	default:
+		return fmt.Sprintf("r%d", r)
+	}
 }

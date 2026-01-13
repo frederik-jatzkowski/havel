@@ -16,6 +16,7 @@ type Block interface {
 	FullyQualifiedIdentifier() string
 	RegisterScope() names.Scope[*memory.RegWrite]
 	ResolveTypes() error
+	ResolveAddresses(offset int) int
 	AllocateRegisters(arch architecture.Architecture) error
 	Execute(vm *runtime.VirtualMachine) (Block, error)
 }

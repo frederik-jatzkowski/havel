@@ -1,5 +1,7 @@
 package bytecode
 
+import "fmt"
+
 //go:generate go tool go-enum ./op.go
 
 // OP represents a vm instruction set opcode
@@ -47,3 +49,33 @@ package bytecode
 //		load_stack_64
 //	)
 type OP byte
+
+func LoadStackForSize(size int) (OP, error) {
+	switch size {
+	case 1:
+		return OPLoadStack8, nil
+	case 2:
+		return OPLoadStack16, nil
+	case 4:
+		return OPLoadStack32, nil
+	case 8:
+		return OPLoadStack64, nil
+	default:
+		return 0, fmt.Errorf("unsupported size %d", size)
+	}
+}
+
+func StoreStackForSize(size int) (OP, error) {
+	switch size {
+	case 1:
+		return OPStoreStack8, nil
+	case 2:
+		return OPStoreStack16, nil
+	case 4:
+		return OPStoreStack32, nil
+	case 8:
+		return OPStoreStack64, nil
+	default:
+		return 0, fmt.Errorf("unsupported size %d", size)
+	}
+}

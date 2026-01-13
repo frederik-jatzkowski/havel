@@ -120,7 +120,7 @@ func (node *Function) Signature() *types.FunctionType {
 }
 
 func (node *Function) ResolveAddresses() error {
-	offset := 0
+	offset := 16 // 8 bytes reserved for return address, 8 byte for return stack pointer
 	node.resolveParamsAddresses(offset)
 	offset += node.AddressResolutionPass.ParamsSize
 	node.resolveResultAddress(offset)
@@ -163,13 +163,10 @@ func (node *Function) resolveLocalsAddresses(offset int) {
 
 func (node *Function) resolveRegisterAddresses(offset int) {
 	for i := 0; i < len(node.Blocks); i++ {
-		blockRegSize := 0
-		for reg := range node.Blocks[i].RegisterScope().All() {
-			reg.AddressResolutionPass.RelAddr = offset + blockRegSize
-			blockRegSize += reg.Type().Bytes()
-		}
-
-		node.AddressResolutionPass.RegsSize = max(blockRegSize, node.AddressResolutionPass.RegsSize)
+		node.AddressResolutionPass.RegsSize = max(
+			node.AddressResolutionPass.RegsSize,
+			node.Blocks[i].ResolveAddresses(offset),
+		)
 	}
 }
 
