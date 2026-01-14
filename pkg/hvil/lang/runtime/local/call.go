@@ -158,6 +158,7 @@ func (node *Call) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	// restore stack pointer
 	p.AddI1RLit(bytecode.OPLoadStack64, bytecode.SP, 8, node.Position())
 
+	// restore registers
 	for regWrite := range node.NameResolutionPass.Block.RegisterScope().All() {
 		op, err := bytecode.LoadStackForSize(regWrite.Type().Bytes())
 		if err != nil {
@@ -165,6 +166,17 @@ func (node *Call) GenerateVirtualMachineAssembly(p *assembly.P) error {
 		}
 
 		p.AddI1RLit(op, regWrite.Register().(bytecode.R), uint16(regWrite.AddressResolutionPass.RelAddr), node.Position())
+	}
+
+	// load result
+	void := types.Void{}
+	if !void.Equals(node.TypeCheckPass.Signature.ReturnValue) {
+		op, err := bytecode.LoadStackForSize(node.NameResolutionPass.Called.Result.Type().Bytes())
+		if err != nil {
+			return node.Wrap(err)
+		}
+
+		p.AddI1RLit(op, node.RegisterAllocationPass.Result.(bytecode.R), uint16(frameSize+node.NameResolutionPass.Called.Result.AddressResolutionPass.RelAddr), node.Position())
 	}
 
 	return nil
