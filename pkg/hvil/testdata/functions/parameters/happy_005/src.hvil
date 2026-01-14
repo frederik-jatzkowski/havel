@@ -1,0 +1,37 @@
+
+func main() {
+    declare (
+        a1 : 1 byte,
+        a2 : 1 byte,
+        a3 : 1 byte,
+        a4 : 1 byte,
+        a5 : 1 byte,
+        a6 : 1 byte,
+        a7 : 1 byte,
+        a8 : 1 byte,
+        a9 : 1 byte,
+        a10 : 1 byte
+    );
+    
+    block entry {
+        a10 = 0b1;
+        local.print(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
+    } return;
+}
+
+func print(
+    a1 : 1 byte,
+    a2 : 1 byte,
+    a3 : 1 byte,
+    a4 : 1 byte,
+    a5 : 1 byte,
+    a6 : 1 byte,
+    a7 : 1 byte,
+    a8 : 1 byte,
+    a9 : 1 byte,
+    a10 : 1 byte
+) {
+    block entry {
+        debug.dump(a10);
+    } return;
+}

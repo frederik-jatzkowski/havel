@@ -1,0 +1,17 @@
+
+func main() {
+    declare (
+        one : 1 byte
+    );
+    
+    block entry {
+        one = 0b1;
+        local.print(one);
+    } return;
+}
+
+func print(value : 1 byte) {
+    block entry {
+        debug.dump(value);
+    } return;
+}

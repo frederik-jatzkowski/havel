@@ -98,6 +98,15 @@ func (node *Call) AllocateRegisters(arch architecture.Architecture) ([]architect
 
 	node.RegisterAllocationPass.Temp = temp
 
+	for _, arg := range node.Args.Items {
+		regs, err := arg.AllocateRegisters(arch)
+		if err != nil {
+			return nil, node.Wrap(err)
+		}
+
+		arch.ReturnScratchRegisters(regs...)
+	}
+
 	return []architecture.Register{temp}, nil
 }
 
@@ -116,6 +125,21 @@ func (node *Call) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	}
 
 	frameSize := node.NameResolutionPass.Current.AddressResolutionPass.FrameSize
+
+	for i, param := range node.NameResolutionPass.Called.Params.Items {
+		arg := node.Args.Items[i]
+
+		op, err := bytecode.StoreStackForSize(param.Type().Bytes())
+		if err != nil {
+			return node.Wrap(err)
+		}
+
+		if err := arg.GenerateVirtualMachineAssembly(p); err != nil {
+			return node.Wrap(err)
+		}
+
+		p.AddI1RLit(op, arg.Register().(bytecode.R), uint16(frameSize+param.AddressResolutionPass.RelAddr), node.Position())
+	}
 
 	temp := node.RegisterAllocationPass.Temp.(bytecode.R)
 
