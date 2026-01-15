@@ -30,7 +30,7 @@ func NewHvilRunCmd() *cobra.Command {
 			}
 
 			vm := runtime.New(
-				1024,
+				1024*1024,
 				os.Stdin,
 				os.Stdout,
 				os.Stderr,

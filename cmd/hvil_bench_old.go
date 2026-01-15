@@ -10,12 +10,12 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil"
-	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 )
 
-func NewHvilBenchCmd() *cobra.Command {
+func NewHvilBenchOldCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "bench",
+		Use:   "bench-old",
 		Short: "Compiles a HVIL file and executes it n times. Averages the runtimes.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			filePath := args[0]
@@ -31,26 +31,20 @@ func NewHvilBenchCmd() *cobra.Command {
 				return fmt.Errorf("compilation failed:\n %w", err)
 			}
 
-			n, err := cmd.Flags().GetInt("executions")
-			cobra.CheckErr(err)
-
-			asm, err := program.GenerateVirtualMachineAssembly()
-			cobra.CheckErr(err)
-
-			bc, err := asm.Assemble()
-			cobra.CheckErr(err)
-
-			vm := virtualmachine.New(
+			vm := runtime.New(
 				1024*1024,
 				os.Stdin,
 				io.Discard,
 				io.Discard,
 			)
 
+			n, err := cmd.Flags().GetInt("executions")
+			cobra.CheckErr(err)
+
 			start := time.Now()
 
 			for range n {
-				err = vm.Execute(bc)
+				err = program.Execute(vm)
 				if err != nil {
 					return errors.Join(
 						errors.New("runtime error"),

@@ -13,20 +13,17 @@ func (i I) String() string {
 }
 
 func (i I) OP() OP {
-	return *(*OP)(unsafe.Pointer(&i))
+	return OP(i & 0xff)
 }
 
 func (i I) Regs() (R, R, R) {
-	arr := *(*[4]R)(unsafe.Pointer(&i))
-	return arr[1], arr[2], arr[3]
+	return R(i >> 8 & 0xff), R(i >> 16 & 0xff), R(i >> 24 & 0xff)
 }
 
-func (i I) Uint16() (uint16, uint16) {
-	arr := *(*[2]uint16)(unsafe.Pointer(&i))
-	return arr[0], arr[1]
+func (i I) R1Uint16() (R, uint16) {
+	return R(i >> 8 & 0xff), uint16(i >> 16 & 0xffff)
 }
 
 func (i I) Int16() (int16, int16) {
-	arr := *(*[2]int16)(unsafe.Pointer(&i))
-	return arr[0], arr[1]
+	return int16(i & 0xffff), int16(i >> 16 & 0xffff)
 }
