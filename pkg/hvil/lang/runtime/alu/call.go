@@ -20,6 +20,10 @@ type Call struct {
 	Operation Operation `parser:"'alu' '.' @@"`
 }
 
+func (node *Call) CalculateLiveRanges(ctx context.Context) error {
+	return node.Operation.CalculateLiveRanges(ctx)
+}
+
 func (node *Call) ResolveNames(ctx context.Context) error {
 	return node.Operation.ResolveNames(ctx)
 }

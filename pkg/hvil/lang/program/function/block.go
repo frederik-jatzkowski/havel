@@ -1,6 +1,8 @@
 package function
 
 import (
+	"context"
+
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
@@ -18,5 +20,6 @@ type Block interface {
 	ResolveTypes() error
 	ResolveAddresses(offset int) int
 	AllocateRegisters(arch architecture.Architecture) error
+	CalculateLiveRanges(ctx context.Context) error
 	Execute(vm *runtime.VirtualMachine) (Block, error)
 }

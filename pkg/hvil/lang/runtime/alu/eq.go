@@ -5,7 +5,7 @@ import (
 	"unsafe"
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block/instruction"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
@@ -25,8 +25,20 @@ type EQ struct {
 		Result architecture.Register
 	}]
 
-	Left  memory.Read `parser:"'eq' '(' @@ ','"`
-	Right memory.Read `parser:"@@ ')'"`
+	Left  instruction.MemoryRead `parser:"'eq' '(' @@ ','"`
+	Right instruction.MemoryRead `parser:"@@ ')'"`
+}
+
+func (node *EQ) CalculateLiveRanges(ctx context.Context) error {
+	if err := node.Left.CalculateLiveRanges(ctx); err != nil {
+		return err
+	}
+
+	if err := node.Right.CalculateLiveRanges(ctx); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (node *EQ) ResolveNames(ctx context.Context) error {

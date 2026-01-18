@@ -7,9 +7,11 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool/contexttool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc/liveness"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/bytecode"
 )
@@ -56,6 +58,20 @@ func (node *RegRead) AllocateRegisters(arch architecture.Architecture) ([]archit
 	node.RegisterAllocationPass.Register = node.NameResolutionPass.Decl.RegisterAllocationPass.Register
 
 	return nil, nil
+}
+
+func (node *RegRead) CalculateLiveRanges(ctx context.Context) error {
+	id, err := contexttool.CurrentFromContext[liveness.InstructionID](ctx)
+	if err != nil {
+		return node.Wrap(err)
+	}
+
+	node.NameResolutionPass.Decl.LivenessPass.End = max(
+		node.NameResolutionPass.Decl.LivenessPass.End,
+		id,
+	)
+
+	return nil
 }
 
 func (node *RegRead) GenerateVirtualMachineAssembly(p *assembly.P) error {

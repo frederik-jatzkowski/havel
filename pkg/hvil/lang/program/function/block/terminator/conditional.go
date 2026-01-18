@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block/instruction"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool/contexttool"
@@ -23,9 +23,9 @@ type Conditional struct {
 		Then, Else function.Block
 	}]
 
-	Condition memory.Read `parser:"'if':Keyword @@"`
-	Then      string      `parser:"'then':Keyword @Ident"`
-	Else      string      `parser:"'else':Keyword @Ident"`
+	Condition instruction.MemoryRead `parser:"'if':Keyword @@"`
+	Then      string                 `parser:"'then':Keyword @Ident"`
+	Else      string                 `parser:"'else':Keyword @Ident"`
 }
 
 var _ block.Terminator = (*Conditional)(nil)
@@ -68,6 +68,10 @@ func (node *Conditional) ResolveTypes() error {
 func (node *Conditional) AllocateRegisters(arch architecture.Architecture) error {
 	_, err := node.Condition.AllocateRegisters(arch)
 	return err
+}
+
+func (node *Conditional) CalculateLiveRanges(ctx context.Context) error {
+	return node.Condition.CalculateLiveRanges(ctx)
 }
 
 func (node *Conditional) GenerateVirtualMachineAssembly(p *assembly.P) error {

@@ -5,7 +5,7 @@ import (
 	"unsafe"
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block/instruction"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
@@ -25,7 +25,7 @@ type Move struct {
 		Result architecture.Register
 	}]
 
-	Arg memory.Read `parser:"'move' '(' @@ ')'"`
+	Arg instruction.MemoryRead `parser:"'move' '(' @@ ')'"`
 }
 
 func (node *Move) ResolveNames(ctx context.Context) error {
@@ -46,6 +46,10 @@ func (node *Move) ResolveTypes(target types.Type) error {
 
 func (node *Move) AllocateRegisters(arch architecture.Architecture) ([]architecture.Register, error) {
 	return node.Arg.AllocateRegisters(arch)
+}
+
+func (node *Move) CalculateLiveRanges(ctx context.Context) error {
+	return node.Arg.CalculateLiveRanges(ctx)
 }
 
 func (node *Move) SetResultRegister(r architecture.Register) {

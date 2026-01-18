@@ -2,7 +2,7 @@
   "compiler": {
     "errors": [
       {
-        "contains": "src.hvil:5:20: unexpected token \"$\" (expected \"(\" Read \")\")"
+        "contains": "src.hvil:5:20: unexpected token \"$\" (expected \"(\" MemoryRead \")\")"
       }
     ]
   }

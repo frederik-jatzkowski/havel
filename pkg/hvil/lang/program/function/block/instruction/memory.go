@@ -1,6 +1,7 @@
-package memory
+package instruction
 
 import (
+	"context"
 	"unsafe"
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
@@ -11,12 +12,22 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
 )
 
-type Read interface {
+type MemoryRead interface {
 	tool.NodeLike
 	names.ScopedObject
 	names.Resolver
 	registeralloc.Value
 	codegen.VirtualMachine
 	Type() types.Type
+	CalculateLiveRanges(ctx context.Context) error
 	Addr(vm *runtime.VirtualMachine) unsafe.Pointer
+}
+
+type MemoryWrite interface {
+	names.Resolver
+	registeralloc.Value
+	codegen.VirtualMachine
+	Type() types.Type
+	Addr(vm *runtime.VirtualMachine) unsafe.Pointer
+	CalculateLiveRanges(ctx context.Context) error
 }

@@ -5,9 +5,9 @@ import (
 	"unsafe"
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool/contexttool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
 )
@@ -15,11 +15,13 @@ import (
 type Instruction struct {
 	tool.Node[Instruction]
 
-	ResultWrite memory.Write `parser:"(@@ '=')?"`
-	Operation   Operation    `parser:"@@ ';'"`
+	ResultWrite MemoryWrite `parser:"(@@ '=')?"`
+	Operation   Operation   `parser:"@@ ';'"`
 }
 
 func (node *Instruction) ResolveNames(ctx context.Context) error {
+	ctx = contexttool.WithCurrent(ctx, node)
+
 	if node.ResultWrite != nil {
 		if err := node.ResultWrite.ResolveNames(ctx); err != nil {
 			return err
@@ -44,6 +46,10 @@ func (node *Instruction) Execute(vm *runtime.VirtualMachine) error {
 	}
 
 	return node.Operation.Execute(vm, result)
+}
+
+func (node *Instruction) CalculateLiveRanges(ctx context.Context) error {
+	return node.Operation.CalculateLiveRanges(ctx)
 }
 
 func (node *Instruction) AllocateRegisters(arch architecture.Architecture) ([]architecture.Register, error) {
@@ -82,6 +88,6 @@ func (node *Instruction) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	return nil
 }
 
-func (node *Instruction) Result() memory.Write {
+func (node *Instruction) Result() MemoryWrite {
 	return node.ResultWrite
 }

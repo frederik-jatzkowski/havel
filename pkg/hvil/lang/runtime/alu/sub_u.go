@@ -5,7 +5,7 @@ import (
 	"unsafe"
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block/instruction"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
@@ -25,8 +25,8 @@ type SubU struct {
 		Result architecture.Register
 	}]
 
-	Left  memory.Read `parser:"'sub_u' '(' @@ ','"`
-	Right memory.Read `parser:"@@ ')'"`
+	Left  instruction.MemoryRead `parser:"'sub_u' '(' @@ ','"`
+	Right instruction.MemoryRead `parser:"@@ ')'"`
 }
 
 func (node *SubU) ResolveNames(ctx context.Context) error {
@@ -75,6 +75,18 @@ func (node *SubU) AllocateRegisters(arch architecture.Architecture) ([]architect
 	}
 
 	return append(leftRegs, rightRegs...), nil
+}
+
+func (node *SubU) CalculateLiveRanges(ctx context.Context) error {
+	if err := node.Left.CalculateLiveRanges(ctx); err != nil {
+		return err
+	}
+
+	if err := node.Right.CalculateLiveRanges(ctx); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (node *SubU) SetResultRegister(r architecture.Register) {

@@ -14,6 +14,7 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool/contexttool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/address"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc/liveness"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
 )
 
@@ -106,6 +107,19 @@ func (node *Block) AllocateRegisters(arch architecture.Architecture) error {
 	}
 
 	return node.Terminator.AllocateRegisters(arch)
+}
+
+func (node *Block) CalculateLiveRanges(ctx context.Context) error {
+	var id liveness.InstructionID
+	for _, instr := range node.Instructions {
+		ctx = contexttool.WithCurrent(ctx, id)
+		if err := instr.CalculateLiveRanges(ctx); err != nil {
+			return err
+		}
+		id++
+	}
+
+	return node.Terminator.CalculateLiveRanges(ctx)
 }
 
 func (node *Block) GenerateVirtualMachineAssembly(p *assembly.P) error {

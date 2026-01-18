@@ -5,11 +5,14 @@ import (
 	"unsafe"
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block/instruction"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool/contexttool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/address"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc/liveness"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/bytecode"
 )
@@ -23,12 +26,16 @@ type RegWrite struct {
 		Register architecture.Register
 		Spilled  bool
 	}]
+	liveness.Liveness[struct {
+		Start liveness.InstructionID
+		End   liveness.InstructionID
+	}]
 
 	Ident   string     `parser:"'$' @Ident"`
 	RegType types.Type `parser:"':' @@"`
 }
 
-var _ Write = (*RegWrite)(nil)
+var _ instruction.MemoryWrite = (*RegWrite)(nil)
 
 func (node *RegWrite) Identifier() string {
 	return node.Ident
@@ -62,6 +69,18 @@ func (node *RegWrite) AllocateRegisters(arch architecture.Architecture) ([]archi
 	return []architecture.Register{reg}, nil
 }
 
+func (node *RegWrite) CalculateLiveRanges(ctx context.Context) error {
+	id, err := contexttool.CurrentFromContext[liveness.InstructionID](ctx)
+	if err != nil {
+		return node.Wrap(err)
+	}
+
+	node.LivenessPass.Start = id
+	node.LivenessPass.End = id
+
+	return nil
+}
+
 func (node *RegWrite) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	if node.RegisterAllocationPass.Spilled {
 		var op bytecode.OP
@@ -93,4 +112,12 @@ func (node *RegWrite) Type() types.Type {
 func (node *RegWrite) Addr(vm *runtime.VirtualMachine) unsafe.Pointer {
 	stackAddr := vm.StackPointer + node.AddressResolutionPass.RelAddr
 	return unsafe.Pointer(&vm.Stack[stackAddr])
+}
+
+func (node *RegWrite) WasLiveBefore(id liveness.InstructionID) bool {
+	return node.LivenessPass.Start < id
+}
+
+func (node *RegWrite) WillBeLiveAfter(id liveness.InstructionID) bool {
+	return node.LivenessPass.End > id
 }

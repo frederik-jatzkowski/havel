@@ -9,12 +9,14 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block/instruction"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool/contexttool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc/liveness"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/typecheck"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/bytecode"
@@ -34,9 +36,12 @@ type Call struct {
 		Temp   architecture.Register
 		Result architecture.Register
 	}]
+	liveness.Liveness[struct {
+		InstructionID liveness.InstructionID
+	}]
 
-	Name string                 `parser:"'local' '.' @Ident"`
-	Args tool.List[memory.Read] `parser:"'(' @@ ')'"`
+	Name string                            `parser:"'local' '.' @Ident"`
+	Args tool.List[instruction.MemoryRead] `parser:"'(' @@ ')'"`
 }
 
 func (node *Call) ResolveNames(ctx context.Context) error {
@@ -114,8 +119,33 @@ func (node *Call) SetResultRegister(r architecture.Register) {
 	node.RegisterAllocationPass.Result = r
 }
 
+func (node *Call) CalculateLiveRanges(ctx context.Context) error {
+	id, err := contexttool.CurrentFromContext[liveness.InstructionID](ctx)
+	if err != nil {
+		return node.Wrap(err)
+	}
+
+	node.LivenessPass.InstructionID = id
+
+	for _, arg := range node.Args.Items {
+		if err := arg.CalculateLiveRanges(ctx); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (node *Call) GenerateVirtualMachineAssembly(p *assembly.P) error {
+	toSave := make([]*memory.RegWrite, 0)
+
 	for regWrite := range node.NameResolutionPass.Block.RegisterScope().All() {
+		if regWrite.WasLiveBefore(node.LivenessPass.InstructionID) && regWrite.WillBeLiveAfter(node.LivenessPass.InstructionID) {
+			toSave = append(toSave, regWrite)
+		}
+	}
+
+	for _, regWrite := range toSave {
 		op, err := bytecode.StoreStackForSize(regWrite.Type().Bytes())
 		if err != nil {
 			return node.Wrap(err)
@@ -159,7 +189,7 @@ func (node *Call) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	p.AddI1RLit(bytecode.OPLoadStack64, bytecode.SP, 8, node.Position())
 
 	// restore registers
-	for regWrite := range node.NameResolutionPass.Block.RegisterScope().All() {
+	for _, regWrite := range toSave {
 		op, err := bytecode.LoadStackForSize(regWrite.Type().Bytes())
 		if err != nil {
 			return node.Wrap(err)

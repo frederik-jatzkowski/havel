@@ -5,7 +5,7 @@ import (
 	"unsafe"
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block/instruction"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
@@ -25,8 +25,20 @@ type LtU struct {
 		Result architecture.Register
 	}]
 
-	Left  memory.Read `parser:"'lt_u' '(' @@ ','"`
-	Right memory.Read `parser:"@@ ')'"`
+	Left  instruction.MemoryRead `parser:"'lt_u' '(' @@ ','"`
+	Right instruction.MemoryRead `parser:"@@ ')'"`
+}
+
+func (node *LtU) CalculateLiveRanges(ctx context.Context) error {
+	if err := node.Left.CalculateLiveRanges(ctx); err != nil {
+		return err
+	}
+
+	if err := node.Right.CalculateLiveRanges(ctx); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (node *LtU) ResolveNames(ctx context.Context) error {

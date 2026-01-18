@@ -27,6 +27,10 @@ type VarRead struct {
 	Ident string `parser:"@Ident"`
 }
 
+func (node *VarRead) CalculateLiveRanges(ctx context.Context) error {
+	return nil
+}
+
 func (node *VarRead) Identifier() string {
 	return node.NameResolutionPass.Decl.Identifier()
 }

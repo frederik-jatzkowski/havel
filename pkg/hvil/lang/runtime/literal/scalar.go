@@ -56,6 +56,10 @@ func (node *Scalar) SetResultRegister(r architecture.Register) {
 	node.RegisterAllocationPass.Target = r
 }
 
+func (node *Scalar) CalculateLiveRanges(ctx context.Context) error {
+	return nil
+}
+
 func (node *Scalar) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	p.AddLit(node.RegisterAllocationPass.Target.(bytecode.R), node.TypeCheckPass.Type.Bytes(), node.Value, node.Position())
 

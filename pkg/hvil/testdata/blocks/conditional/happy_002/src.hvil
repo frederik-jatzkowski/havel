@@ -1,0 +1,24 @@
+
+func main() {
+    declare (
+        n : 4 byte
+    );
+
+    block entry {
+        n = 0b0;
+        debug.dump(n);
+    } goto increment;
+
+    block increment {
+        $one : 4 byte = 0b1;
+        $five : 4 byte = 0b101;
+
+        n = alu.add_u(n, $one);
+
+        $check : 1 byte = alu.lt_u(n, $five);
+    } if $check then increment else exit;
+
+    block exit {
+        debug.dump(n);
+    } return;
+}

@@ -6,7 +6,7 @@ import (
 	"unsafe"
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block/instruction"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
@@ -21,7 +21,7 @@ type Dump struct {
 		Type types.Type
 	}]
 
-	Param memory.Read `parser:"'dump' '(' @@ ')'"`
+	Param instruction.MemoryRead `parser:"'dump' '(' @@ ')'"`
 }
 
 func (node *Dump) ResolveNames(ctx context.Context) error {
@@ -44,6 +44,10 @@ func (node *Dump) AllocateRegisters(arch architecture.Architecture) ([]architect
 
 func (node *Dump) SetResultRegister(r architecture.Register) {
 	panic(fmt.Sprintf("target register assigned to %T, which returns void", node))
+}
+
+func (node *Dump) CalculateLiveRanges(ctx context.Context) error {
+	return node.Param.CalculateLiveRanges(ctx)
 }
 
 func (node *Dump) GenerateVirtualMachineAssembly(p *assembly.P) error {

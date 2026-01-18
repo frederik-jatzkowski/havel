@@ -179,7 +179,7 @@ func TestCompiler_OnVirtualMachine(t *testing.T) {
 				t.Log("Bytecode:\n" + byteCode.String())
 
 				stdout := bytes.NewBuffer(nil)
-				vm := virtualmachine.New(1024, bytes.NewBuffer(nil), stdout, io.Discard)
+				vm := virtualmachine.New(1024*1024, bytes.NewBuffer(nil), stdout, io.Discard)
 
 				err = vm.Execute(byteCode)
 

@@ -175,6 +175,8 @@ func (node *Function) AllocateRegisters(arch architecture.Architecture) error {
 		if err := node.Blocks[i].AllocateRegisters(arch); err != nil {
 			return err
 		}
+
+		node.Blocks[i].CalculateLiveRanges(context.Background())
 	}
 
 	return nil

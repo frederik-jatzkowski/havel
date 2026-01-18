@@ -5,6 +5,7 @@ import (
 	"unsafe"
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block/instruction"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/stack"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
@@ -16,7 +17,7 @@ import (
 )
 
 type VarWrite struct {
-	tool.Node[Write]
+	tool.Node[instruction.MemoryWrite]
 	names.NameResolution[struct {
 		Decl *stack.Decl
 	}]
@@ -49,6 +50,11 @@ func (node *VarWrite) AllocateRegisters(arch architecture.Architecture) ([]archi
 	arch.ReturnScratchRegisters(reg)
 
 	return nil, nil
+}
+
+func (node *VarWrite) CalculateLiveRanges(ctx context.Context) error {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (node *VarWrite) GenerateVirtualMachineAssembly(p *assembly.P) error {
