@@ -75,13 +75,13 @@ func (node *DivU) ResolveTypes(target types.Type) error {
 	return nil
 }
 
-func (node *DivU) AllocateRegisters(arch architecture.Architecture) ([]architecture.Register, error) {
-	leftRegs, err := node.Left.AllocateRegisters(arch)
+func (node *DivU) AllocateRegisters(scope registeralloc.Scope) ([]architecture.Register, error) {
+	leftRegs, err := node.Left.AllocateRegisters(scope)
 	if err != nil {
 		return nil, err
 	}
 
-	rightRegs, err := node.Right.AllocateRegisters(arch)
+	rightRegs, err := node.Right.AllocateRegisters(scope)
 	if err != nil {
 		return nil, err
 	}

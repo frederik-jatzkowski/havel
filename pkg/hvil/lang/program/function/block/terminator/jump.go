@@ -3,13 +3,13 @@ package terminator
 import (
 	"context"
 
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool/contexttool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
 )
 
@@ -49,7 +49,7 @@ func (node *Jump) ResolveTypes() error {
 	return nil
 }
 
-func (node *Jump) AllocateRegisters(arch architecture.Architecture) error {
+func (node *Jump) AllocateRegisters(scope registeralloc.Scope) error {
 	return nil
 }
 

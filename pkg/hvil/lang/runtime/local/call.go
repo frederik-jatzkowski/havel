@@ -95,8 +95,8 @@ func (node *Call) calculateSignature(target types.Type) {
 	node.TypeCheckPass.Signature.ReturnValue = target
 }
 
-func (node *Call) AllocateRegisters(arch architecture.Architecture) ([]architecture.Register, error) {
-	temp, ok := arch.GetScratchRegister()
+func (node *Call) AllocateRegisters(scope registeralloc.Scope) ([]architecture.Register, error) {
+	temp, ok := scope.GetScratchRegister()
 	if !ok {
 		return nil, node.Wrap(fmt.Errorf("failed to allocate register"))
 	}
@@ -104,12 +104,12 @@ func (node *Call) AllocateRegisters(arch architecture.Architecture) ([]architect
 	node.RegisterAllocationPass.Temp = temp
 
 	for _, arg := range node.Args.Items {
-		regs, err := arg.AllocateRegisters(arch)
+		regs, err := arg.AllocateRegisters(scope)
 		if err != nil {
 			return nil, node.Wrap(err)
 		}
 
-		arch.ReturnScratchRegisters(regs...)
+		scope.ReturnScratchRegisters(regs...)
 	}
 
 	return []architecture.Register{temp}, nil

@@ -44,8 +44,8 @@ func (node *Move) ResolveTypes(target types.Type) error {
 	return nil
 }
 
-func (node *Move) AllocateRegisters(arch architecture.Architecture) ([]architecture.Register, error) {
-	return node.Arg.AllocateRegisters(arch)
+func (node *Move) AllocateRegisters(scope registeralloc.Scope) ([]architecture.Register, error) {
+	return node.Arg.AllocateRegisters(scope)
 }
 
 func (node *Move) CalculateLiveRanges(ctx context.Context) error {

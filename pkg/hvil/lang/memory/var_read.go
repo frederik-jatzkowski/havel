@@ -46,8 +46,8 @@ func (node *VarRead) ResolveNames(ctx context.Context) error {
 	return nil
 }
 
-func (node *VarRead) AllocateRegisters(arch architecture.Architecture) ([]architecture.Register, error) {
-	reg, ok := arch.GetScratchRegister()
+func (node *VarRead) AllocateRegisters(scope registeralloc.Scope) ([]architecture.Register, error) {
+	reg, ok := scope.GetScratchRegister()
 	if !ok {
 		return nil, node.Errorf("cannot allocate variable load register")
 	}

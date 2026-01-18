@@ -3,7 +3,6 @@ package function
 import (
 	"context"
 
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/stack"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
@@ -11,6 +10,7 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/address"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
 )
 
@@ -170,13 +170,15 @@ func (node *Function) resolveRegisterAddresses(offset int) {
 	}
 }
 
-func (node *Function) AllocateRegisters(arch architecture.Architecture) error {
+func (node *Function) AllocateRegisters(allocator registeralloc.Allocator) error {
 	for i := 0; i < len(node.Blocks); i++ {
-		if err := node.Blocks[i].AllocateRegisters(arch); err != nil {
+		if err := node.Blocks[i].AllocateRegisters(allocator.NewScope()); err != nil {
 			return err
 		}
 
-		node.Blocks[i].CalculateLiveRanges(context.Background())
+		if err := node.Blocks[i].CalculateLiveRanges(context.Background()); err != nil {
+			return err
+		}
 	}
 
 	return nil

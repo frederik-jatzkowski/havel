@@ -14,6 +14,7 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool/contexttool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/address"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc/liveness"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
 )
@@ -91,10 +92,10 @@ func (node *Block) ResolveTypes() error {
 	return node.Terminator.ResolveTypes()
 }
 
-func (node *Block) AllocateRegisters(arch architecture.Architecture) error {
+func (node *Block) AllocateRegisters(scope registeralloc.Scope) error {
 	registers := make([]architecture.Register, 0, len(node.Instructions))
 	for i := range node.Instructions {
-		regs, err := node.Instructions[i].AllocateRegisters(arch)
+		regs, err := node.Instructions[i].AllocateRegisters(scope)
 		if err != nil {
 			return err
 		}
@@ -103,10 +104,10 @@ func (node *Block) AllocateRegisters(arch architecture.Architecture) error {
 	}
 
 	for _, reg := range registers {
-		arch.ReturnGeneralPurposeRegisters(reg)
+		scope.ReturnGeneralPurposeRegisters(reg)
 	}
 
-	return node.Terminator.AllocateRegisters(arch)
+	return node.Terminator.AllocateRegisters(scope)
 }
 
 func (node *Block) CalculateLiveRanges(ctx context.Context) error {

@@ -10,6 +10,7 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/typecheck"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/bytecode"
@@ -38,8 +39,8 @@ func (node *Dump) ResolveTypes(target types.Type) error {
 	return nil
 }
 
-func (node *Dump) AllocateRegisters(arch architecture.Architecture) ([]architecture.Register, error) {
-	return node.Param.AllocateRegisters(arch)
+func (node *Dump) AllocateRegisters(scope registeralloc.Scope) ([]architecture.Register, error) {
+	return node.Param.AllocateRegisters(scope)
 }
 
 func (node *Dump) SetResultRegister(r architecture.Register) {

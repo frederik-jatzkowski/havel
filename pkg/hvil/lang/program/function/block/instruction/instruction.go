@@ -9,6 +9,7 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool/contexttool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
 )
 
@@ -52,19 +53,19 @@ func (node *Instruction) CalculateLiveRanges(ctx context.Context) error {
 	return node.Operation.CalculateLiveRanges(ctx)
 }
 
-func (node *Instruction) AllocateRegisters(arch architecture.Architecture) ([]architecture.Register, error) {
-	regs, err := node.Operation.AllocateRegisters(arch)
+func (node *Instruction) AllocateRegisters(scope registeralloc.Scope) ([]architecture.Register, error) {
+	regs, err := node.Operation.AllocateRegisters(scope)
 	if err != nil {
 		return nil, err
 	}
 
-	defer arch.ReturnScratchRegisters(regs...)
+	defer scope.ReturnScratchRegisters(regs...)
 
 	if node.ResultWrite == nil {
 		return nil, nil
 	}
 
-	resultRegs, err := node.ResultWrite.AllocateRegisters(arch)
+	resultRegs, err := node.ResultWrite.AllocateRegisters(scope)
 	if err != nil {
 		return nil, err
 	}

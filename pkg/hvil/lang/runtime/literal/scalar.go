@@ -48,7 +48,7 @@ func (node *Scalar) ResolveTypes(target types.Type) error {
 	return nil
 }
 
-func (node *Scalar) AllocateRegisters(arch architecture.Architecture) ([]architecture.Register, error) {
+func (node *Scalar) AllocateRegisters(scope registeralloc.Scope) ([]architecture.Register, error) {
 	return nil, nil
 }
 

@@ -49,17 +49,17 @@ func (node *RegWrite) ResolveNames(ctx context.Context) error {
 	return nil
 }
 
-func (node *RegWrite) AllocateRegisters(arch architecture.Architecture) ([]architecture.Register, error) {
-	reg, ok := arch.GetGeneralPurposeRegister()
+func (node *RegWrite) AllocateRegisters(scope registeralloc.Scope) ([]architecture.Register, error) {
+	reg, ok := scope.GetGeneralPurposeRegister()
 	if !ok {
 		node.RegisterAllocationPass.Spilled = true
-		reg, ok := arch.GetScratchRegister()
+		reg, ok := scope.GetScratchRegister()
 		if !ok {
 			return nil, node.Errorf("cannot allocate spill register")
 		}
 
 		node.RegisterAllocationPass.Register = reg
-		arch.ReturnScratchRegisters(reg)
+		scope.ReturnScratchRegisters(reg)
 
 		return nil, nil
 	}

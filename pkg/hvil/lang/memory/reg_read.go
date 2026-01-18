@@ -43,9 +43,9 @@ func (node *RegRead) ResolveNames(ctx context.Context) error {
 	return nil
 }
 
-func (node *RegRead) AllocateRegisters(arch architecture.Architecture) ([]architecture.Register, error) {
+func (node *RegRead) AllocateRegisters(scope registeralloc.Scope) ([]architecture.Register, error) {
 	if node.NameResolutionPass.Decl.RegisterAllocationPass.Spilled {
-		reg, ok := arch.GetScratchRegister()
+		reg, ok := scope.GetScratchRegister()
 		if !ok {
 			return nil, node.Errorf("cannot allocate spill register")
 		}

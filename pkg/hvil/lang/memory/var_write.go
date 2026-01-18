@@ -39,15 +39,15 @@ func (node *VarWrite) ResolveNames(ctx context.Context) error {
 	return nil
 }
 
-func (node *VarWrite) AllocateRegisters(arch architecture.Architecture) ([]architecture.Register, error) {
-	reg, ok := arch.GetScratchRegister()
+func (node *VarWrite) AllocateRegisters(scope registeralloc.Scope) ([]architecture.Register, error) {
+	reg, ok := scope.GetScratchRegister()
 	if !ok {
 		return nil, node.Errorf("cannot allocate variable store register")
 	}
 
 	node.RegisterAllocationPass.Register = reg
 
-	arch.ReturnScratchRegisters(reg)
+	scope.ReturnScratchRegisters(reg)
 
 	return nil, nil
 }

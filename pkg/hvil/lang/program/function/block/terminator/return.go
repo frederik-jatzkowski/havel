@@ -45,13 +45,13 @@ func (node *Return) ResolveTypes() error {
 	return nil
 }
 
-func (node *Return) AllocateRegisters(arch architecture.Architecture) error {
-	r, ok := arch.GetScratchRegister()
+func (node *Return) AllocateRegisters(scope registeralloc.Scope) error {
+	r, ok := scope.GetScratchRegister()
 	if !ok {
 		return node.Errorf("failed to obtain exit code register")
 	}
 
-	arch.ReturnScratchRegisters(r)
+	scope.ReturnScratchRegisters(r)
 	node.RegisterAllocationPass.ExitCode = r
 
 	return nil

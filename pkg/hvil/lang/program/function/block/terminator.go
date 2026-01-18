@@ -3,11 +3,11 @@ package block
 import (
 	"context"
 
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/codegen"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
 )
 
 type Terminator interface {
@@ -15,7 +15,7 @@ type Terminator interface {
 	codegen.VirtualMachine
 
 	ResolveTypes() error
-	AllocateRegisters(arch architecture.Architecture) error
+	AllocateRegisters(scope registeralloc.Scope) error
 	CalculateLiveRanges(ctx context.Context) error
 	Execute(vm *runtime.VirtualMachine) (function.Block, error)
 }

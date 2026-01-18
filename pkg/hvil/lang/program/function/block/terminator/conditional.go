@@ -3,7 +3,6 @@ package terminator
 import (
 	"context"
 
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block/instruction"
@@ -12,6 +11,7 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool/contexttool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/bytecode"
 )
@@ -65,8 +65,8 @@ func (node *Conditional) ResolveTypes() error {
 	return nil
 }
 
-func (node *Conditional) AllocateRegisters(arch architecture.Architecture) error {
-	_, err := node.Condition.AllocateRegisters(arch)
+func (node *Conditional) AllocateRegisters(scope registeralloc.Scope) error {
+	_, err := node.Condition.AllocateRegisters(scope)
 	return err
 }
 

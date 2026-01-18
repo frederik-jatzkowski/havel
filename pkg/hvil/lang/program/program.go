@@ -3,12 +3,12 @@ package program
 import (
 	"context"
 
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool/contexttool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
 )
@@ -70,7 +70,7 @@ func (node *Program) ResolveAddresses() error {
 }
 
 func (node *Program) GenerateVirtualMachineAssembly() (*assembly.P, error) {
-	if err := node.allocateRegisters(virtualmachine.NewArchitecture()); err != nil {
+	if err := node.allocateRegisters(registeralloc.NewAllocator(virtualmachine.NewArchitecture())); err != nil {
 		return nil, err
 	}
 
@@ -81,9 +81,9 @@ func (node *Program) GenerateVirtualMachineAssembly() (*assembly.P, error) {
 	return p, node.generateVirtualMachineAssembly(p)
 }
 
-func (node *Program) allocateRegisters(arch architecture.Architecture) error {
+func (node *Program) allocateRegisters(allocator registeralloc.Allocator) error {
 	for i := 0; i < len(node.Functions); i++ {
-		if err := node.Functions[i].AllocateRegisters(arch); err != nil {
+		if err := node.Functions[i].AllocateRegisters(allocator); err != nil {
 			return err
 		}
 	}

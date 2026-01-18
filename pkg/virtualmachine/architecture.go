@@ -1,23 +1,21 @@
 package virtualmachine
 
 import (
-	"fmt"
-
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/bytecode"
 )
 
 type Architecture struct {
-	argRegisters            []bytecode.R
-	resultRegisters         []bytecode.R
-	generalPurposeRegisters []bytecode.R
-	scratchRegisters        []bytecode.R
+	argRegisters            []architecture.Register
+	resultRegisters         []architecture.Register
+	generalPurposeRegisters []architecture.Register
+	scratchRegisters        []architecture.Register
 }
 
 func NewArchitecture() *Architecture {
 	arch := &Architecture{}
 	for i := range 32 {
-		r := bytecode.R(i)
+		r := architecture.Register(bytecode.R(i))
 		switch {
 		case i < 2:
 			// reserved for pc and sp
@@ -37,48 +35,10 @@ func NewArchitecture() *Architecture {
 
 var _ architecture.Architecture = &Architecture{}
 
-func (a *Architecture) GetArgRegister() (architecture.Register, bool) {
-	return a.pop(&a.argRegisters)
+func (a *Architecture) GeneralPurposeRegisters() []architecture.Register {
+	return append([]architecture.Register(nil), a.generalPurposeRegisters...)
 }
 
-func (a *Architecture) GetResultRegister() (architecture.Register, bool) {
-	return a.pop(&a.resultRegisters)
-}
-
-func (a *Architecture) GetGeneralPurposeRegister() (architecture.Register, bool) {
-	return a.pop(&a.generalPurposeRegisters)
-}
-
-func (a *Architecture) ReturnGeneralPurposeRegisters(r ...architecture.Register) {
-	a.push(&a.generalPurposeRegisters, r)
-}
-
-func (a *Architecture) GetScratchRegister() (architecture.Register, bool) {
-	return a.pop(&a.scratchRegisters)
-}
-
-func (a *Architecture) ReturnScratchRegisters(r ...architecture.Register) {
-	a.push(&a.scratchRegisters, r)
-}
-
-func (a *Architecture) pop(registers *[]bytecode.R) (architecture.Register, bool) {
-	if len(*registers) == 0 {
-		return nil, false
-	}
-
-	r := (*registers)[len(*registers)-1]
-	*registers = (*registers)[:len(*registers)-1]
-
-	return r, true
-}
-
-func (a *Architecture) push(registers *[]bytecode.R, archRs []architecture.Register) {
-	for _, archR := range archRs {
-		r, ok := archR.(bytecode.R)
-		if !ok {
-			panic(fmt.Sprintf("invalid architecture register type: %T", archR))
-		}
-
-		*registers = append(*registers, r)
-	}
+func (a *Architecture) ScratchRegisters() []architecture.Register {
+	return append([]architecture.Register(nil), a.scratchRegisters...)
 }

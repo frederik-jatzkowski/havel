@@ -9,6 +9,7 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
 )
 
@@ -32,8 +33,8 @@ func (node *Call) ResolveTypes(target types.Type) error {
 	return node.Operation.ResolveTypes(target)
 }
 
-func (node *Call) AllocateRegisters(arch architecture.Architecture) ([]architecture.Register, error) {
-	return node.Operation.AllocateRegisters(arch)
+func (node *Call) AllocateRegisters(scope registeralloc.Scope) ([]architecture.Register, error) {
+	return node.Operation.AllocateRegisters(scope)
 }
 
 func (node *Call) SetResultRegister(r architecture.Register) {
