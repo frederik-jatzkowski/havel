@@ -171,12 +171,9 @@ func (node *Function) resolveRegisterAddresses(offset int) {
 }
 
 func (node *Function) AllocateRegisters(allocator registeralloc.Allocator) error {
+	scope := allocator.NewScope()
 	for i := 0; i < len(node.Blocks); i++ {
-		if err := node.Blocks[i].AllocateRegisters(allocator.NewScope()); err != nil {
-			return err
-		}
-
-		if err := node.Blocks[i].CalculateLiveRanges(context.Background()); err != nil {
+		if err := node.Blocks[i].AllocateRegisters(scope); err != nil {
 			return err
 		}
 	}

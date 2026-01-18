@@ -48,10 +48,6 @@ func (node *Move) AllocateRegisters(scope registeralloc.Scope) ([]architecture.R
 	return node.Arg.AllocateRegisters(scope)
 }
 
-func (node *Move) CalculateLiveRanges(ctx context.Context) error {
-	return node.Arg.CalculateLiveRanges(ctx)
-}
-
 func (node *Move) SetResultRegister(r architecture.Register) {
 	node.RegisterAllocationPass.Result = r
 }

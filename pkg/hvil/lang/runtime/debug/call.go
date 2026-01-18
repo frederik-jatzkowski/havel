@@ -37,10 +37,6 @@ func (node *Call) SetResultRegister(r architecture.Register) {
 	node.Operation.SetResultRegister(r)
 }
 
-func (node *Call) CalculateLiveRanges(ctx context.Context) error {
-	return node.Operation.CalculateLiveRanges(ctx)
-}
-
 func (node *Call) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	return node.Operation.GenerateVirtualMachineAssembly(p)
 }

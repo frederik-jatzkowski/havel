@@ -33,6 +33,7 @@ type Call struct {
 		Signature *types.FunctionType
 	}]
 	registeralloc.RegisterAllocation[struct {
+		Scope  registeralloc.Scope
 		Temp   architecture.Register
 		Result architecture.Register
 	}]
@@ -96,6 +97,9 @@ func (node *Call) calculateSignature(target types.Type) {
 }
 
 func (node *Call) AllocateRegisters(scope registeralloc.Scope) ([]architecture.Register, error) {
+	node.LivenessPass.InstructionID = scope.GetInstructionID()
+	node.RegisterAllocationPass.Scope = scope
+
 	temp, ok := scope.GetScratchRegister()
 	if !ok {
 		return nil, node.Wrap(fmt.Errorf("failed to allocate register"))
@@ -119,28 +123,13 @@ func (node *Call) SetResultRegister(r architecture.Register) {
 	node.RegisterAllocationPass.Result = r
 }
 
-func (node *Call) CalculateLiveRanges(ctx context.Context) error {
-	id, err := contexttool.CurrentFromContext[liveness.InstructionID](ctx)
-	if err != nil {
-		return node.Wrap(err)
-	}
-
-	node.LivenessPass.InstructionID = id
-
-	for _, arg := range node.Args.Items {
-		if err := arg.CalculateLiveRanges(ctx); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
 func (node *Call) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	toSave := make([]*memory.RegWrite, 0)
 
 	for regWrite := range node.NameResolutionPass.Block.RegisterScope().All() {
-		if regWrite.WasLiveBefore(node.LivenessPass.InstructionID) && regWrite.WillBeLiveAfter(node.LivenessPass.InstructionID) {
+		r := regWrite.Register()
+		id := node.LivenessPass.InstructionID
+		if node.RegisterAllocationPass.Scope.IsLiveAt(r, id) {
 			toSave = append(toSave, regWrite)
 		}
 	}

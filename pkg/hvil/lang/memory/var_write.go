@@ -52,11 +52,6 @@ func (node *VarWrite) AllocateRegisters(scope registeralloc.Scope) ([]architectu
 	return nil, nil
 }
 
-func (node *VarWrite) CalculateLiveRanges(ctx context.Context) error {
-	//TODO implement me
-	panic("implement me")
-}
-
 func (node *VarWrite) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	var op bytecode.OP
 	switch node.NameResolutionPass.Decl.Type().Bytes() {

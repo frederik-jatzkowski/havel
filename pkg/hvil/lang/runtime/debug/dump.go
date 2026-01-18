@@ -47,10 +47,6 @@ func (node *Dump) SetResultRegister(r architecture.Register) {
 	panic(fmt.Sprintf("target register assigned to %T, which returns void", node))
 }
 
-func (node *Dump) CalculateLiveRanges(ctx context.Context) error {
-	return node.Param.CalculateLiveRanges(ctx)
-}
-
 func (node *Dump) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	if err := node.Param.GenerateVirtualMachineAssembly(p); err != nil {
 		return err

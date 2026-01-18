@@ -70,10 +70,6 @@ func (node *Conditional) AllocateRegisters(scope registeralloc.Scope) error {
 	return err
 }
 
-func (node *Conditional) CalculateLiveRanges(ctx context.Context) error {
-	return node.Condition.CalculateLiveRanges(ctx)
-}
-
 func (node *Conditional) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	if err := node.Condition.GenerateVirtualMachineAssembly(p); err != nil {
 		return node.Wrap(err)

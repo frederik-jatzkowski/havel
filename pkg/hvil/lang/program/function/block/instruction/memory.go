@@ -1,7 +1,6 @@
 package instruction
 
 import (
-	"context"
 	"unsafe"
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
@@ -19,7 +18,6 @@ type MemoryRead interface {
 	registeralloc.Value
 	codegen.VirtualMachine
 	Type() types.Type
-	CalculateLiveRanges(ctx context.Context) error
 	Addr(vm *runtime.VirtualMachine) unsafe.Pointer
 }
 
@@ -29,5 +27,4 @@ type MemoryWrite interface {
 	codegen.VirtualMachine
 	Type() types.Type
 	Addr(vm *runtime.VirtualMachine) unsafe.Pointer
-	CalculateLiveRanges(ctx context.Context) error
 }

@@ -19,8 +19,5 @@ func NewAllocator(arch architecture.Architecture) Allocator {
 }
 
 func (a *allocator) NewScope() Scope {
-	return &scope{
-		generalPurposeRegisters: a.arch.GeneralPurposeRegisters(),
-		scratchRegisters:        a.arch.ScratchRegisters(),
-	}
+	return newScope(a.arch)
 }

@@ -49,10 +49,6 @@ func (node *Instruction) Execute(vm *runtime.VirtualMachine) error {
 	return node.Operation.Execute(vm, result)
 }
 
-func (node *Instruction) CalculateLiveRanges(ctx context.Context) error {
-	return node.Operation.CalculateLiveRanges(ctx)
-}
-
 func (node *Instruction) AllocateRegisters(scope registeralloc.Scope) ([]architecture.Register, error) {
 	regs, err := node.Operation.AllocateRegisters(scope)
 	if err != nil {

@@ -29,18 +29,6 @@ type DivU struct {
 	Right instruction.MemoryRead `parser:"@@ ')'"`
 }
 
-func (node *DivU) CalculateLiveRanges(ctx context.Context) error {
-	if err := node.Left.CalculateLiveRanges(ctx); err != nil {
-		return err
-	}
-
-	if err := node.Right.CalculateLiveRanges(ctx); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (node *DivU) ResolveNames(ctx context.Context) error {
 	if err := node.Left.ResolveNames(ctx); err != nil {
 		return err

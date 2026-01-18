@@ -1,7 +1,6 @@
 package instruction
 
 import (
-	"context"
 	"unsafe"
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
@@ -15,7 +14,6 @@ import (
 type Operation interface {
 	names.Resolver
 	ResolveTypes(expected types.Type) error
-	CalculateLiveRanges(ctx context.Context) error
 	AllocateRegisters(scope registeralloc.Scope) ([]architecture.Register, error)
 	SetResultRegister(r architecture.Register)
 	codegen.VirtualMachine

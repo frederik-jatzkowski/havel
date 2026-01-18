@@ -53,10 +53,6 @@ func (node *Jump) AllocateRegisters(scope registeralloc.Scope) error {
 	return nil
 }
 
-func (node *Jump) CalculateLiveRanges(ctx context.Context) error {
-	return nil
-}
-
 func (node *Jump) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	p.AddJumpToLabel(node.NameResolutionPass.Target.FullyQualifiedIdentifier(), node.Position())
 

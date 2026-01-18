@@ -77,18 +77,6 @@ func (node *SubU) AllocateRegisters(scope registeralloc.Scope) ([]architecture.R
 	return append(leftRegs, rightRegs...), nil
 }
 
-func (node *SubU) CalculateLiveRanges(ctx context.Context) error {
-	if err := node.Left.CalculateLiveRanges(ctx); err != nil {
-		return err
-	}
-
-	if err := node.Right.CalculateLiveRanges(ctx); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (node *SubU) SetResultRegister(r architecture.Register) {
 	node.RegisterAllocationPass.Result = r
 }

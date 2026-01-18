@@ -57,10 +57,6 @@ func (node *Return) AllocateRegisters(scope registeralloc.Scope) error {
 	return nil
 }
 
-func (node *Return) CalculateLiveRanges(ctx context.Context) error {
-	return nil
-}
-
 func (node *Return) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	if node.NameResolutionPass.IsMain {
 		// exit code 0

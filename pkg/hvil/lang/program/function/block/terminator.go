@@ -1,8 +1,6 @@
 package block
 
 import (
-	"context"
-
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/codegen"
@@ -16,6 +14,5 @@ type Terminator interface {
 
 	ResolveTypes() error
 	AllocateRegisters(scope registeralloc.Scope) error
-	CalculateLiveRanges(ctx context.Context) error
 	Execute(vm *runtime.VirtualMachine) (function.Block, error)
 }
