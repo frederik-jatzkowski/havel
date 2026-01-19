@@ -11,6 +11,7 @@ import "fmt"
 //		exit,
 //		jump_relative,
 //		jump_relative_if,
+//		call,
 //		lit8,
 //		lit16,
 //		lit32,

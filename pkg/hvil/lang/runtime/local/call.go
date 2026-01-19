@@ -135,23 +135,7 @@ func (node *Call) GenerateVirtualMachineAssembly(p *assembly.P) error {
 		return err
 	}
 
-	temp := node.RegisterAllocationPass.Temp.(bytecode.R)
-	frameSize := node.NameResolutionPass.Current.AddressResolutionPass.FrameSize
-
-	// advance stack pointer
-	p.AddI1RLit(bytecode.OPStoreStack64, bytecode.SP, uint16(frameSize+8), node.Position())
-	p.AddLit(temp, 2, uint64(frameSize), node.Position())
-	p.AddI3R(bytecode.OPAluAddU64, bytecode.SP, bytecode.SP, temp, node.Position())
-
-	// prepare return address
-	p.AddLit(temp, 1, 2, node.Position())
-	p.AddI3R(bytecode.OPAluAddU64, temp, bytecode.PC, temp, node.Position())
-	p.AddI1RLit(bytecode.OPStoreStack64, temp, 0, node.Position())
-
-	p.AddJumpToLabel(node.NameResolutionPass.Called.NameResolutionPass.Entry.FullyQualifiedIdentifier(), node.Position())
-
-	// restore stack pointer
-	p.AddI1RLit(bytecode.OPLoadStack64, bytecode.SP, 8, node.Position())
+	node.generateVirtualMachineAssemblyCallCode(p)
 
 	if err := node.generateVirtualMachineAssemblyRestoreCode(p, toSave); err != nil {
 		return err
@@ -162,6 +146,15 @@ func (node *Call) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	}
 
 	return nil
+}
+
+func (node *Call) generateVirtualMachineAssemblyCallCode(p *assembly.P) {
+	temp := node.RegisterAllocationPass.Temp.(bytecode.R)
+	frameSize := node.NameResolutionPass.Current.AddressResolutionPass.FrameSize
+
+	p.AddLoadLabel(temp, node.NameResolutionPass.Called.NameResolutionPass.Entry.FullyQualifiedIdentifier(), node.Position())
+	p.AddCall(temp, uint32(frameSize), node.Position())
+	p.AddI1RLit(bytecode.OPLoadStack64, bytecode.SP, 8, node.Position()) // restore stack pointer
 }
 
 func (node *Call) generateVirtualMachineAssemblySaveCode(p *assembly.P, toSave []SavedMemory) error {

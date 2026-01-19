@@ -69,6 +69,8 @@ func (vm *VM) execI(p *bytecode.P) {
 		vm.execOPJumpRelative(p, i)
 	case bytecode.OPJumpRelativeIf:
 		vm.execOPJumpRelativeIf(p, i)
+	case bytecode.OPCall:
+		vm.execOPCall(p, i)
 	case bytecode.OPLit8:
 		vm.execOPLit8(p, i)
 	case bytecode.OPLit16:
@@ -170,6 +172,20 @@ func (vm *VM) execOPJumpRelativeIf(p *bytecode.P, i bytecode.I) {
 
 	offset := int16(i >> 16 & 0xffff)
 	*vm.pc += int64(offset)
+}
+
+//go:inline
+func (vm *VM) execOPCall(p *bytecode.P, i bytecode.I) {
+	fp, frameSize := i.R1Uint16()
+
+	// advance stack pointer
+	*(*int64)(unsafe.Pointer(&vm.stack[*vm.sp+int64(frameSize)+8])) = *vm.sp
+	*vm.sp += int64(frameSize)
+
+	// prepare return address
+	*(*int64)(unsafe.Pointer(&vm.stack[*vm.sp])) = *vm.pc
+
+	*vm.pc = int64(vm.registers[fp])
 }
 
 //go:inline
