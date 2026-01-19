@@ -6,6 +6,7 @@ import (
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/parser"
+	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine"
 )
 
 type Compiler struct {
@@ -29,7 +30,7 @@ func (c Compiler) Compile(path string, src io.Reader) (program.Program, error) {
 		return p, err
 	}
 
-	if err = p.ResolveAddresses(); err != nil {
+	if err = p.ResolveAddresses(virtualmachine.NewArchitecture()); err != nil {
 		return p, err
 	}
 

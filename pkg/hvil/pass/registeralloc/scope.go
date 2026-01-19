@@ -9,6 +9,8 @@ import (
 )
 
 type Scope interface {
+	Architecture() architecture.Architecture
+
 	IncrementInstructionID()
 	GetInstructionID() liveness.InstructionID
 
@@ -23,6 +25,7 @@ type Scope interface {
 }
 
 type scope struct {
+	arch                    architecture.Architecture
 	instructionID           liveness.InstructionID
 	generalPurposeRegisters []architecture.Register
 	liveRanges              map[architecture.Register][]liveness.Range
@@ -31,6 +34,7 @@ type scope struct {
 
 func newScope(arch architecture.Architecture) Scope {
 	s := &scope{
+		arch:                    arch,
 		generalPurposeRegisters: arch.GeneralPurposeRegisters(),
 		liveRanges:              make(map[architecture.Register][]liveness.Range),
 		scratchRegisters:        arch.ScratchRegisters(),
@@ -44,6 +48,10 @@ func newScope(arch architecture.Architecture) Scope {
 }
 
 var _ Scope = (*scope)(nil)
+
+func (s *scope) Architecture() architecture.Architecture {
+	return s.arch
+}
 
 func (s *scope) IncrementInstructionID() {
 	s.instructionID++

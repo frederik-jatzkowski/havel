@@ -3,6 +3,7 @@ package function
 import (
 	"context"
 
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/stack"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
@@ -23,7 +24,6 @@ type Function struct {
 	}]
 	address.Resolution[struct {
 		FrameSize  int
-		ParamsSize int
 		ResultSize int
 		VarsSize   int
 		RegsSize   int
@@ -119,10 +119,15 @@ func (node *Function) Signature() *types.FunctionType {
 	return signature
 }
 
-func (node *Function) ResolveAddresses() error {
-	offset := 16 // 8 bytes reserved for return address, 8 byte for return stack pointer
-	node.resolveParamsAddresses(offset)
-	offset += node.AddressResolutionPass.ParamsSize
+func (node *Function) ResolveAddresses(arch architecture.Architecture) error {
+	callPlan := arch.CalculateCallPlan(node.Signature())
+	for i, paramPlan := range callPlan.Params {
+		param := node.Params.Items[i]
+		param.AddressResolutionPass.RelAddr = paramPlan.RelAddr
+		param.RegisterAllocationPass.BoundTo = paramPlan.BoundTo
+	}
+
+	offset := callPlan.Offset
 	node.resolveResultAddress(offset)
 	offset += node.AddressResolutionPass.ResultSize
 	node.resolveLocalsAddresses(offset)
@@ -133,14 +138,6 @@ func (node *Function) ResolveAddresses() error {
 	node.AddressResolutionPass.FrameSize = offset
 
 	return nil
-}
-
-func (node *Function) resolveParamsAddresses(offset int) {
-	for _, decl := range node.Params.Items {
-		size := decl.Type().Bytes()
-		decl.AddressResolutionPass.RelAddr = offset + node.AddressResolutionPass.ParamsSize
-		node.AddressResolutionPass.ParamsSize += size
-	}
 }
 
 func (node *Function) resolveResultAddress(offset int) {

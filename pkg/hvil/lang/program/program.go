@@ -3,6 +3,7 @@ package program
 import (
 	"context"
 
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
@@ -59,9 +60,9 @@ func (node *Program) ResolveTypes() error {
 	return nil
 }
 
-func (node *Program) ResolveAddresses() error {
+func (node *Program) ResolveAddresses(arch architecture.Architecture) error {
 	for i := 0; i < len(node.Functions); i++ {
-		if err := node.Functions[i].ResolveAddresses(); err != nil {
+		if err := node.Functions[i].ResolveAddresses(arch); err != nil {
 			return err
 		}
 	}

@@ -6,7 +6,6 @@ import (
 	"unsafe"
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block/instruction"
@@ -33,9 +32,10 @@ type Call struct {
 		Signature *types.FunctionType
 	}]
 	registeralloc.RegisterAllocation[struct {
-		Scope  registeralloc.Scope
-		Temp   architecture.Register
-		Result architecture.Register
+		Scope    registeralloc.Scope
+		Temp     architecture.Register
+		Result   architecture.Register
+		CallPlan architecture.CallPlan
 	}]
 	liveness.Liveness[struct {
 		InstructionID liveness.InstructionID
@@ -99,6 +99,7 @@ func (node *Call) calculateSignature(target types.Type) {
 func (node *Call) AllocateRegisters(scope registeralloc.Scope) ([]architecture.Register, error) {
 	node.LivenessPass.InstructionID = scope.GetInstructionID()
 	node.RegisterAllocationPass.Scope = scope
+	node.RegisterAllocationPass.CallPlan = scope.Architecture().CalculateCallPlan(node.TypeCheckPass.Signature)
 
 	temp, ok := scope.GetScratchRegister()
 	if !ok {
@@ -124,48 +125,23 @@ func (node *Call) SetResultRegister(r architecture.Register) {
 }
 
 func (node *Call) GenerateVirtualMachineAssembly(p *assembly.P) error {
-	toSave := make([]*memory.RegWrite, 0)
+	toSave := node.calculateSavedMemory()
 
-	for regWrite := range node.NameResolutionPass.Block.RegisterScope().All() {
-		r := regWrite.Register()
-		id := node.LivenessPass.InstructionID
-		if node.RegisterAllocationPass.Scope.IsLiveAt(r, id) {
-			toSave = append(toSave, regWrite)
-		}
+	if err := node.generateVirtualMachineAssemblySaveCode(p, toSave); err != nil {
+		return err
 	}
 
-	for _, regWrite := range toSave {
-		op, err := bytecode.StoreStackForSize(regWrite.Type().Bytes())
-		if err != nil {
-			return node.Wrap(err)
-		}
-
-		p.AddI1RLit(op, regWrite.Register().(bytecode.R), uint16(regWrite.AddressResolutionPass.RelAddr), node.Position())
-	}
-
-	frameSize := node.NameResolutionPass.Current.AddressResolutionPass.FrameSize
-
-	for i, param := range node.NameResolutionPass.Called.Params.Items {
-		arg := node.Args.Items[i]
-
-		op, err := bytecode.StoreStackForSize(param.Type().Bytes())
-		if err != nil {
-			return node.Wrap(err)
-		}
-
-		if err := arg.GenerateVirtualMachineAssembly(p); err != nil {
-			return node.Wrap(err)
-		}
-
-		p.AddI1RLit(op, arg.Register().(bytecode.R), uint16(frameSize+param.AddressResolutionPass.RelAddr), node.Position())
+	if err := node.generateVirtualMachineAssemblyParamsCode(p); err != nil {
+		return err
 	}
 
 	temp := node.RegisterAllocationPass.Temp.(bytecode.R)
+	frameSize := node.NameResolutionPass.Current.AddressResolutionPass.FrameSize
 
 	// advance stack pointer
 	p.AddI1RLit(bytecode.OPStoreStack64, bytecode.SP, uint16(frameSize+8), node.Position())
 	p.AddLit(temp, 2, uint64(frameSize), node.Position())
-	p.AddI3R(bytecode.OPAluAddU64, bytecode.SP, bytecode.SP, node.RegisterAllocationPass.Temp.(bytecode.R), node.Position())
+	p.AddI3R(bytecode.OPAluAddU64, bytecode.SP, bytecode.SP, temp, node.Position())
 
 	// prepare return address
 	p.AddLit(temp, 1, 2, node.Position())
@@ -177,17 +153,72 @@ func (node *Call) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	// restore stack pointer
 	p.AddI1RLit(bytecode.OPLoadStack64, bytecode.SP, 8, node.Position())
 
-	// restore registers
-	for _, regWrite := range toSave {
-		op, err := bytecode.LoadStackForSize(regWrite.Type().Bytes())
+	if err := node.generateVirtualMachineAssemblyRestoreCode(p, toSave); err != nil {
+		return err
+	}
+
+	if err := node.generateVirtualMachineAssemblyResultCode(p); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (node *Call) generateVirtualMachineAssemblySaveCode(p *assembly.P, toSave []SavedMemory) error {
+	for _, saved := range toSave {
+		op, err := bytecode.StoreStackForSize(saved.Bytes)
 		if err != nil {
 			return node.Wrap(err)
 		}
 
-		p.AddI1RLit(op, regWrite.Register().(bytecode.R), uint16(regWrite.AddressResolutionPass.RelAddr), node.Position())
+		p.AddI1RLit(op, saved.Register.(bytecode.R), uint16(saved.RelAddr), node.Position())
 	}
 
-	// load result
+	return nil
+}
+
+func (node *Call) generateVirtualMachineAssemblyParamsCode(p *assembly.P) error {
+	frameSize := node.NameResolutionPass.Current.AddressResolutionPass.FrameSize
+	for i, param := range node.NameResolutionPass.Called.Params.Items {
+		arg := node.Args.Items[i]
+
+		if err := arg.GenerateVirtualMachineAssembly(p); err != nil {
+			return node.Wrap(err)
+		}
+
+		plan := node.RegisterAllocationPass.CallPlan.Params[i]
+		if plan.BoundTo != nil {
+			if plan.BoundTo != arg.Register() {
+				p.AddI2R(bytecode.OPAluMove, plan.BoundTo.(bytecode.R), arg.Register().(bytecode.R), arg.Position())
+			}
+		} else {
+			op, err := bytecode.StoreStackForSize(param.Type().Bytes())
+			if err != nil {
+				return node.Wrap(err)
+			}
+
+			p.AddI1RLit(op, arg.Register().(bytecode.R), uint16(frameSize+param.AddressResolutionPass.RelAddr), node.Position())
+		}
+	}
+
+	return nil
+}
+
+func (node *Call) generateVirtualMachineAssemblyRestoreCode(p *assembly.P, toSave []SavedMemory) error {
+	for _, saved := range toSave {
+		op, err := bytecode.LoadStackForSize(saved.Bytes)
+		if err != nil {
+			return node.Wrap(err)
+		}
+
+		p.AddI1RLit(op, saved.Register.(bytecode.R), uint16(saved.RelAddr), node.Position())
+	}
+
+	return nil
+}
+
+func (node *Call) generateVirtualMachineAssemblyResultCode(p *assembly.P) error {
+	frameSize := node.NameResolutionPass.Current.AddressResolutionPass.FrameSize
 	void := types.Void{}
 	if !void.Equals(node.TypeCheckPass.Signature.ReturnValue) {
 		op, err := bytecode.LoadStackForSize(node.NameResolutionPass.Called.Result.Type().Bytes())
@@ -195,10 +226,45 @@ func (node *Call) GenerateVirtualMachineAssembly(p *assembly.P) error {
 			return node.Wrap(err)
 		}
 
-		p.AddI1RLit(op, node.RegisterAllocationPass.Result.(bytecode.R), uint16(frameSize+node.NameResolutionPass.Called.Result.AddressResolutionPass.RelAddr), node.Position())
+		p.AddI1RLit(
+			op,
+			node.RegisterAllocationPass.Result.(bytecode.R),
+			uint16(frameSize+node.NameResolutionPass.Called.Result.AddressResolutionPass.RelAddr),
+			node.Position(),
+		)
 	}
 
 	return nil
+}
+
+func (node *Call) calculateSavedMemory() []SavedMemory {
+	toSave := make([]SavedMemory, 0)
+
+	for _, param := range node.NameResolutionPass.Current.Params.Items {
+		r := param.RegisterAllocationPass.BoundTo
+		if r == nil {
+			continue
+		}
+
+		toSave = append(toSave, SavedMemory{
+			Register: r,
+			RelAddr:  param.AddressResolutionPass.RelAddr,
+			Bytes:    param.Type().Bytes(),
+		})
+	}
+
+	for regWrite := range node.NameResolutionPass.Block.RegisterScope().All() {
+		r := regWrite.Register()
+		if node.RegisterAllocationPass.Scope.IsLiveAt(r, node.LivenessPass.InstructionID) {
+			toSave = append(toSave, SavedMemory{
+				Register: r,
+				RelAddr:  regWrite.AddressResolutionPass.RelAddr,
+				Bytes:    regWrite.Type().Bytes(),
+			})
+		}
+	}
+
+	return toSave
 }
 
 func (node *Call) Execute(vm *runtime.VirtualMachine, result unsafe.Pointer) error {

@@ -43,6 +43,14 @@ func (node *VarRead) ResolveNames(ctx context.Context) error {
 }
 
 func (node *VarRead) AllocateRegisters(scope registeralloc.Scope) ([]architecture.Register, error) {
+	node.NameResolutionPass.Decl.RegisterAllocationPass.Usages++
+
+	if reg := node.NameResolutionPass.Decl.RegisterAllocationPass.BoundTo; reg != nil {
+		node.RegisterAllocationPass.Register = reg
+
+		return nil, nil
+	}
+
 	reg, ok := scope.GetScratchRegister()
 	if !ok {
 		return nil, node.Errorf("cannot allocate variable load register")
@@ -54,6 +62,10 @@ func (node *VarRead) AllocateRegisters(scope registeralloc.Scope) ([]architectur
 }
 
 func (node *VarRead) GenerateVirtualMachineAssembly(p *assembly.P) error {
+	if reg := node.NameResolutionPass.Decl.RegisterAllocationPass.BoundTo; reg != nil {
+		return nil
+	}
+
 	var op bytecode.OP
 	switch node.NameResolutionPass.Decl.Type().Bytes() {
 	case 1:
