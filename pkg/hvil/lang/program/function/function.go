@@ -50,7 +50,7 @@ func (node *Function) ResolveNames(ctx context.Context) error {
 	ctx = contexttool.WithCurrent(ctx, node)
 
 	node.NameResolutionPass.Vars = names.NewRootScope[*stack.Decl](names.KindVariable)
-	ctx = stack.WithScope(ctx, node.NameResolutionPass.Vars)
+	ctx = contexttool.WithScope(ctx, node.NameResolutionPass.Vars)
 
 	for _, param := range node.Params.Items {
 		if err := node.NameResolutionPass.Vars.Define(param); err != nil {

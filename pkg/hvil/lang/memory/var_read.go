@@ -8,6 +8,7 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/stack"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool/contexttool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
@@ -32,7 +33,7 @@ func (node *VarRead) Identifier() string {
 }
 
 func (node *VarRead) ResolveNames(ctx context.Context) error {
-	decl, err := stack.FromCtx(ctx, node.Ident)
+	decl, err := contexttool.FromCtx[*stack.Decl](ctx, node.Ident)
 	if err != nil {
 		return node.Wrap(err)
 	}
