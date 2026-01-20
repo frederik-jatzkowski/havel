@@ -43,7 +43,7 @@ func (node *Block) FullyQualifiedIdentifier() string {
 
 func (node *Block) ResolveNames(ctx context.Context) error {
 	node.NameResolutionPass.Regs = names.NewRootScope[*memory.RegWrite](names.KindRegister)
-	ctx = memory.WithRegisterScope(ctx, node.NameResolutionPass.Regs)
+	ctx = contexttool.WithScope(ctx, node.NameResolutionPass.Regs)
 	ctx = contexttool.WithCurrent(ctx, node)
 
 	for _, i := range node.Instructions {

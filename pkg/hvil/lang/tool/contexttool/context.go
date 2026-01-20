@@ -15,6 +15,15 @@ func WithScope[T names.ScopedObject](ctx context.Context, scope names.Scope[T]) 
 	return context.WithValue(ctx, contextKeyScope[T]{}, scope)
 }
 
+func DefineInScope[T names.ScopedObject](ctx context.Context, node T) error {
+	scope, ok := ctx.Value(contextKeyScope[T]{}).(names.Scope[T])
+	if !ok {
+		return errors.New("no scope found in context")
+	}
+
+	return scope.Define(node)
+}
+
 func FromCtx[T names.ScopedObject](ctx context.Context, name string) (value T, err error) {
 	scope, ok := ctx.Value(contextKeyScope[T]{}).(names.Scope[T])
 	if !ok {

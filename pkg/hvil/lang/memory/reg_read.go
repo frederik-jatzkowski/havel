@@ -7,6 +7,7 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool/contexttool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
@@ -31,7 +32,7 @@ func (node *RegRead) Identifier() string {
 }
 
 func (node *RegRead) ResolveNames(ctx context.Context) error {
-	decl, err := RegisterFromCtx(ctx, node.Ident)
+	decl, err := contexttool.FromCtx[*RegWrite](ctx, node.Ident)
 	if err != nil {
 		return node.Wrap(err)
 	}
