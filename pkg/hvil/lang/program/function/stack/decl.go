@@ -1,6 +1,8 @@
 package stack
 
 import (
+	"context"
+
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
@@ -30,6 +32,6 @@ func (node *Decl) Type() types.Type {
 	return node.DeclaredType
 }
 
-func (node *Decl) CalculateStatistics() {
+func (node *Decl) CalculateStatistics(ctx context.Context) {
 
 }

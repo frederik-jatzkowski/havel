@@ -59,9 +59,9 @@ func (node *Program) ResolveTypes() error {
 	return nil
 }
 
-func (node *Program) CalculateStatistics() {
+func (node *Program) CalculateStatistics(ctx context.Context) {
 	for _, f := range node.Functions {
-		f.CalculateStatistics()
+		f.CalculateStatistics(ctx)
 	}
 }
 

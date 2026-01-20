@@ -42,8 +42,8 @@ func (node *Move) ResolveTypes(target types.Type) error {
 	return nil
 }
 
-func (node *Move) CalculateStatistics() {
-	node.Arg.CalculateStatistics()
+func (node *Move) CalculateStatistics(ctx context.Context) {
+	node.Arg.CalculateStatistics(ctx)
 }
 
 func (node *Move) AllocateRegisters(scope registeralloc.Scope) ([]architecture.Register, error) {

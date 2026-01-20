@@ -13,8 +13,8 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool/contexttool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/optimization/statistics"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc/liveness"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/typecheck"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/bytecode"
@@ -30,14 +30,14 @@ type Call struct {
 	typecheck.TypeCheck[struct {
 		Signature *types.FunctionType
 	}]
+	statistics.Statistics[struct {
+		InstructionID statistics.InstructionID
+	}]
 	registeralloc.RegisterAllocation[struct {
 		Scope    registeralloc.Scope
 		Temp     architecture.Register
 		Result   architecture.Register
 		CallPlan architecture.CallPlan
-	}]
-	liveness.Liveness[struct {
-		InstructionID liveness.InstructionID
 	}]
 
 	Name string                            `parser:"'local' '.' @Ident"`
@@ -81,9 +81,15 @@ func (node *Call) ResolveTypes(target types.Type) error {
 	return nil
 }
 
-func (node *Call) CalculateStatistics() {
+func (node *Call) CalculateStatistics(ctx context.Context) {
+	id, err := contexttool.CurrentFromContext[statistics.InstructionID](ctx)
+	if err != nil {
+		panic(err)
+	}
+
+	node.StatisticsPass.InstructionID = id
 	for _, arg := range node.Args.Items {
-		arg.CalculateStatistics()
+		arg.CalculateStatistics(ctx)
 	}
 }
 
@@ -102,7 +108,6 @@ func (node *Call) calculateSignature(target types.Type) {
 }
 
 func (node *Call) AllocateRegisters(scope registeralloc.Scope) ([]architecture.Register, error) {
-	node.LivenessPass.InstructionID = scope.GetInstructionID()
 	node.RegisterAllocationPass.Scope = scope
 	node.RegisterAllocationPass.CallPlan = scope.Architecture().CalculateCallPlan(node.TypeCheckPass.Signature)
 
@@ -273,7 +278,7 @@ func (node *Call) calculateSavedMemory() []architecture.MemoryAllocation {
 
 	for regWrite := range node.NameResolutionPass.Block.RegisterScope().All() {
 		r := regWrite.Register()
-		if node.RegisterAllocationPass.Scope.IsLiveAt(r, node.LivenessPass.InstructionID) {
+		if node.RegisterAllocationPass.Scope.IsLiveAt(r, node.StatisticsPass.InstructionID) {
 			toSave = append(toSave, architecture.MemoryAllocation{
 				BoundTo: r,
 				RelAddr: regWrite.AddressResolutionPass.RelAddr,

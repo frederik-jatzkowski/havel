@@ -38,7 +38,7 @@ func (node *VarWrite) ResolveNames(ctx context.Context) error {
 	return nil
 }
 
-func (node *VarWrite) CalculateStatistics() {
+func (node *VarWrite) CalculateStatistics(ctx context.Context) {
 
 }
 

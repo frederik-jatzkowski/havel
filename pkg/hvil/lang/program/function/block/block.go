@@ -13,6 +13,7 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool/contexttool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/address"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/optimization/statistics"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
 )
@@ -22,6 +23,9 @@ type Block struct {
 	names.NameResolution[struct {
 		Regs     names.Scope[*memory.RegWrite]
 		Function *function.Function
+	}]
+	statistics.Statistics[struct {
+		TerminatorInstructionID statistics.InstructionID
 	}]
 	address.Resolution[struct {
 		SpillAddressMap map[*memory.RegWrite]uint16
@@ -90,13 +94,23 @@ func (node *Block) ResolveTypes() error {
 	return node.Terminator.ResolveTypes()
 }
 
-func (node *Block) CalculateStatistics() {
+func (node *Block) CalculateStatistics(ctx context.Context, current statistics.InstructionID) (next statistics.InstructionID) {
 	node.NameResolutionPass.Function.StatisticsPass.BlockCount++
 
-	for _, instr := range node.Instructions {
+	for i, _ := range node.Instructions {
+		instr := &node.Instructions[i]
+		ctx = contexttool.WithCurrent(ctx, current)
 		node.NameResolutionPass.Function.StatisticsPass.InstructionCount++
-		instr.CalculateStatistics()
+		instr.CalculateStatistics(ctx)
+
+		current++
 	}
+
+	ctx = contexttool.WithCurrent(ctx, current)
+	node.Terminator.CalculateStatistics(ctx)
+	node.StatisticsPass.TerminatorInstructionID = current
+
+	return current + 1
 }
 
 func (node *Block) AllocateRegisters(scope registeralloc.Scope) error {
@@ -108,15 +122,14 @@ func (node *Block) AllocateRegisters(scope registeralloc.Scope) error {
 		}
 
 		registers = append(registers, regs...)
-
-		scope.IncrementInstructionID()
 	}
+
+	scope.SetInstructionID(node.StatisticsPass.TerminatorInstructionID)
 
 	if err := node.Terminator.AllocateRegisters(scope); err != nil {
 		return err
 	}
 
-	scope.IncrementInstructionID()
 	scope.ReturnGeneralPurposeRegisters(registers...)
 
 	return nil

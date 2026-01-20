@@ -4,15 +4,15 @@ import (
 	"fmt"
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc/liveness"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/optimization/statistics"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/bytecode"
 )
 
 type Scope interface {
 	Architecture() architecture.Architecture
 
-	IncrementInstructionID()
-	GetInstructionID() liveness.InstructionID
+	SetInstructionID(id statistics.InstructionID)
+	GetInstructionID() statistics.InstructionID
 
 	GetGeneralPurposeRegister() (architecture.Register, bool)
 	ReturnGeneralPurposeRegisters(r ...architecture.Register)
@@ -21,14 +21,14 @@ type Scope interface {
 	ReturnScratchRegisters(r ...architecture.Register)
 
 	UseRegisters(r ...architecture.Register)
-	IsLiveAt(r architecture.Register, id liveness.InstructionID) bool
+	IsLiveAt(r architecture.Register, id statistics.InstructionID) bool
 }
 
 type scope struct {
 	arch                    architecture.Architecture
-	instructionID           liveness.InstructionID
+	instructionID           statistics.InstructionID
 	generalPurposeRegisters []architecture.Register
-	liveRanges              map[architecture.Register][]liveness.Range
+	liveRanges              map[architecture.Register][]Range
 	scratchRegisters        []architecture.Register
 }
 
@@ -36,12 +36,12 @@ func newScope(arch architecture.Architecture) Scope {
 	s := &scope{
 		arch:                    arch,
 		generalPurposeRegisters: arch.GeneralPurposeRegisters(),
-		liveRanges:              make(map[architecture.Register][]liveness.Range),
+		liveRanges:              make(map[architecture.Register][]Range),
 		scratchRegisters:        arch.ScratchRegisters(),
 	}
 
 	for _, register := range s.generalPurposeRegisters {
-		s.liveRanges[register] = []liveness.Range{}
+		s.liveRanges[register] = []Range{}
 	}
 
 	return s
@@ -53,11 +53,11 @@ func (s *scope) Architecture() architecture.Architecture {
 	return s.arch
 }
 
-func (s *scope) IncrementInstructionID() {
-	s.instructionID++
+func (s *scope) SetInstructionID(id statistics.InstructionID) {
+	s.instructionID = id
 }
 
-func (s *scope) GetInstructionID() liveness.InstructionID {
+func (s *scope) GetInstructionID() statistics.InstructionID {
 	return s.instructionID
 }
 
@@ -67,7 +67,7 @@ func (s *scope) GetGeneralPurposeRegister() (architecture.Register, bool) {
 		return nil, false
 	}
 
-	s.liveRanges[r] = append(s.liveRanges[r], liveness.Range{
+	s.liveRanges[r] = append(s.liveRanges[r], Range{
 		Start: s.instructionID,
 		End:   s.instructionID,
 	})
@@ -117,7 +117,7 @@ func (s *scope) UseRegisters(rs ...architecture.Register) {
 	}
 }
 
-func (s *scope) IsLiveAt(r architecture.Register, id liveness.InstructionID) bool {
+func (s *scope) IsLiveAt(r architecture.Register, id statistics.InstructionID) bool {
 	for _, lr := range s.liveRanges[r] {
 		if lr.Start < id && lr.End > id {
 			return true

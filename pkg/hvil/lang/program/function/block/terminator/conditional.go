@@ -64,6 +64,10 @@ func (node *Conditional) ResolveTypes() error {
 	return nil
 }
 
+func (node *Conditional) CalculateStatistics(ctx context.Context) {
+	node.Condition.CalculateStatistics(ctx)
+}
+
 func (node *Conditional) AllocateRegisters(scope registeralloc.Scope) error {
 	_, err := node.Condition.AllocateRegisters(scope)
 	return err

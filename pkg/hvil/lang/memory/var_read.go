@@ -41,7 +41,7 @@ func (node *VarRead) ResolveNames(ctx context.Context) error {
 	return nil
 }
 
-func (node *VarRead) CalculateStatistics() {
+func (node *VarRead) CalculateStatistics(ctx context.Context) {
 
 }
 

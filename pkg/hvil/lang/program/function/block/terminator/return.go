@@ -44,6 +44,8 @@ func (node *Return) ResolveTypes() error {
 	return nil
 }
 
+func (node *Return) CalculateStatistics(ctx context.Context) {}
+
 func (node *Return) AllocateRegisters(scope registeralloc.Scope) error {
 	r, ok := scope.GetScratchRegister()
 	if !ok {

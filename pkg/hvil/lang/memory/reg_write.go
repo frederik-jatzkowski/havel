@@ -42,7 +42,7 @@ func (node *RegWrite) ResolveNames(ctx context.Context) error {
 	return nil
 }
 
-func (node *RegWrite) CalculateStatistics() {
+func (node *RegWrite) CalculateStatistics(ctx context.Context) {
 
 }
 

@@ -61,9 +61,9 @@ func (node *AddU) ResolveTypes(target types.Type) error {
 	return nil
 }
 
-func (node *AddU) CalculateStatistics() {
-	node.Left.CalculateStatistics()
-	node.Right.CalculateStatistics()
+func (node *AddU) CalculateStatistics(ctx context.Context) {
+	node.Left.CalculateStatistics(ctx)
+	node.Right.CalculateStatistics(ctx)
 }
 
 func (node *AddU) AllocateRegisters(scope registeralloc.Scope) ([]architecture.Register, error) {

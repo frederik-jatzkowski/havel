@@ -63,9 +63,9 @@ func (node *EQ) ResolveTypes(target types.Type) error {
 	return nil
 }
 
-func (node *EQ) CalculateStatistics() {
-	node.Left.CalculateStatistics()
-	node.Right.CalculateStatistics()
+func (node *EQ) CalculateStatistics(ctx context.Context) {
+	node.Left.CalculateStatistics(ctx)
+	node.Right.CalculateStatistics(ctx)
 }
 
 func (node *EQ) AllocateRegisters(scope registeralloc.Scope) ([]architecture.Register, error) {

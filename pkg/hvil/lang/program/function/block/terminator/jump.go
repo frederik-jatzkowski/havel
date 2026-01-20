@@ -48,6 +48,8 @@ func (node *Jump) ResolveTypes() error {
 	return nil
 }
 
+func (node *Jump) CalculateStatistics(ctx context.Context) {}
+
 func (node *Jump) AllocateRegisters(scope registeralloc.Scope) error {
 	return nil
 }

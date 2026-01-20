@@ -7,12 +7,16 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool/contexttool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/optimization/statistics"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
 )
 
 type Instruction struct {
 	tool.Node[Instruction]
+	statistics.Statistics[struct {
+		InstructionID statistics.InstructionID
+	}]
 
 	ResultWrite MemoryWrite `parser:"(@@ '=')?"`
 	Operation   Operation   `parser:"@@ ';'"`
@@ -38,15 +42,24 @@ func (node *Instruction) ResolveTypes() error {
 	return node.Operation.ResolveTypes(&types.Void{})
 }
 
-func (node *Instruction) CalculateStatistics() {
-	if node.ResultWrite != nil {
-		node.ResultWrite.CalculateStatistics()
+func (node *Instruction) CalculateStatistics(ctx context.Context) {
+	id, err := contexttool.CurrentFromContext[statistics.InstructionID](ctx)
+	if err != nil {
+		panic(err)
 	}
 
-	node.Operation.CalculateStatistics()
+	node.StatisticsPass.InstructionID = id
+
+	if node.ResultWrite != nil {
+		node.ResultWrite.CalculateStatistics(ctx)
+	}
+
+	node.Operation.CalculateStatistics(ctx)
 }
 
 func (node *Instruction) AllocateRegisters(scope registeralloc.Scope) ([]architecture.Register, error) {
+	scope.SetInstructionID(node.StatisticsPass.InstructionID)
+
 	regs, err := node.Operation.AllocateRegisters(scope)
 	if err != nil {
 		return nil, err

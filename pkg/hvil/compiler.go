@@ -30,7 +30,7 @@ func (c Compiler) Compile(path string, src io.Reader) (program.Program, error) {
 		return p, err
 	}
 
-	p.CalculateStatistics()
+	p.CalculateStatistics(context.Background())
 
 	if err = p.ResolveAddresses(virtualmachine.NewArchitecture()); err != nil {
 		return p, err

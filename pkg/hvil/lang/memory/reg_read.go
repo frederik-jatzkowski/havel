@@ -40,7 +40,7 @@ func (node *RegRead) ResolveNames(ctx context.Context) error {
 	return nil
 }
 
-func (node *RegRead) CalculateStatistics() {
+func (node *RegRead) CalculateStatistics(ctx context.Context) {
 
 }
 
