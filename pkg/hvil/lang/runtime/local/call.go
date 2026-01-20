@@ -4,13 +4,11 @@ import (
 	"context"
 	"fmt"
 	"slices"
-	"unsafe"
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block/instruction"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool/contexttool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
@@ -287,41 +285,4 @@ func (node *Call) calculateSavedMemory() []architecture.MemoryAllocation {
 	return slices.DeleteFunc(toSave, func(allocation architecture.MemoryAllocation) bool {
 		return allocation.BoundTo == node.RegisterAllocationPass.Result
 	})
-}
-
-func (node *Call) Execute(vm *runtime.VirtualMachine, result unsafe.Pointer) error {
-	newStackPointer := vm.StackPointer + node.NameResolutionPass.Current.AddressResolutionPass.FrameSize
-	newStackSize := newStackPointer + node.NameResolutionPass.Called.AddressResolutionPass.FrameSize
-	if len(vm.Stack) < newStackSize {
-		return node.Errorf("stack overflow")
-	}
-
-	prevStackPtr := vm.StackPointer
-
-	sourceAddresses := make([]unsafe.Pointer, len(node.Args.Items))
-	for i, arg := range node.Args.Items {
-		sourceAddresses[i] = arg.Addr(vm)
-	}
-
-	vm.StackPointer = newStackPointer
-
-	for i, param := range node.NameResolutionPass.Called.Params.Items {
-		length := param.Type().Bytes()
-		addr := param.Addr(vm)
-		copy(unsafe.Slice((*byte)(addr), length), unsafe.Slice((*byte)(sourceAddresses[i]), length))
-	}
-
-	if err := node.NameResolutionPass.Called.Execute(vm); err != nil {
-		return err
-	}
-
-	if node.NameResolutionPass.Called.Result != nil && result != nil {
-		length := node.NameResolutionPass.Called.Result.Type().Bytes()
-		sourceAddr := node.NameResolutionPass.Called.Result.Addr(vm)
-		copy(unsafe.Slice((*byte)(result), length), unsafe.Slice((*byte)(sourceAddr), length))
-	}
-
-	vm.StackPointer = prevStackPtr
-
-	return nil
 }

@@ -2,11 +2,9 @@ package memory
 
 import (
 	"context"
-	"unsafe"
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block/instruction"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool/contexttool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
@@ -94,9 +92,4 @@ func (node *RegWrite) Register() architecture.Register {
 
 func (node *RegWrite) Type() types.Type {
 	return node.RegType
-}
-
-func (node *RegWrite) Addr(vm *runtime.VirtualMachine) unsafe.Pointer {
-	stackAddr := vm.StackPointer + node.AddressResolutionPass.RelAddr
-	return unsafe.Pointer(&vm.Stack[stackAddr])
 }

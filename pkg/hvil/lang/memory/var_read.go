@@ -2,11 +2,9 @@ package memory
 
 import (
 	"context"
-	"unsafe"
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/stack"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool/contexttool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
@@ -94,8 +92,4 @@ func (node *VarRead) Register() architecture.Register {
 
 func (node *VarRead) Type() types.Type {
 	return node.NameResolutionPass.Decl.Type()
-}
-
-func (node *VarRead) Addr(vm *runtime.VirtualMachine) unsafe.Pointer {
-	return node.NameResolutionPass.Decl.Addr(vm)
 }

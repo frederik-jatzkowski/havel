@@ -2,11 +2,9 @@ package alu
 
 import (
 	"context"
-	"unsafe"
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block/instruction"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
@@ -43,8 +41,4 @@ func (node *Call) SetResultRegister(r architecture.Register) {
 
 func (node *Call) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	return node.Operation.GenerateVirtualMachineAssembly(p)
-}
-
-func (node *Call) Execute(vm *runtime.VirtualMachine, result unsafe.Pointer) error {
-	return node.Operation.Execute(vm, result)
 }

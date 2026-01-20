@@ -3,10 +3,8 @@ package literal
 import (
 	"context"
 	"math/bits"
-	"unsafe"
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
@@ -60,21 +58,6 @@ func (node *Scalar) SetResultRegister(r architecture.Register) {
 
 func (node *Scalar) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	p.AddLit(node.RegisterAllocationPass.Target.(bytecode.R), node.TypeCheckPass.Type.Bytes(), node.Value, node.Position())
-
-	return nil
-}
-
-func (node *Scalar) Execute(vm *runtime.VirtualMachine, result unsafe.Pointer) error {
-	switch node.TypeCheckPass.Type.Bytes() {
-	case 1:
-		*(*byte)(result) = byte(node.Value)
-	case 2:
-		*(*uint16)(result) = uint16(node.Value)
-	case 4:
-		*(*uint32)(result) = uint32(node.Value)
-	case 8:
-		*(*uint64)(result) = node.Value
-	}
 
 	return nil
 }

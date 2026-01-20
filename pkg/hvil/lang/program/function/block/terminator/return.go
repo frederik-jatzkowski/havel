@@ -6,7 +6,6 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool/contexttool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
@@ -67,9 +66,4 @@ func (node *Return) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	}
 
 	return nil
-}
-
-func (node *Return) Execute(vm *runtime.VirtualMachine) (function.Block, error) {
-	// there is no next block after a return statement
-	return nil, nil
 }

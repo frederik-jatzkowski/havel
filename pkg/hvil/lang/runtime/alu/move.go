@@ -2,11 +2,9 @@ package alu
 
 import (
 	"context"
-	"unsafe"
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block/instruction"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
@@ -67,14 +65,6 @@ func (node *Move) GenerateVirtualMachineAssembly(p *assembly.P) error {
 		node.Arg.Register().(bytecode.R),
 		node.Position(),
 	)
-
-	return nil
-}
-
-func (node *Move) Execute(vm *runtime.VirtualMachine, result unsafe.Pointer) error {
-	sourceAddr := node.Arg.Addr(vm)
-	length := node.TypeCheckPass.Type.Bytes()
-	copy(unsafe.Slice((*byte)(result), length), unsafe.Slice((*byte)(sourceAddr), length))
 
 	return nil
 }

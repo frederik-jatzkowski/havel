@@ -5,7 +5,6 @@ import (
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/stack"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool/contexttool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
@@ -196,18 +195,6 @@ func (node *Function) AllocateRegisters(allocator registeralloc.Allocator) error
 func (node *Function) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	for i := 0; i < len(node.Blocks); i++ {
 		if err := node.Blocks[i].GenerateVirtualMachineAssembly(p); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (node *Function) Execute(vm *runtime.VirtualMachine) (err error) {
-	next := node.NameResolutionPass.Entry
-	for next != nil {
-		next, err = next.Execute(vm)
-		if err != nil {
 			return err
 		}
 	}

@@ -3,11 +3,9 @@ package debug
 import (
 	"context"
 	"fmt"
-	"unsafe"
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block/instruction"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
@@ -57,22 +55,4 @@ func (node *Dump) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	p.AddI1R(bytecode.OPDebugDump, node.Param.Register().(bytecode.R), node.Position())
 
 	return nil
-}
-
-func (node *Dump) Execute(vm *runtime.VirtualMachine, _ unsafe.Pointer) error {
-	var value any
-	switch node.TypeCheckPass.Type.Bytes() {
-	case 1:
-		value = *(*byte)(node.Param.Addr(vm))
-	case 2:
-		value = *(*uint16)(node.Param.Addr(vm))
-	case 4:
-		value = *(*uint32)(node.Param.Addr(vm))
-	case 8:
-		value = *(*uint64)(node.Param.Addr(vm))
-	}
-
-	_, err := fmt.Fprintf(vm.Stdout, "%s register content: %d\n", node.Position(), value)
-
-	return err
 }

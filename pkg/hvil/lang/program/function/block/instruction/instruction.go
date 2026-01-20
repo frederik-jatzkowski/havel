@@ -2,10 +2,8 @@ package instruction
 
 import (
 	"context"
-	"unsafe"
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool/contexttool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
@@ -38,15 +36,6 @@ func (node *Instruction) ResolveTypes() error {
 	}
 
 	return node.Operation.ResolveTypes(&types.Void{})
-}
-
-func (node *Instruction) Execute(vm *runtime.VirtualMachine) error {
-	var result unsafe.Pointer
-	if node.ResultWrite != nil {
-		result = node.ResultWrite.Addr(vm)
-	}
-
-	return node.Operation.Execute(vm, result)
 }
 
 func (node *Instruction) CalculateStatistics() {
@@ -91,8 +80,4 @@ func (node *Instruction) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	}
 
 	return nil
-}
-
-func (node *Instruction) Result() MemoryWrite {
-	return node.ResultWrite
 }

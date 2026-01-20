@@ -5,7 +5,6 @@ import (
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool/contexttool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
@@ -103,18 +102,6 @@ func (node *Program) generateVirtualMachineAssembly(p *assembly.P) error {
 		if err := node.Functions[i].GenerateVirtualMachineAssembly(p); err != nil {
 			return err
 		}
-	}
-
-	return nil
-}
-
-func (node *Program) Execute(vm *runtime.VirtualMachine) error {
-	vm.CallStack = append(vm.CallStack, runtime.Call{
-		Name: node.NameResolutionPass.Main.Name,
-	})
-
-	if err := node.NameResolutionPass.Main.Execute(vm); err != nil {
-		return err
 	}
 
 	return nil

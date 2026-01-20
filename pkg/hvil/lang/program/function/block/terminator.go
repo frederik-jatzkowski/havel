@@ -1,8 +1,6 @@
 package block
 
 import (
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/codegen"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
@@ -14,5 +12,4 @@ type Terminator interface {
 
 	ResolveTypes() error
 	AllocateRegisters(scope registeralloc.Scope) error
-	Execute(vm *runtime.VirtualMachine) (function.Block, error)
 }

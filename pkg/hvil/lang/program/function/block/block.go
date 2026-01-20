@@ -9,7 +9,6 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block/instruction"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool/contexttool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/address"
@@ -133,15 +132,4 @@ func (node *Block) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	}
 
 	return node.Terminator.GenerateVirtualMachineAssembly(p)
-}
-
-func (node *Block) Execute(vm *runtime.VirtualMachine) (function.Block, error) {
-	for _, i := range node.Instructions {
-		err := i.Execute(vm)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return node.Terminator.Execute(vm)
 }

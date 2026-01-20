@@ -1,10 +1,7 @@
 package stack
 
 import (
-	"unsafe"
-
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/address"
@@ -35,9 +32,4 @@ func (node *Decl) Type() types.Type {
 
 func (node *Decl) CalculateStatistics() {
 
-}
-
-func (node *Decl) Addr(vm *runtime.VirtualMachine) unsafe.Pointer {
-	stackAddr := vm.StackPointer + node.AddressResolutionPass.RelAddr
-	return unsafe.Pointer(&vm.Stack[stackAddr])
 }

@@ -2,11 +2,9 @@ package alu
 
 import (
 	"context"
-	"unsafe"
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block/instruction"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
@@ -114,33 +112,6 @@ func (node *DivU) GenerateVirtualMachineAssembly(p *assembly.P) error {
 		node.Right.Register().(bytecode.R),
 		node.Position(),
 	)
-
-	return nil
-}
-
-func (node *DivU) Execute(vm *runtime.VirtualMachine, result unsafe.Pointer) error {
-	switch node.TypeCheckPass.Type.Bytes() {
-	case 1:
-		if *(*byte)(node.Right.Addr(vm)) == 0 {
-			return node.Errorf("division by zero")
-		}
-		*(*byte)(result) = *(*byte)(node.Left.Addr(vm)) / *(*byte)(node.Right.Addr(vm))
-	case 2:
-		if *(*uint16)(node.Right.Addr(vm)) == 0 {
-			return node.Errorf("division by zero")
-		}
-		*(*uint16)(result) = *(*uint16)(node.Left.Addr(vm)) / *(*uint16)(node.Right.Addr(vm))
-	case 4:
-		if *(*uint32)(node.Right.Addr(vm)) == 0 {
-			return node.Errorf("division by zero")
-		}
-		*(*uint32)(result) = *(*uint32)(node.Left.Addr(vm)) / *(*uint32)(node.Right.Addr(vm))
-	case 8:
-		if *(*uint64)(node.Right.Addr(vm)) == 0 {
-			return node.Errorf("division by zero")
-		}
-		*(*uint64)(result) = *(*uint64)(node.Left.Addr(vm)) / *(*uint64)(node.Right.Addr(vm))
-	}
 
 	return nil
 }

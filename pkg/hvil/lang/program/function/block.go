@@ -2,7 +2,6 @@ package function
 
 import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/codegen"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/optimization/statistics"
@@ -20,5 +19,4 @@ type Block interface {
 	ResolveTypes() error
 	ResolveAddresses(offset int) int
 	AllocateRegisters(scope registeralloc.Scope) error
-	Execute(vm *runtime.VirtualMachine) (Block, error)
 }

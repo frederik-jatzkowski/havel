@@ -6,7 +6,6 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block/instruction"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool/contexttool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
@@ -79,13 +78,4 @@ func (node *Conditional) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	p.AddJumpToLabel(node.NameResolutionPass.Else.FullyQualifiedIdentifier(), node.Position())
 
 	return nil
-}
-
-func (node *Conditional) Execute(vm *runtime.VirtualMachine) (function.Block, error) {
-	cond := *(*byte)(node.Condition.Addr(vm))
-	if cond > 0 {
-		return node.NameResolutionPass.Then, nil
-	}
-
-	return node.NameResolutionPass.Else, nil
 }
