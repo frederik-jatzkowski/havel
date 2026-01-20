@@ -10,7 +10,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine"
 )
 
@@ -68,40 +67,6 @@ func BenchmarkCollatz_virtualmachine(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		err = vm.Execute(bc)
-		if err != nil {
-			panic(errors.Join(
-				errors.New("runtime error"),
-				err,
-			))
-		}
-	}
-}
-
-func BenchmarkCollatz_interpreted(b *testing.B) {
-	filePath := "./src_bench.hvil"
-	file, err := os.Open(filePath)
-	if err != nil {
-		panic(err)
-	}
-
-	compiler := hvil.NewCompiler()
-
-	program, err := compiler.Compile(filePath, file)
-	if err != nil {
-		panic(fmt.Errorf("compilation failed:\n %w", err))
-	}
-
-	vm := runtime.New(
-		1024*1024,
-		os.Stdin,
-		io.Discard,
-		io.Discard,
-	)
-
-	b.ResetTimer()
-
-	for i := 0; i < b.N; i++ {
-		err = program.Execute(vm)
 		if err != nil {
 			panic(errors.Join(
 				errors.New("runtime error"),
