@@ -1,6 +1,6 @@
 package architecture
 
-type CallParam struct {
+type MemoryAllocation struct {
 	BoundTo Register
 	RelAddr int
 	Bytes   int
@@ -8,5 +8,6 @@ type CallParam struct {
 
 type CallPlan struct {
 	Offset int
-	Params []CallParam
+	Params []MemoryAllocation
+	Result MemoryAllocation
 }

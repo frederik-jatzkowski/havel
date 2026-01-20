@@ -38,7 +38,7 @@ func SolveCollatz(n uint64) uint64 {
 }
 
 func BenchmarkCollatz_virtualmachine(b *testing.B) {
-	filePath := "./src.hvil"
+	filePath := "./src_bench.hvil"
 	file, err := os.Open(filePath)
 	if err != nil {
 		panic(err)
@@ -78,7 +78,7 @@ func BenchmarkCollatz_virtualmachine(b *testing.B) {
 }
 
 func BenchmarkCollatz_interpreted(b *testing.B) {
-	filePath := "./src.hvil"
+	filePath := "./src_bench.hvil"
 	file, err := os.Open(filePath)
 	if err != nil {
 		panic(err)

@@ -3,6 +3,7 @@ package local
 import (
 	"context"
 	"fmt"
+	"slices"
 	"unsafe"
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
@@ -137,11 +138,11 @@ func (node *Call) GenerateVirtualMachineAssembly(p *assembly.P) error {
 
 	node.generateVirtualMachineAssemblyCallCode(p)
 
-	if err := node.generateVirtualMachineAssemblyRestoreCode(p, toSave); err != nil {
+	if err := node.generateVirtualMachineAssemblyResultCode(p); err != nil {
 		return err
 	}
 
-	if err := node.generateVirtualMachineAssemblyResultCode(p); err != nil {
+	if err := node.generateVirtualMachineAssemblyRestoreCode(p, toSave); err != nil {
 		return err
 	}
 
@@ -157,14 +158,14 @@ func (node *Call) generateVirtualMachineAssemblyCallCode(p *assembly.P) {
 	p.AddI1RLit(bytecode.OPLoadStack64, bytecode.SP, 8, node.Position()) // restore stack pointer
 }
 
-func (node *Call) generateVirtualMachineAssemblySaveCode(p *assembly.P, toSave []SavedMemory) error {
+func (node *Call) generateVirtualMachineAssemblySaveCode(p *assembly.P, toSave []architecture.MemoryAllocation) error {
 	for _, saved := range toSave {
 		op, err := bytecode.StoreStackForSize(saved.Bytes)
 		if err != nil {
 			return node.Wrap(err)
 		}
 
-		p.AddI1RLit(op, saved.Register.(bytecode.R), uint16(saved.RelAddr), node.Position())
+		p.AddI1RLit(op, saved.BoundTo.(bytecode.R), uint16(saved.RelAddr), node.Position())
 	}
 
 	return nil
@@ -197,14 +198,14 @@ func (node *Call) generateVirtualMachineAssemblyParamsCode(p *assembly.P) error 
 	return nil
 }
 
-func (node *Call) generateVirtualMachineAssemblyRestoreCode(p *assembly.P, toSave []SavedMemory) error {
+func (node *Call) generateVirtualMachineAssemblyRestoreCode(p *assembly.P, toSave []architecture.MemoryAllocation) error {
 	for _, saved := range toSave {
 		op, err := bytecode.LoadStackForSize(saved.Bytes)
 		if err != nil {
 			return node.Wrap(err)
 		}
 
-		p.AddI1RLit(op, saved.Register.(bytecode.R), uint16(saved.RelAddr), node.Position())
+		p.AddI1RLit(op, saved.BoundTo.(bytecode.R), uint16(saved.RelAddr), node.Position())
 	}
 
 	return nil
@@ -214,6 +215,15 @@ func (node *Call) generateVirtualMachineAssemblyResultCode(p *assembly.P) error 
 	frameSize := node.NameResolutionPass.Current.AddressResolutionPass.FrameSize
 	void := types.Void{}
 	if !void.Equals(node.TypeCheckPass.Signature.ReturnValue) {
+		plan := node.RegisterAllocationPass.CallPlan.Result
+		if plan.BoundTo != nil {
+			if plan.BoundTo != node.RegisterAllocationPass.Result {
+				p.AddI2R(bytecode.OPAluMove, node.RegisterAllocationPass.Result.(bytecode.R), plan.BoundTo.(bytecode.R), node.Position())
+			}
+
+			return nil
+		}
+
 		op, err := bytecode.LoadStackForSize(node.NameResolutionPass.Called.Result.Type().Bytes())
 		if err != nil {
 			return node.Wrap(err)
@@ -230,8 +240,8 @@ func (node *Call) generateVirtualMachineAssemblyResultCode(p *assembly.P) error 
 	return nil
 }
 
-func (node *Call) calculateSavedMemory() []SavedMemory {
-	toSave := make([]SavedMemory, 0)
+func (node *Call) calculateSavedMemory() []architecture.MemoryAllocation {
+	toSave := make([]architecture.MemoryAllocation, 0)
 
 	for _, param := range node.NameResolutionPass.Current.Params.Items {
 		r := param.RegisterAllocationPass.BoundTo
@@ -239,25 +249,38 @@ func (node *Call) calculateSavedMemory() []SavedMemory {
 			continue
 		}
 
-		toSave = append(toSave, SavedMemory{
-			Register: r,
-			RelAddr:  param.AddressResolutionPass.RelAddr,
-			Bytes:    param.Type().Bytes(),
+		toSave = append(toSave, architecture.MemoryAllocation{
+			BoundTo: r,
+			RelAddr: param.AddressResolutionPass.RelAddr,
+			Bytes:   param.Type().Bytes(),
 		})
+	}
+
+	result := node.NameResolutionPass.Current.Result
+	if result != nil {
+		if r := result.RegisterAllocationPass.BoundTo; r != nil {
+			toSave = append(toSave, architecture.MemoryAllocation{
+				BoundTo: r,
+				RelAddr: result.AddressResolutionPass.RelAddr,
+				Bytes:   result.Type().Bytes(),
+			})
+		}
 	}
 
 	for regWrite := range node.NameResolutionPass.Block.RegisterScope().All() {
 		r := regWrite.Register()
 		if node.RegisterAllocationPass.Scope.IsLiveAt(r, node.LivenessPass.InstructionID) {
-			toSave = append(toSave, SavedMemory{
-				Register: r,
-				RelAddr:  regWrite.AddressResolutionPass.RelAddr,
-				Bytes:    regWrite.Type().Bytes(),
+			toSave = append(toSave, architecture.MemoryAllocation{
+				BoundTo: r,
+				RelAddr: regWrite.AddressResolutionPass.RelAddr,
+				Bytes:   regWrite.Type().Bytes(),
 			})
 		}
 	}
 
-	return toSave
+	return slices.DeleteFunc(toSave, func(allocation architecture.MemoryAllocation) bool {
+		return allocation.BoundTo == node.RegisterAllocationPass.Result
+	})
 }
 
 func (node *Call) Execute(vm *runtime.VirtualMachine, result unsafe.Pointer) error {

@@ -1,7 +1,8 @@
 
 func main() {
     block entry {
-        $n : 8 byte = 0b1101;
+        $n : 8 byte = 0b11010110;
+        debug.dump($n);
         $steps : 8 byte = local.solve_collatz($n);
         debug.dump($steps);
     } return;
@@ -9,7 +10,7 @@ func main() {
 
 func solve_collatz(n : 8 byte) -> (steps : 8 byte) {
     block entry {
-        debug.dump(n);
+        // debug.dump(n);
         $one : 8 byte = 0b1;
         $check : 1 byte = alu.eq(n, $one);
         steps = 0b0;

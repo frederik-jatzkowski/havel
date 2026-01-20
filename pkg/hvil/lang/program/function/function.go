@@ -23,10 +23,9 @@ type Function struct {
 		Vars   names.Scope[*stack.Decl]
 	}]
 	address.Resolution[struct {
-		FrameSize  int
-		ResultSize int
-		VarsSize   int
-		RegsSize   int
+		FrameSize int
+		VarsSize  int
+		RegsSize  int
 	}]
 
 	Name   string                 `parser:"'func':Keyword @Ident"`
@@ -127,9 +126,12 @@ func (node *Function) ResolveAddresses(arch architecture.Architecture) error {
 		param.RegisterAllocationPass.BoundTo = paramPlan.BoundTo
 	}
 
+	if node.Result != nil {
+		node.Result.AddressResolutionPass.RelAddr = callPlan.Result.RelAddr
+		node.Result.RegisterAllocationPass.BoundTo = callPlan.Result.BoundTo
+	}
+
 	offset := callPlan.Offset
-	node.resolveResultAddress(offset)
-	offset += node.AddressResolutionPass.ResultSize
 	node.resolveLocalsAddresses(offset)
 	offset += node.AddressResolutionPass.VarsSize
 	node.resolveRegisterAddresses(offset)
@@ -138,16 +140,6 @@ func (node *Function) ResolveAddresses(arch architecture.Architecture) error {
 	node.AddressResolutionPass.FrameSize = offset
 
 	return nil
-}
-
-func (node *Function) resolveResultAddress(offset int) {
-	if node.Result == nil {
-		return
-	}
-
-	size := node.Result.Type().Bytes()
-	node.Result.AddressResolutionPass.RelAddr = offset
-	node.AddressResolutionPass.ResultSize = size
 }
 
 func (node *Function) resolveLocalsAddresses(offset int) {

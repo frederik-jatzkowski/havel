@@ -58,13 +58,13 @@ func (a *Architecture) CalculateCallPlan(signature *types.FunctionType) architec
 	offset := a.InitialStackOffset()
 	for i, param := range signature.Parameters.Items {
 		if i > len(argRegs)-1 {
-			call.Params = append(call.Params, architecture.CallParam{
+			call.Params = append(call.Params, architecture.MemoryAllocation{
 				RelAddr: offset,
 				Bytes:   param.Bytes(),
 			})
 		} else {
 			r := argRegs[i]
-			call.Params = append(call.Params, architecture.CallParam{
+			call.Params = append(call.Params, architecture.MemoryAllocation{
 				BoundTo: r,
 				RelAddr: offset,
 				Bytes:   param.Bytes(),
@@ -73,6 +73,14 @@ func (a *Architecture) CalculateCallPlan(signature *types.FunctionType) architec
 
 		offset += param.Bytes()
 	}
+
+	call.Result = architecture.MemoryAllocation{
+		BoundTo: a.resultRegisters[0],
+		RelAddr: offset,
+		Bytes:   signature.ReturnValue.Bytes(),
+	}
+
+	offset += call.Result.Bytes
 
 	call.Offset = offset
 
