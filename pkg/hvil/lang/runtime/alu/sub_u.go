@@ -63,6 +63,11 @@ func (node *SubU) ResolveTypes(target types.Type) error {
 	return nil
 }
 
+func (node *SubU) CalculateStatistics() {
+	node.Left.CalculateStatistics()
+	node.Right.CalculateStatistics()
+}
+
 func (node *SubU) AllocateRegisters(scope registeralloc.Scope) ([]architecture.Register, error) {
 	leftRegs, err := node.Left.AllocateRegisters(scope)
 	if err != nil {

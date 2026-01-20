@@ -91,6 +91,15 @@ func (node *Block) ResolveTypes() error {
 	return node.Terminator.ResolveTypes()
 }
 
+func (node *Block) CalculateStatistics() {
+	node.NameResolutionPass.Function.StatisticsPass.BlockCount++
+
+	for _, instr := range node.Instructions {
+		node.NameResolutionPass.Function.StatisticsPass.InstructionCount++
+		instr.CalculateStatistics()
+	}
+}
+
 func (node *Block) AllocateRegisters(scope registeralloc.Scope) error {
 	registers := make([]architecture.Register, 0, len(node.Instructions))
 	for i := range node.Instructions {

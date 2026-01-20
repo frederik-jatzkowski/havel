@@ -33,6 +33,10 @@ func (node *Decl) Type() types.Type {
 	return node.DeclaredType
 }
 
+func (node *Decl) CalculateStatistics() {
+
+}
+
 func (node *Decl) Addr(vm *runtime.VirtualMachine) unsafe.Pointer {
 	stackAddr := vm.StackPointer + node.AddressResolutionPass.RelAddr
 	return unsafe.Pointer(&vm.Stack[stackAddr])

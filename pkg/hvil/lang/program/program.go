@@ -60,6 +60,12 @@ func (node *Program) ResolveTypes() error {
 	return nil
 }
 
+func (node *Program) CalculateStatistics() {
+	for _, f := range node.Functions {
+		f.CalculateStatistics()
+	}
+}
+
 func (node *Program) ResolveAddresses(arch architecture.Architecture) error {
 	for i := 0; i < len(node.Functions); i++ {
 		if err := node.Functions[i].ResolveAddresses(arch); err != nil {

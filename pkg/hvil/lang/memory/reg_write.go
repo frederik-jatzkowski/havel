@@ -43,6 +43,10 @@ func (node *RegWrite) ResolveNames(ctx context.Context) error {
 	return nil
 }
 
+func (node *RegWrite) CalculateStatistics() {
+
+}
+
 func (node *RegWrite) AllocateRegisters(scope registeralloc.Scope) ([]architecture.Register, error) {
 	reg, ok := scope.GetGeneralPurposeRegister()
 	if !ok {

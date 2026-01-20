@@ -49,6 +49,14 @@ func (node *Instruction) Execute(vm *runtime.VirtualMachine) error {
 	return node.Operation.Execute(vm, result)
 }
 
+func (node *Instruction) CalculateStatistics() {
+	if node.ResultWrite != nil {
+		node.ResultWrite.CalculateStatistics()
+	}
+
+	node.Operation.CalculateStatistics()
+}
+
 func (node *Instruction) AllocateRegisters(scope registeralloc.Scope) ([]architecture.Register, error) {
 	regs, err := node.Operation.AllocateRegisters(scope)
 	if err != nil {

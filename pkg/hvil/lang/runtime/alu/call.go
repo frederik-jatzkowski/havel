@@ -29,6 +29,10 @@ func (node *Call) ResolveTypes(target types.Type) error {
 	return node.Operation.ResolveTypes(target)
 }
 
+func (node *Call) CalculateStatistics() {
+	node.Operation.CalculateStatistics()
+}
+
 func (node *Call) AllocateRegisters(scope registeralloc.Scope) ([]architecture.Register, error) {
 	return node.Operation.AllocateRegisters(scope)
 }

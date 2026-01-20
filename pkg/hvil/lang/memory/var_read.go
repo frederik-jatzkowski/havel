@@ -42,6 +42,10 @@ func (node *VarRead) ResolveNames(ctx context.Context) error {
 	return nil
 }
 
+func (node *VarRead) CalculateStatistics() {
+
+}
+
 func (node *VarRead) AllocateRegisters(scope registeralloc.Scope) ([]architecture.Register, error) {
 	node.NameResolutionPass.Decl.RegisterAllocationPass.Usages++
 

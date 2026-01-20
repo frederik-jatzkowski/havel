@@ -39,6 +39,10 @@ func (node *VarWrite) ResolveNames(ctx context.Context) error {
 	return nil
 }
 
+func (node *VarWrite) CalculateStatistics() {
+
+}
+
 func (node *VarWrite) AllocateRegisters(scope registeralloc.Scope) ([]architecture.Register, error) {
 	node.NameResolutionPass.Decl.RegisterAllocationPass.Usages++
 

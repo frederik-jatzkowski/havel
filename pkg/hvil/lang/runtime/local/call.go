@@ -83,6 +83,12 @@ func (node *Call) ResolveTypes(target types.Type) error {
 	return nil
 }
 
+func (node *Call) CalculateStatistics() {
+	for _, arg := range node.Args.Items {
+		arg.CalculateStatistics()
+	}
+}
+
 func (node *Call) calculateSignature(target types.Type) {
 	node.TypeCheckPass.Signature = &types.FunctionType{
 		Parameters: tool.List[types.Type]{

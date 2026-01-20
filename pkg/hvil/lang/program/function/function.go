@@ -11,6 +11,7 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/address"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/optimization/statistics"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
 )
@@ -21,6 +22,12 @@ type Function struct {
 		Entry  Block
 		Blocks names.Scope[Block]
 		Vars   names.Scope[*stack.Decl]
+	}]
+	statistics.Statistics[struct {
+		BlockCount        int
+		InstructionCount  int
+		AddressTakenCount int
+		CalledCount       int
 	}]
 	address.Resolution[struct {
 		FrameSize int
@@ -116,6 +123,22 @@ func (node *Function) Signature() *types.FunctionType {
 	}
 
 	return signature
+}
+
+func (node *Function) CalculateStatistics() {
+	for _, block := range node.Blocks {
+		block.CalculateStatistics()
+	}
+
+	for _, param := range node.Params.Items {
+		param.CalculateStatistics()
+	}
+
+	node.Result.CalculateStatistics()
+
+	for _, local := range node.Locals.Items {
+		local.CalculateStatistics()
+	}
 }
 
 func (node *Function) ResolveAddresses(arch architecture.Architecture) error {

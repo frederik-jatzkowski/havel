@@ -5,6 +5,7 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/codegen"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/optimization/statistics"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
 )
 
@@ -12,6 +13,7 @@ type Block interface {
 	names.ScopedObject
 	names.Resolver
 	codegen.VirtualMachine
+	statistics.Calculator
 
 	FullyQualifiedIdentifier() string
 	RegisterScope() names.Scope[*memory.RegWrite]

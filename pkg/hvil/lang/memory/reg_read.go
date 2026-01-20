@@ -41,6 +41,10 @@ func (node *RegRead) ResolveNames(ctx context.Context) error {
 	return nil
 }
 
+func (node *RegRead) CalculateStatistics() {
+
+}
+
 func (node *RegRead) AllocateRegisters(scope registeralloc.Scope) ([]architecture.Register, error) {
 	if node.NameResolutionPass.Decl.RegisterAllocationPass.Spilled {
 		reg, ok := scope.GetScratchRegister()

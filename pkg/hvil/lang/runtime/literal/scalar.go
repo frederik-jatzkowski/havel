@@ -27,6 +27,8 @@ type Scalar struct {
 	Value uint64 `parser:"@BitLiteral"`
 }
 
+func (node *Scalar) CalculateStatistics() {}
+
 func (node *Scalar) ResolveNames(_ context.Context) error {
 	return nil
 }
