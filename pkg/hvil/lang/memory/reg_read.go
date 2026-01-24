@@ -8,6 +8,7 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool/contexttool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/optimization/statistics"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/bytecode"
@@ -41,7 +42,12 @@ func (node *RegRead) ResolveNames(ctx context.Context) error {
 }
 
 func (node *RegRead) CalculateStatistics(ctx context.Context) {
+	id, err := contexttool.CurrentFromContext[statistics.InstructionID](ctx)
+	if err != nil {
+		panic(err)
+	}
 
+	node.NameResolutionPass.Decl.StatisticsPass.Reads = append(node.NameResolutionPass.Decl.StatisticsPass.Reads, id)
 }
 
 func (node *RegRead) AllocateRegisters(scope registeralloc.Scope) ([]architecture.Register, error) {

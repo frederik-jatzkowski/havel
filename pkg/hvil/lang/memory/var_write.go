@@ -10,6 +10,7 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool/contexttool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/optimization/statistics"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/bytecode"
@@ -39,7 +40,24 @@ func (node *VarWrite) ResolveNames(ctx context.Context) error {
 }
 
 func (node *VarWrite) CalculateStatistics(ctx context.Context) {
+	instructionID, err := contexttool.CurrentFromContext[statistics.InstructionID](ctx)
+	if err != nil {
+		panic(err)
+	}
 
+	blockID, err := contexttool.CurrentFromContext[statistics.BlockID](ctx)
+	if err != nil {
+		panic(err)
+	}
+
+	if node.NameResolutionPass.Decl.StatisticsPass.Writes == nil {
+		node.NameResolutionPass.Decl.StatisticsPass.Writes = make(map[statistics.BlockID][]statistics.InstructionID)
+	}
+
+	node.NameResolutionPass.Decl.StatisticsPass.Writes[blockID] = append(
+		node.NameResolutionPass.Decl.StatisticsPass.Writes[blockID],
+		instructionID,
+	)
 }
 
 func (node *VarWrite) AllocateRegisters(scope registeralloc.Scope) ([]architecture.Register, error) {

@@ -9,6 +9,7 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool/contexttool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/optimization/statistics"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/bytecode"
@@ -42,7 +43,24 @@ func (node *VarRead) ResolveNames(ctx context.Context) error {
 }
 
 func (node *VarRead) CalculateStatistics(ctx context.Context) {
+	instructionID, err := contexttool.CurrentFromContext[statistics.InstructionID](ctx)
+	if err != nil {
+		panic(err)
+	}
 
+	blockID, err := contexttool.CurrentFromContext[statistics.BlockID](ctx)
+	if err != nil {
+		panic(err)
+	}
+
+	if node.NameResolutionPass.Decl.StatisticsPass.Reads == nil {
+		node.NameResolutionPass.Decl.StatisticsPass.Reads = make(map[statistics.BlockID][]statistics.InstructionID)
+	}
+
+	node.NameResolutionPass.Decl.StatisticsPass.Reads[blockID] = append(
+		node.NameResolutionPass.Decl.StatisticsPass.Reads[blockID],
+		instructionID,
+	)
 }
 
 func (node *VarRead) AllocateRegisters(scope registeralloc.Scope) ([]architecture.Register, error) {

@@ -37,7 +37,9 @@ func (node *Dump) ResolveTypes(target types.Type) error {
 	return nil
 }
 
-func (node *Dump) CalculateStatistics(ctx context.Context) {}
+func (node *Dump) CalculateStatistics(ctx context.Context) {
+	node.Param.CalculateStatistics(ctx)
+}
 
 func (node *Dump) AllocateRegisters(scope registeralloc.Scope) ([]architecture.Register, error) {
 	return node.Param.AllocateRegisters(scope)

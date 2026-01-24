@@ -3,7 +3,6 @@ package local
 import (
 	"context"
 	"fmt"
-	"slices"
 
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function"
@@ -13,6 +12,7 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool/contexttool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/optimization/controlflow"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/optimization/statistics"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/typecheck"
@@ -31,6 +31,7 @@ type Call struct {
 		Signature *types.FunctionType
 	}]
 	statistics.Statistics[struct {
+		BlockID       statistics.BlockID
 		InstructionID statistics.InstructionID
 	}]
 	registeralloc.RegisterAllocation[struct {
@@ -82,12 +83,20 @@ func (node *Call) ResolveTypes(target types.Type) error {
 }
 
 func (node *Call) CalculateStatistics(ctx context.Context) {
-	id, err := contexttool.CurrentFromContext[statistics.InstructionID](ctx)
+	instructionID, err := contexttool.CurrentFromContext[statistics.InstructionID](ctx)
 	if err != nil {
 		panic(err)
 	}
 
-	node.StatisticsPass.InstructionID = id
+	node.StatisticsPass.InstructionID = instructionID
+
+	blockID, err := contexttool.CurrentFromContext[statistics.BlockID](ctx)
+	if err != nil {
+		panic(err)
+	}
+
+	node.StatisticsPass.BlockID = blockID
+
 	for _, arg := range node.Args.Items {
 		arg.CalculateStatistics(ctx)
 	}
@@ -258,6 +267,13 @@ func (node *Call) calculateSavedMemory() []architecture.MemoryAllocation {
 			continue
 		}
 
+		if !controlflow.MustBeSavedAt(
+			param.StatisticsPass.LiveRanges[node.StatisticsPass.BlockID],
+			node.StatisticsPass.InstructionID,
+		) {
+			continue
+		}
+
 		toSave = append(toSave, architecture.MemoryAllocation{
 			BoundTo: r,
 			RelAddr: param.AddressResolutionPass.RelAddr,
@@ -267,13 +283,36 @@ func (node *Call) calculateSavedMemory() []architecture.MemoryAllocation {
 
 	result := node.NameResolutionPass.Current.Result
 	if result != nil {
-		if r := result.RegisterAllocationPass.BoundTo; r != nil {
+		if r := result.RegisterAllocationPass.BoundTo; r != nil && controlflow.MustBeSavedAt(
+			result.StatisticsPass.LiveRanges[node.StatisticsPass.BlockID],
+			node.StatisticsPass.InstructionID,
+		) {
 			toSave = append(toSave, architecture.MemoryAllocation{
 				BoundTo: r,
 				RelAddr: result.AddressResolutionPass.RelAddr,
 				Bytes:   result.Type().Bytes(),
 			})
 		}
+	}
+
+	for _, local := range node.NameResolutionPass.Current.Locals.Items {
+		r := local.RegisterAllocationPass.BoundTo
+		if r == nil {
+			continue
+		}
+
+		if !controlflow.MustBeSavedAt(
+			local.StatisticsPass.LiveRanges[node.StatisticsPass.BlockID],
+			node.StatisticsPass.InstructionID,
+		) {
+			continue
+		}
+
+		toSave = append(toSave, architecture.MemoryAllocation{
+			BoundTo: r,
+			RelAddr: local.AddressResolutionPass.RelAddr,
+			Bytes:   local.Type().Bytes(),
+		})
 	}
 
 	for regWrite := range node.NameResolutionPass.Block.RegisterScope().All() {
@@ -287,7 +326,5 @@ func (node *Call) calculateSavedMemory() []architecture.MemoryAllocation {
 		}
 	}
 
-	return slices.DeleteFunc(toSave, func(allocation architecture.MemoryAllocation) bool {
-		return allocation.BoundTo == node.RegisterAllocationPass.Result
-	})
+	return toSave
 }

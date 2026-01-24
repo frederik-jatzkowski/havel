@@ -8,6 +8,7 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool/contexttool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/optimization/controlflow"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
 )
@@ -58,4 +59,8 @@ func (node *Jump) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	p.AddJumpToLabel(node.NameResolutionPass.Target.FullyQualifiedIdentifier(), node.Position())
 
 	return nil
+}
+
+func (node *Jump) Successors() []controlflow.Node {
+	return []controlflow.Node{node.NameResolutionPass.Target}
 }

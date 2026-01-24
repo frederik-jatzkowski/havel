@@ -13,6 +13,7 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool/contexttool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/address"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/optimization/controlflow"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/optimization/statistics"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
@@ -25,7 +26,9 @@ type Block struct {
 		Function *function.Function
 	}]
 	statistics.Statistics[struct {
-		TerminatorInstructionID statistics.InstructionID
+		BlockID            statistics.BlockID
+		FirstInstructionID statistics.InstructionID
+		LastInstructionID  statistics.InstructionID
 	}]
 	address.Resolution[struct {
 		SpillAddressMap map[*memory.RegWrite]uint16
@@ -94,8 +97,15 @@ func (node *Block) ResolveTypes() error {
 	return node.Terminator.ResolveTypes()
 }
 
-func (node *Block) CalculateStatistics(ctx context.Context, current statistics.InstructionID) (next statistics.InstructionID) {
+func (node *Block) CalculateStatistics(
+	ctx context.Context,
+	blockID statistics.BlockID,
+	current statistics.InstructionID,
+) (next statistics.InstructionID) {
+	node.StatisticsPass.BlockID = blockID
+	ctx = contexttool.WithCurrent(ctx, blockID)
 	node.NameResolutionPass.Function.StatisticsPass.BlockCount++
+	node.StatisticsPass.FirstInstructionID = current
 
 	for i, _ := range node.Instructions {
 		instr := &node.Instructions[i]
@@ -108,7 +118,7 @@ func (node *Block) CalculateStatistics(ctx context.Context, current statistics.I
 
 	ctx = contexttool.WithCurrent(ctx, current)
 	node.Terminator.CalculateStatistics(ctx)
-	node.StatisticsPass.TerminatorInstructionID = current
+	node.StatisticsPass.LastInstructionID = current
 
 	return current + 1
 }
@@ -124,7 +134,7 @@ func (node *Block) AllocateRegisters(scope registeralloc.Scope) error {
 		registers = append(registers, regs...)
 	}
 
-	scope.SetInstructionID(node.StatisticsPass.TerminatorInstructionID)
+	scope.SetInstructionID(node.StatisticsPass.LastInstructionID)
 
 	if err := node.Terminator.AllocateRegisters(scope); err != nil {
 		return err
@@ -145,4 +155,14 @@ func (node *Block) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	}
 
 	return node.Terminator.GenerateVirtualMachineAssembly(p)
+}
+
+var _ controlflow.Node = (*Block)(nil)
+
+func (node *Block) ID() statistics.BlockID {
+	return node.StatisticsPass.BlockID
+}
+
+func (node *Block) Successors() []controlflow.Node {
+	return node.Terminator.Successors()
 }

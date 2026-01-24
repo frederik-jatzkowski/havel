@@ -10,6 +10,7 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool/contexttool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/optimization/controlflow"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/bytecode"
@@ -82,4 +83,11 @@ func (node *Conditional) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	p.AddJumpToLabel(node.NameResolutionPass.Else.FullyQualifiedIdentifier(), node.Position())
 
 	return nil
+}
+
+func (node *Conditional) Successors() []controlflow.Node {
+	return []controlflow.Node{
+		node.NameResolutionPass.Then,
+		node.NameResolutionPass.Else,
+	}
 }

@@ -126,18 +126,22 @@ func (node *Function) Signature() *types.FunctionType {
 
 func (node *Function) CalculateStatistics(ctx context.Context) {
 	var current statistics.InstructionID
+	var blockID statistics.BlockID
 	for _, block := range node.Blocks {
-		current = block.CalculateStatistics(ctx, current)
+		current = block.CalculateStatistics(ctx, blockID, current)
+		blockID++
 	}
 
 	for _, param := range node.Params.Items {
-		param.CalculateStatistics(ctx)
+		param.CalculateStatistics(ctx, node.NameResolutionPass.Entry)
 	}
 
-	node.Result.CalculateStatistics(ctx)
+	if node.Result != nil {
+		node.Result.CalculateStatistics(ctx, node.NameResolutionPass.Entry)
+	}
 
 	for _, local := range node.Locals.Items {
-		local.CalculateStatistics(ctx)
+		local.CalculateStatistics(ctx, node.NameResolutionPass.Entry)
 	}
 }
 

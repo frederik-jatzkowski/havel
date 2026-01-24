@@ -7,11 +7,18 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/address"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/optimization/controlflow"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/optimization/statistics"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
 )
 
 type Decl struct {
 	tool.Node[Decl]
+	statistics.Statistics[struct {
+		Reads      map[statistics.BlockID][]statistics.InstructionID
+		Writes     map[statistics.BlockID][]statistics.InstructionID
+		LiveRanges map[statistics.BlockID][]controlflow.LiveRange
+	}]
 	address.Resolution[struct {
 		RelAddr int
 	}]
@@ -32,6 +39,6 @@ func (node *Decl) Type() types.Type {
 	return node.DeclaredType
 }
 
-func (node *Decl) CalculateStatistics(ctx context.Context) {
-
+func (node *Decl) CalculateStatistics(_ context.Context, entry controlflow.Node) {
+	node.StatisticsPass.LiveRanges = controlflow.ComputeLiveRanges(entry, node.StatisticsPass.Reads, node.StatisticsPass.Writes)
 }
