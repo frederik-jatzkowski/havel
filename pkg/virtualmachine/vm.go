@@ -9,11 +9,16 @@ import (
 )
 
 type VM struct {
-	pc, sp    *int64
-	done      bool
-	exitCode  int
+	done     bool
+	exitCode int
+
+	pc, sp *int64
+
 	registers [32]uint64
-	stack     []byte
+
+	stack []byte
+
+	heap *Heap
 
 	stdin          io.Reader
 	stdout, stderr io.Writer
@@ -38,9 +43,13 @@ func New(
 }
 
 func (vm *VM) Execute(p *bytecode.P) (err error) {
+	vm.done = false
+	vm.exitCode = 0
+
 	*vm.pc = 0
 	*vm.sp = 0
-	vm.done = false
+
+	vm.heap = &Heap{}
 
 	defer func() {
 		r := recover()
@@ -143,6 +152,26 @@ func (vm *VM) execI(p *bytecode.P) {
 		vm.execOPLoadStack32(p, i)
 	case bytecode.OPLoadStack64:
 		vm.execOPLoadStack64(p, i)
+	case bytecode.OPAlloc:
+		vm.execOPAlloc(p, i)
+	case bytecode.OPFree:
+		vm.execOPFree(p, i)
+	case bytecode.OPStore8:
+		vm.execOPStore8(p, i)
+	case bytecode.OPStore16:
+		vm.execOPStore16(p, i)
+	case bytecode.OPStore32:
+		vm.execOPStore32(p, i)
+	case bytecode.OPStore64:
+		vm.execOPStore64(p, i)
+	case bytecode.OPLoad8:
+		vm.execOPLoad8(p, i)
+	case bytecode.OPLoad16:
+		vm.execOPLoad16(p, i)
+	case bytecode.OPLoad32:
+		vm.execOPLoad32(p, i)
+	case bytecode.OPLoad64:
+		vm.execOPLoad64(p, i)
 	default:
 		panic(fmt.Sprintf("invalid opcode: %d (%s)", i.OP(), i.OP()))
 	}
@@ -465,5 +494,85 @@ func (vm *VM) execOPLoadStack32(p *bytecode.P, i bytecode.I) {
 func (vm *VM) execOPLoadStack64(p *bytecode.P, i bytecode.I) {
 	r1, offset := i.R1Uint16()
 	vm.registers[r1] = *(*uint64)(unsafe.Pointer(&vm.stack[*vm.sp+int64(offset)]))
+	*vm.pc++
+}
+
+//go:inline
+func (vm *VM) execOPAlloc(p *bytecode.P, i bytecode.I) {
+	r1, r2, _ := i.Regs()
+	ptr := vm.heap.Alloc(vm.registers[r2])
+	vm.registers[r1] = ptr.ToUint64()
+	*vm.pc++
+}
+
+//go:inline
+func (vm *VM) execOPFree(p *bytecode.P, i bytecode.I) {
+	r1, _, _ := i.Regs()
+	ptr := NewFatPtrFromUint64(vm.registers[r1])
+	vm.heap.Free(ptr)
+	*vm.pc++
+}
+
+//go:inline
+func (vm *VM) execOPStore8(p *bytecode.P, i bytecode.I) {
+	r1, r2, _ := i.Regs()
+	ptr := NewFatPtrFromUint64(vm.registers[r1])
+	vm.heap.Store8(ptr, uint8(vm.registers[r2]))
+	*vm.pc++
+}
+
+//go:inline
+func (vm *VM) execOPStore16(p *bytecode.P, i bytecode.I) {
+	r1, r2, _ := i.Regs()
+	ptr := NewFatPtrFromUint64(vm.registers[r1])
+	vm.heap.Store16(ptr, uint16(vm.registers[r2]))
+	*vm.pc++
+}
+
+//go:inline
+func (vm *VM) execOPStore32(p *bytecode.P, i bytecode.I) {
+	r1, r2, _ := i.Regs()
+	ptr := NewFatPtrFromUint64(vm.registers[r1])
+	vm.heap.Store32(ptr, uint32(vm.registers[r2]))
+	*vm.pc++
+}
+
+//go:inline
+func (vm *VM) execOPStore64(p *bytecode.P, i bytecode.I) {
+	r1, r2, _ := i.Regs()
+	ptr := NewFatPtrFromUint64(vm.registers[r1])
+	vm.heap.Store64(ptr, vm.registers[r2])
+	*vm.pc++
+}
+
+//go:inline
+func (vm *VM) execOPLoad8(p *bytecode.P, i bytecode.I) {
+	r1, r2, _ := i.Regs()
+	ptr := NewFatPtrFromUint64(vm.registers[r2])
+	vm.registers[r1] = uint64(vm.heap.Load8(ptr))
+	*vm.pc++
+}
+
+//go:inline
+func (vm *VM) execOPLoad16(p *bytecode.P, i bytecode.I) {
+	r1, r2, _ := i.Regs()
+	ptr := NewFatPtrFromUint64(vm.registers[r2])
+	vm.registers[r1] = uint64(vm.heap.Load16(ptr))
+	*vm.pc++
+}
+
+//go:inline
+func (vm *VM) execOPLoad32(p *bytecode.P, i bytecode.I) {
+	r1, r2, _ := i.Regs()
+	ptr := NewFatPtrFromUint64(vm.registers[r2])
+	vm.registers[r1] = uint64(vm.heap.Load32(ptr))
+	*vm.pc++
+}
+
+//go:inline
+func (vm *VM) execOPLoad64(p *bytecode.P, i bytecode.I) {
+	r1, r2, _ := i.Regs()
+	ptr := NewFatPtrFromUint64(vm.registers[r2])
+	vm.registers[r1] = vm.heap.Load64(ptr)
 	*vm.pc++
 }

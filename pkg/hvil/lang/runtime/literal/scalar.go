@@ -32,8 +32,9 @@ func (node *Scalar) ResolveNames(_ context.Context) error {
 }
 
 func (node *Scalar) ResolveTypes(target types.Type) error {
-	_, ok := target.(*types.ScalarType)
-	if !ok {
+	switch target.(type) {
+	case *types.ScalarType, *types.RefType:
+	default:
 		return node.Errorf("cannot assign scalar literal to %s", target)
 	}
 

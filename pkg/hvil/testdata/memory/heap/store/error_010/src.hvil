@@ -1,0 +1,8 @@
+
+func main() {
+    block entry {
+        $size : 8 byte = 0b1;
+        $ptr : ref = 0b100000000000000000000000000000000;
+        mem.store($ptr, $size);
+    } return;
+}

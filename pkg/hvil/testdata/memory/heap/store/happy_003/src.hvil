@@ -1,0 +1,10 @@
+
+func main() {
+    block entry {
+        $size : 2 byte = 0b1000;
+        $ptr : ref = mem.alloc($size);
+        mem.store($ptr, $size);
+        $loaded : 2 byte = mem.load($ptr);
+        debug.dump($loaded);
+    } return;
+}

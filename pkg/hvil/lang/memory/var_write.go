@@ -61,8 +61,6 @@ func (node *VarWrite) CalculateStatistics(ctx context.Context) {
 }
 
 func (node *VarWrite) AllocateRegisters(scope registeralloc.Scope) ([]architecture.Register, error) {
-	node.NameResolutionPass.Decl.RegisterAllocationPass.Usages++
-
 	if reg := node.NameResolutionPass.Decl.RegisterAllocationPass.BoundTo; reg != nil {
 		node.RegisterAllocationPass.Register = reg
 
@@ -86,16 +84,9 @@ func (node *VarWrite) GenerateVirtualMachineAssembly(p *assembly.P) error {
 		return nil
 	}
 
-	var op bytecode.OP
-	switch node.NameResolutionPass.Decl.Type().Bytes() {
-	case 1:
-		op = bytecode.OPStoreStack8
-	case 2:
-		op = bytecode.OPStoreStack16
-	case 4:
-		op = bytecode.OPStoreStack32
-	case 8:
-		op = bytecode.OPStoreStack64
+	op, err := bytecode.StoreStackForSize(node.NameResolutionPass.Decl.Type().Bytes())
+	if err != nil {
+		return node.Wrap(err)
 	}
 
 	p.AddI1RLit(op, node.Register().(bytecode.R), uint16(node.NameResolutionPass.Decl.AddressResolutionPass.RelAddr), node.Position())

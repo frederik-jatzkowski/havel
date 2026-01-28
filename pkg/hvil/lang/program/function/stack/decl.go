@@ -23,7 +23,6 @@ type Decl struct {
 		RelAddr int
 	}]
 	registeralloc.RegisterAllocation[struct {
-		Usages  int
 		BoundTo architecture.Register
 	}]
 

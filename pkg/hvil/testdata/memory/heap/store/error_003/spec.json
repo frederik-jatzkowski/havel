@@ -1,0 +1,9 @@
+{
+  "compiler": {
+    "errors": [
+      {
+        "contains": "src.hvil:6:13: 4 byte is not a ref type"
+      }
+    ]
+  }
+}

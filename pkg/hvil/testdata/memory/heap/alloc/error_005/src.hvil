@@ -1,0 +1,7 @@
+
+func main() {
+    block entry {
+        $n : ref = 0b1;
+        $ptr : ref = mem.alloc($n);
+    } return;
+}

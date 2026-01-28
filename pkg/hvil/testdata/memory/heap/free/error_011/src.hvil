@@ -1,0 +1,8 @@
+
+func main() {
+    block entry {
+        $size : 8 byte = 0b1;
+        $ptr : ref = mem.alloc($size);
+        $test : 8 byte = mem.free($ptr);
+    } return;
+}

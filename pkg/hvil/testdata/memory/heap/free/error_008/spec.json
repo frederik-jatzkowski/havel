@@ -1,0 +1,9 @@
+{
+  "compiler": {
+    "errors": [
+      {
+        "contains": "src.hvil:6:30: cannot assign void to 1 byte"
+      }
+    ]
+  }
+}

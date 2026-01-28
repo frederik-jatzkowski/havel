@@ -1,0 +1,8 @@
+
+func main() {
+    block entry {
+        $ptr : 1 byte = 0b1;
+        mem.load($ptr);
+        debug.dump($ptr);
+    } return;
+}
