@@ -16,7 +16,7 @@ type VM struct {
 
 	registers [32]uint64
 
-	stack []byte
+	stackSize int
 
 	heap *Heap
 
@@ -30,14 +30,17 @@ func New(
 	stdout, stderr io.Writer,
 ) *VM {
 	vm := &VM{
-		stdin:  stdin,
-		stdout: stdout,
-		stderr: stderr,
-		stack:  make([]byte, stackSize),
+		stdin:     stdin,
+		stdout:    stdout,
+		stderr:    stderr,
+		stackSize: stackSize,
 	}
 
 	vm.pc = (*int64)(unsafe.Pointer(&vm.registers[0]))
 	vm.sp = (*int64)(unsafe.Pointer(&vm.registers[1]))
+
+	vm.heap = &Heap{}
+	vm.heap.Alloc(uint64(vm.stackSize))
 
 	return vm
 }
@@ -49,7 +52,10 @@ func (vm *VM) Execute(p *bytecode.P) (err error) {
 	*vm.pc = 0
 	*vm.sp = 0
 
-	vm.heap = &Heap{}
+	if len(vm.heap.data) > 1 {
+		vm.heap.data = [][]byte{vm.heap.data[0]}
+		vm.heap.free = nil
+	}
 
 	defer func() {
 		r := recover()
@@ -136,26 +142,12 @@ func (vm *VM) execI(p *bytecode.P) {
 		vm.execOPAluEq(p, i)
 	case bytecode.OPAluMove:
 		vm.execOPAluMove(p, i)
-	case bytecode.OPStoreStack8:
-		vm.execOPStoreStack8(p, i)
-	case bytecode.OPStoreStack16:
-		vm.execOPStoreStack16(p, i)
-	case bytecode.OPStoreStack32:
-		vm.execOPStoreStack32(p, i)
-	case bytecode.OPStoreStack64:
-		vm.execOPStoreStack64(p, i)
-	case bytecode.OPLoadStack8:
-		vm.execOPLoadStack8(p, i)
-	case bytecode.OPLoadStack16:
-		vm.execOPLoadStack16(p, i)
-	case bytecode.OPLoadStack32:
-		vm.execOPLoadStack32(p, i)
-	case bytecode.OPLoadStack64:
-		vm.execOPLoadStack64(p, i)
 	case bytecode.OPAlloc:
 		vm.execOPAlloc(p, i)
 	case bytecode.OPFree:
 		vm.execOPFree(p, i)
+	case bytecode.OPStackPtr:
+		vm.execOPStackPtr(p, i)
 	case bytecode.OPStore8:
 		vm.execOPStore8(p, i)
 	case bytecode.OPStore16:
@@ -208,11 +200,11 @@ func (vm *VM) execOPCall(p *bytecode.P, i bytecode.I) {
 	fp, frameSize := i.R1Uint16()
 
 	// advance stack pointer
-	*(*int64)(unsafe.Pointer(&vm.stack[*vm.sp+int64(frameSize)+8])) = *vm.sp
+	vm.heap.Store64(NewFatPtr(0, uint32(*vm.sp+int64(frameSize)+8)), uint64(*vm.sp))
 	*vm.sp += int64(frameSize)
 
 	// prepare return address
-	*(*int64)(unsafe.Pointer(&vm.stack[*vm.sp])) = *vm.pc
+	vm.heap.Store64(NewFatPtr(0, uint32(*vm.sp)), uint64(*vm.pc))
 
 	*vm.pc = int64(vm.registers[fp])
 }
@@ -442,62 +434,6 @@ func (vm *VM) execOPAluMove(p *bytecode.P, i bytecode.I) {
 }
 
 //go:inline
-func (vm *VM) execOPStoreStack8(p *bytecode.P, i bytecode.I) {
-	r1, offset := i.R1Uint16()
-	vm.stack[*vm.sp+int64(offset)] = uint8(vm.registers[r1])
-	*vm.pc++
-}
-
-//go:inline
-func (vm *VM) execOPStoreStack16(p *bytecode.P, i bytecode.I) {
-	r1, offset := i.R1Uint16()
-	*(*uint16)(unsafe.Pointer(&vm.stack[*vm.sp+int64(offset)])) = uint16(vm.registers[r1])
-	*vm.pc++
-}
-
-//go:inline
-func (vm *VM) execOPStoreStack32(p *bytecode.P, i bytecode.I) {
-	r1, offset := i.R1Uint16()
-	*(*uint32)(unsafe.Pointer(&vm.stack[*vm.sp+int64(offset)])) = uint32(vm.registers[r1])
-	*vm.pc++
-}
-
-//go:inline
-func (vm *VM) execOPStoreStack64(p *bytecode.P, i bytecode.I) {
-	r1, offset := i.R1Uint16()
-	*(*uint64)(unsafe.Pointer(&vm.stack[*vm.sp+int64(offset)])) = vm.registers[r1]
-	*vm.pc++
-}
-
-//go:inline
-func (vm *VM) execOPLoadStack8(p *bytecode.P, i bytecode.I) {
-	r1, offset := i.R1Uint16()
-	vm.registers[r1] = uint64(vm.stack[*vm.sp+int64(offset)])
-	*vm.pc++
-}
-
-//go:inline
-func (vm *VM) execOPLoadStack16(p *bytecode.P, i bytecode.I) {
-	r1, offset := i.R1Uint16()
-	vm.registers[r1] = uint64(*(*uint16)(unsafe.Pointer(&vm.stack[*vm.sp+int64(offset)])))
-	*vm.pc++
-}
-
-//go:inline
-func (vm *VM) execOPLoadStack32(p *bytecode.P, i bytecode.I) {
-	r1, offset := i.R1Uint16()
-	vm.registers[r1] = uint64(*(*uint32)(unsafe.Pointer(&vm.stack[*vm.sp+int64(offset)])))
-	*vm.pc++
-}
-
-//go:inline
-func (vm *VM) execOPLoadStack64(p *bytecode.P, i bytecode.I) {
-	r1, offset := i.R1Uint16()
-	vm.registers[r1] = *(*uint64)(unsafe.Pointer(&vm.stack[*vm.sp+int64(offset)]))
-	*vm.pc++
-}
-
-//go:inline
 func (vm *VM) execOPAlloc(p *bytecode.P, i bytecode.I) {
 	r1, r2, _ := i.Regs()
 	ptr := vm.heap.Alloc(vm.registers[r2])
@@ -510,6 +446,14 @@ func (vm *VM) execOPFree(p *bytecode.P, i bytecode.I) {
 	r1, _, _ := i.Regs()
 	ptr := NewFatPtrFromUint64(vm.registers[r1])
 	vm.heap.Free(ptr)
+	*vm.pc++
+}
+
+//go:inline
+func (vm *VM) execOPStackPtr(p *bytecode.P, i bytecode.I) {
+	r1, offset := i.R1Uint16()
+	ptr := NewFatPtr(0, uint32(offset)+uint32(*vm.sp))
+	vm.registers[r1] = ptr.ToUint64()
 	*vm.pc++
 }
 

@@ -4,7 +4,7 @@
   },
   "execution": {
     "stdout_lines": [
-      "src.hvil:6:15 register content: 0"
+      "src.hvil:6:15 register content: 4294967296"
     ]
   }
 }

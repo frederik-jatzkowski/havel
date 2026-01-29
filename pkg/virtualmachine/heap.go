@@ -1,5 +1,7 @@
 package virtualmachine
 
+import "encoding/binary"
+
 type Heap struct {
 	data [][]byte
 	free []uint32
@@ -34,26 +36,17 @@ func (h *Heap) Store8(ptr FatPtr, value uint8) {
 }
 
 func (h *Heap) Store16(ptr FatPtr, value uint16) {
-	h.data[ptr.handle][ptr.offset] = byte(value)
-	h.data[ptr.handle][ptr.offset+1] = byte(value >> 8)
+	// Slice once: This triggers a single bounds check for [offset : offset+2]
+	// and provides a 2-byte sub-slice for the binary package.
+	binary.LittleEndian.PutUint16(h.data[ptr.handle][ptr.offset:ptr.offset+2], value)
 }
 
 func (h *Heap) Store32(ptr FatPtr, value uint32) {
-	h.data[ptr.handle][ptr.offset] = byte(value)
-	h.data[ptr.handle][ptr.offset+1] = byte(value >> 8)
-	h.data[ptr.handle][ptr.offset+2] = byte(value >> 16)
-	h.data[ptr.handle][ptr.offset+3] = byte(value >> 24)
+	binary.LittleEndian.PutUint32(h.data[ptr.handle][ptr.offset:ptr.offset+4], value)
 }
 
 func (h *Heap) Store64(ptr FatPtr, value uint64) {
-	h.data[ptr.handle][ptr.offset] = byte(value)
-	h.data[ptr.handle][ptr.offset+1] = byte(value >> 8)
-	h.data[ptr.handle][ptr.offset+2] = byte(value >> 16)
-	h.data[ptr.handle][ptr.offset+3] = byte(value >> 24)
-	h.data[ptr.handle][ptr.offset+1] = byte(value >> 32)
-	h.data[ptr.handle][ptr.offset+2] = byte(value >> 40)
-	h.data[ptr.handle][ptr.offset+3] = byte(value >> 48)
-	h.data[ptr.handle][ptr.offset+1] = byte(value >> 56)
+	binary.LittleEndian.PutUint64(h.data[ptr.handle][ptr.offset:ptr.offset+8], value)
 }
 
 func (h *Heap) Load8(ptr FatPtr) uint8 {
@@ -61,26 +54,17 @@ func (h *Heap) Load8(ptr FatPtr) uint8 {
 }
 
 func (h *Heap) Load16(ptr FatPtr) uint16 {
-	return uint16(h.data[ptr.handle][ptr.offset]) +
-		(uint16(h.data[ptr.handle][ptr.offset+1]) << 8)
+	// The compiler will optimize this sub-slice and binary call
+	// into a single MOV instruction on most modern architectures.
+	return binary.LittleEndian.Uint16(h.data[ptr.handle][ptr.offset : ptr.offset+2])
 }
 
 func (h *Heap) Load32(ptr FatPtr) uint32 {
-	return uint32(h.data[ptr.handle][ptr.offset]) +
-		(uint32(h.data[ptr.handle][ptr.offset+1]) << 8) +
-		(uint32(h.data[ptr.handle][ptr.offset+1]) << 16) +
-		(uint32(h.data[ptr.handle][ptr.offset+1]) << 24)
+	return binary.LittleEndian.Uint32(h.data[ptr.handle][ptr.offset : ptr.offset+4])
 }
 
 func (h *Heap) Load64(ptr FatPtr) uint64 {
-	return uint64(h.data[ptr.handle][ptr.offset]) +
-		(uint64(h.data[ptr.handle][ptr.offset+1]) << 8) +
-		(uint64(h.data[ptr.handle][ptr.offset+1]) << 16) +
-		(uint64(h.data[ptr.handle][ptr.offset+1]) << 24) +
-		(uint64(h.data[ptr.handle][ptr.offset+1]) << 32) +
-		(uint64(h.data[ptr.handle][ptr.offset+1]) << 40) +
-		(uint64(h.data[ptr.handle][ptr.offset+1]) << 48) +
-		(uint64(h.data[ptr.handle][ptr.offset+1]) << 56)
+	return binary.LittleEndian.Uint64(h.data[ptr.handle][ptr.offset : ptr.offset+8])
 }
 
 type FatPtr struct {
@@ -94,11 +78,11 @@ func NewFatPtr(handle uint32, offset uint32) FatPtr {
 
 func NewFatPtrFromUint64(value uint64) FatPtr {
 	return FatPtr{
-		handle: uint32(value),
-		offset: uint32(value >> 32),
+		handle: uint32(value >> 32),
+		offset: uint32(value),
 	}
 }
 
 func (p FatPtr) ToUint64() uint64 {
-	return (uint64(p.offset) << 32) | uint64(p.handle)
+	return (uint64(p.offset)) | uint64(p.handle)<<32
 }

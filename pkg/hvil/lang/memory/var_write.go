@@ -22,7 +22,7 @@ type VarWrite struct {
 		Decl *stack.Decl
 	}]
 	registeralloc.RegisterAllocation[struct {
-		Register architecture.Register
+		Register, Temp architecture.Register
 	}]
 
 	Ident string `parser:"@Ident"`
@@ -72,7 +72,13 @@ func (node *VarWrite) AllocateRegisters(scope registeralloc.Scope) ([]architectu
 		return nil, node.Errorf("cannot allocate variable store register")
 	}
 
+	temp, ok := scope.GetScratchRegister()
+	if !ok {
+		return nil, node.Errorf("cannot allocate variable store tmp register")
+	}
+
 	node.RegisterAllocationPass.Register = reg
+	node.RegisterAllocationPass.Temp = temp
 
 	scope.ReturnScratchRegisters(reg)
 
@@ -84,12 +90,14 @@ func (node *VarWrite) GenerateVirtualMachineAssembly(p *assembly.P) error {
 		return nil
 	}
 
-	op, err := bytecode.StoreStackForSize(node.NameResolutionPass.Decl.Type().Bytes())
+	p.AddI1RLit(bytecode.OPStackPtr, node.RegisterAllocationPass.Temp.(bytecode.R), uint16(node.NameResolutionPass.Decl.AddressResolutionPass.RelAddr), node.Position())
+
+	op, err := bytecode.StoreForSize(node.NameResolutionPass.Decl.Type().Bytes())
 	if err != nil {
 		return node.Wrap(err)
 	}
 
-	p.AddI1RLit(op, node.Register().(bytecode.R), uint16(node.NameResolutionPass.Decl.AddressResolutionPass.RelAddr), node.Position())
+	p.AddI2R(op, node.RegisterAllocationPass.Temp.(bytecode.R), node.Register().(bytecode.R), node.Position())
 
 	return nil
 }

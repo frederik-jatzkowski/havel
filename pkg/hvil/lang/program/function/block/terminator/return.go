@@ -23,7 +23,7 @@ type Return struct {
 		Function *function.Function
 	}]
 	registeralloc.RegisterAllocation[struct {
-		ExitCode architecture.Register
+		Temp architecture.Register
 	}]
 
 	Token string `parser:"@'return':Keyword" json:"-"`
@@ -77,18 +77,20 @@ func (node *Return) AllocateRegisters(scope registeralloc.Scope) error {
 	}
 
 	scope.ReturnScratchRegisters(r)
-	node.RegisterAllocationPass.ExitCode = r
+	node.RegisterAllocationPass.Temp = r
 
 	return nil
 }
 
 func (node *Return) GenerateVirtualMachineAssembly(p *assembly.P) error {
+	temp := node.RegisterAllocationPass.Temp.(bytecode.R)
 	if node.NameResolutionPass.IsMain {
 		// exit code 0
-		p.AddLit(node.RegisterAllocationPass.ExitCode.(bytecode.R), 1, 0, node.Position())
-		p.AddI1R(bytecode.OPExit, node.RegisterAllocationPass.ExitCode.(bytecode.R), node.Position())
+		p.AddLit(temp, 1, 0, node.Position())
+		p.AddI1R(bytecode.OPExit, temp, node.Position())
 	} else {
-		p.AddI1RLit(bytecode.OPLoadStack64, bytecode.PC, 0, node.Position())
+		p.AddI1RLit(bytecode.OPStackPtr, temp, 0, node.Position())
+		p.AddI2R(bytecode.OPLoad64, bytecode.PC, temp, node.Position())
 	}
 
 	return nil

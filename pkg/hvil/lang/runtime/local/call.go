@@ -173,23 +173,31 @@ func (node *Call) generateVirtualMachineAssemblyCallCode(p *assembly.P) {
 
 	p.AddLoadLabel(temp, node.NameResolutionPass.Called.NameResolutionPass.Entry.FullyQualifiedIdentifier(), node.Position())
 	p.AddCall(temp, uint32(frameSize), node.Position())
-	p.AddI1RLit(bytecode.OPLoadStack64, bytecode.SP, 8, node.Position()) // restore stack pointer
+	// restore stack pointer
+	p.AddI1RLit(bytecode.OPStackPtr, temp, 8, node.Position())
+	p.AddI2R(bytecode.OPLoad64, bytecode.SP, temp, node.Position())
 }
 
 func (node *Call) generateVirtualMachineAssemblySaveCode(p *assembly.P, toSave []architecture.MemoryAllocation) error {
+	temp := node.RegisterAllocationPass.Temp.(bytecode.R)
+
 	for _, saved := range toSave {
-		op, err := bytecode.StoreStackForSize(saved.Bytes)
+		p.AddI1RLit(bytecode.OPStackPtr, temp, uint16(saved.RelAddr), node.Position())
+
+		op, err := bytecode.StoreForSize(saved.Bytes)
 		if err != nil {
 			return node.Wrap(err)
 		}
 
-		p.AddI1RLit(op, saved.BoundTo.(bytecode.R), uint16(saved.RelAddr), node.Position())
+		p.AddI2R(op, temp, saved.BoundTo.(bytecode.R), node.Position())
 	}
 
 	return nil
 }
 
 func (node *Call) generateVirtualMachineAssemblyParamsCode(p *assembly.P) error {
+	temp := node.RegisterAllocationPass.Temp.(bytecode.R)
+
 	frameSize := node.NameResolutionPass.Current.AddressResolutionPass.FrameSize
 	for i, param := range node.NameResolutionPass.Called.Params.Items {
 		arg := node.Args.Items[i]
@@ -204,12 +212,14 @@ func (node *Call) generateVirtualMachineAssemblyParamsCode(p *assembly.P) error 
 				p.AddI2R(bytecode.OPAluMove, plan.BoundTo.(bytecode.R), arg.Register().(bytecode.R), arg.Position())
 			}
 		} else {
-			op, err := bytecode.StoreStackForSize(param.Type().Bytes())
+			p.AddI1RLit(bytecode.OPStackPtr, temp, uint16(frameSize+param.AddressResolutionPass.RelAddr), node.Position())
+
+			op, err := bytecode.StoreForSize(param.Type().Bytes())
 			if err != nil {
 				return node.Wrap(err)
 			}
 
-			p.AddI1RLit(op, arg.Register().(bytecode.R), uint16(frameSize+param.AddressResolutionPass.RelAddr), node.Position())
+			p.AddI2R(op, temp, arg.Register().(bytecode.R), node.Position())
 		}
 	}
 
@@ -217,13 +227,17 @@ func (node *Call) generateVirtualMachineAssemblyParamsCode(p *assembly.P) error 
 }
 
 func (node *Call) generateVirtualMachineAssemblyRestoreCode(p *assembly.P, toSave []architecture.MemoryAllocation) error {
+	temp := node.RegisterAllocationPass.Temp.(bytecode.R)
+
 	for _, saved := range toSave {
-		op, err := bytecode.LoadStackForSize(saved.Bytes)
+		p.AddI1RLit(bytecode.OPStackPtr, temp, uint16(saved.RelAddr), node.Position())
+
+		op, err := bytecode.LoadForSize(saved.Bytes)
 		if err != nil {
 			return node.Wrap(err)
 		}
 
-		p.AddI1RLit(op, saved.BoundTo.(bytecode.R), uint16(saved.RelAddr), node.Position())
+		p.AddI2R(op, saved.BoundTo.(bytecode.R), temp, node.Position())
 	}
 
 	return nil
@@ -242,17 +256,15 @@ func (node *Call) generateVirtualMachineAssemblyResultCode(p *assembly.P) error 
 			return nil
 		}
 
-		op, err := bytecode.LoadStackForSize(node.NameResolutionPass.Called.Result.Type().Bytes())
+		temp := node.RegisterAllocationPass.Temp.(bytecode.R)
+		p.AddI1RLit(bytecode.OPStackPtr, temp, uint16(frameSize+node.NameResolutionPass.Called.Result.AddressResolutionPass.RelAddr), node.Position())
+
+		op, err := bytecode.LoadForSize(node.NameResolutionPass.Called.Result.Type().Bytes())
 		if err != nil {
 			return node.Wrap(err)
 		}
 
-		p.AddI1RLit(
-			op,
-			node.RegisterAllocationPass.Result.(bytecode.R),
-			uint16(frameSize+node.NameResolutionPass.Called.Result.AddressResolutionPass.RelAddr),
-			node.Position(),
-		)
+		p.AddI2R(op, node.RegisterAllocationPass.Result.(bytecode.R), temp, node.Position())
 	}
 
 	return nil

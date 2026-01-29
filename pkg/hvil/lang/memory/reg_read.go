@@ -71,19 +71,14 @@ func (node *RegRead) AllocateRegisters(scope registeralloc.Scope) ([]architectur
 
 func (node *RegRead) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	if node.NameResolutionPass.Decl.RegisterAllocationPass.Spilled {
-		var op bytecode.OP
-		switch node.NameResolutionPass.Decl.Type().Bytes() {
-		case 1:
-			op = bytecode.OPLoadStack8
-		case 2:
-			op = bytecode.OPLoadStack16
-		case 4:
-			op = bytecode.OPLoadStack32
-		case 8:
-			op = bytecode.OPLoadStack64
+		p.AddI1RLit(bytecode.OPStackPtr, node.Register().(bytecode.R), uint16(node.NameResolutionPass.Decl.AddressResolutionPass.RelAddr), node.Position())
+
+		op, err := bytecode.LoadForSize(node.NameResolutionPass.Decl.Type().Bytes())
+		if err != nil {
+			return node.Wrap(err)
 		}
 
-		p.AddI1RLit(op, node.Register().(bytecode.R), uint16(node.NameResolutionPass.Decl.AddressResolutionPass.RelAddr), node.Position())
+		p.AddI2R(op, node.Register().(bytecode.R), node.Register().(bytecode.R), node.Position())
 	}
 
 	return nil

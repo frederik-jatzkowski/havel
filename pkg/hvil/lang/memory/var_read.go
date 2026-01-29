@@ -85,12 +85,14 @@ func (node *VarRead) GenerateVirtualMachineAssembly(p *assembly.P) error {
 		return nil
 	}
 
-	op, err := bytecode.LoadStackForSize(node.NameResolutionPass.Decl.Type().Bytes())
+	p.AddI1RLit(bytecode.OPStackPtr, node.Register().(bytecode.R), uint16(node.NameResolutionPass.Decl.AddressResolutionPass.RelAddr), node.Position())
+
+	op, err := bytecode.LoadForSize(node.NameResolutionPass.Decl.Type().Bytes())
 	if err != nil {
 		return node.Wrap(err)
 	}
 
-	p.AddI1RLit(op, node.Register().(bytecode.R), uint16(node.NameResolutionPass.Decl.AddressResolutionPass.RelAddr), node.Position())
+	p.AddI2R(op, node.Register().(bytecode.R), node.Register().(bytecode.R), node.Position())
 
 	return nil
 }

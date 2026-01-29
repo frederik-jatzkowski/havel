@@ -40,16 +40,9 @@ import "fmt"
 //		alu_lt_u,
 //		alu_eq,
 //		alu_move,
-//		store_stack_8,
-//		store_stack_16,
-//		store_stack_32,
-//		store_stack_64,
-//		load_stack_8,
-//		load_stack_16,
-//		load_stack_32,
-//		load_stack_64,
 //		alloc,
 //		free,
+//		stack_ptr,
 //		store_8,
 //		store_16,
 //		store_32,
@@ -60,36 +53,6 @@ import "fmt"
 //		load_64
 //	)
 type OP byte
-
-func LoadStackForSize(size int) (OP, error) {
-	switch size {
-	case 1:
-		return OPLoadStack8, nil
-	case 2:
-		return OPLoadStack16, nil
-	case 4:
-		return OPLoadStack32, nil
-	case 8:
-		return OPLoadStack64, nil
-	default:
-		return 0, fmt.Errorf("unsupported size %d", size)
-	}
-}
-
-func StoreStackForSize(size int) (OP, error) {
-	switch size {
-	case 1:
-		return OPStoreStack8, nil
-	case 2:
-		return OPStoreStack16, nil
-	case 4:
-		return OPStoreStack32, nil
-	case 8:
-		return OPStoreStack64, nil
-	default:
-		return 0, fmt.Errorf("unsupported size %d", size)
-	}
-}
 
 func LoadForSize(size int) (OP, error) {
 	switch size {
