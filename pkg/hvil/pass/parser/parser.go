@@ -83,3 +83,7 @@ func Parse(fileName string, reader io.Reader) (program.Program, error) {
 
 	return *prog, err
 }
+
+func String() string {
+	return parser.String()
+}

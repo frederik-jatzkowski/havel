@@ -10,6 +10,7 @@ func NewHvilCmd() *cobra.Command {
 
 	cmd.AddCommand(NewHvilDumpCmd())
 	cmd.AddCommand(NewHvilRunCmd())
+	cmd.AddCommand(NewHvilGrammarCmd())
 
 	return cmd
 }
