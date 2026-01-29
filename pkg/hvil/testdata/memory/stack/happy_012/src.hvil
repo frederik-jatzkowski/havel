@@ -1,0 +1,19 @@
+
+func main() {
+    block entry {
+        $n : 1 byte = 0b1;
+        local.volatile($n);
+    } return;
+}
+
+func volatile(n : 1 byte) {
+    block entry {
+        mem.ptr(n); // make it volatile
+        local.noop(); // check if save - restore logic works
+        debug.dump(n);
+    } return;
+}
+
+func noop() {
+    block entry {} return;
+}

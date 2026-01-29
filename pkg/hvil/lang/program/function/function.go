@@ -13,6 +13,7 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/optimization/statistics"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
+	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/bytecode"
 )
 
 type Function struct {
@@ -32,6 +33,10 @@ type Function struct {
 		FrameSize int
 		VarsSize  int
 		RegsSize  int
+		CallPlan  architecture.CallPlan
+	}]
+	registeralloc.RegisterAllocation[struct {
+		Temp architecture.Register
 	}]
 
 	Name   string                 `parser:"'func':Keyword @Ident"`
@@ -147,14 +152,18 @@ func (node *Function) CalculateStatistics(ctx context.Context) {
 
 func (node *Function) ResolveAddresses(arch architecture.Architecture) error {
 	callPlan := arch.CalculateCallPlan(node.Signature())
+	node.AddressResolutionPass.CallPlan = callPlan
+
 	for i, paramPlan := range callPlan.Params {
 		param := node.Params.Items[i]
 		param.AddressResolutionPass.RelAddr = paramPlan.RelAddr
+		param.RegisterAllocationPass.Volatile = node.Params.Items[i].StatisticsPass.PtrTaken
 		param.RegisterAllocationPass.BoundTo = paramPlan.BoundTo
 	}
 
 	if node.Result != nil {
 		node.Result.AddressResolutionPass.RelAddr = callPlan.Result.RelAddr
+		node.Result.RegisterAllocationPass.Volatile = node.Result.StatisticsPass.PtrTaken
 		node.Result.RegisterAllocationPass.BoundTo = callPlan.Result.BoundTo
 	}
 
@@ -188,6 +197,14 @@ func (node *Function) resolveRegisterAddresses(offset int) {
 
 func (node *Function) AllocateRegisters(allocator registeralloc.Allocator) error {
 	scope := allocator.NewScope()
+	temp, ok := scope.GetScratchRegister()
+	if !ok {
+		return node.Errorf("failed to allocate temp register")
+	}
+
+	node.RegisterAllocationPass.Temp = temp
+	scope.ReturnScratchRegisters(temp)
+
 	for i := 0; i < len(node.Blocks); i++ {
 		if err := node.Blocks[i].AllocateRegisters(scope); err != nil {
 			return err
@@ -198,6 +215,20 @@ func (node *Function) AllocateRegisters(allocator registeralloc.Allocator) error
 }
 
 func (node *Function) GenerateVirtualMachineAssembly(p *assembly.P) error {
+	temp := node.RegisterAllocationPass.Temp.(bytecode.R)
+	for _, param := range node.Params.Items {
+		if param.RegisterAllocationPass.Volatile {
+			p.AddI1RLit(bytecode.OPStackPtr, temp, uint16(param.AddressResolutionPass.RelAddr), node.Position())
+
+			op, err := bytecode.StoreForSize(param.Type().Bytes())
+			if err != nil {
+				return node.Wrap(err)
+			}
+
+			p.AddI2R(op, temp, param.RegisterAllocationPass.BoundTo.(bytecode.R), node.Position())
+		}
+	}
+
 	for i := 0; i < len(node.Blocks); i++ {
 		if err := node.Blocks[i].GenerateVirtualMachineAssembly(p); err != nil {
 			return err

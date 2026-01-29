@@ -275,7 +275,7 @@ func (node *Call) calculateSavedMemory() []architecture.MemoryAllocation {
 
 	for _, param := range node.NameResolutionPass.Current.Params.Items {
 		r := param.RegisterAllocationPass.BoundTo
-		if r == nil {
+		if r == nil || param.RegisterAllocationPass.Volatile {
 			continue
 		}
 
@@ -295,7 +295,7 @@ func (node *Call) calculateSavedMemory() []architecture.MemoryAllocation {
 
 	result := node.NameResolutionPass.Current.Result
 	if result != nil {
-		if r := result.RegisterAllocationPass.BoundTo; r != nil && controlflow.MustBeSavedAt(
+		if r := result.RegisterAllocationPass.BoundTo; r != nil && !result.RegisterAllocationPass.Volatile && controlflow.MustBeSavedAt(
 			result.StatisticsPass.LiveRanges[node.StatisticsPass.BlockID],
 			node.StatisticsPass.InstructionID,
 		) {
@@ -309,7 +309,7 @@ func (node *Call) calculateSavedMemory() []architecture.MemoryAllocation {
 
 	for _, local := range node.NameResolutionPass.Current.Locals.Items {
 		r := local.RegisterAllocationPass.BoundTo
-		if r == nil {
+		if r == nil || local.RegisterAllocationPass.Volatile {
 			continue
 		}
 

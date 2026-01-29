@@ -1,0 +1,12 @@
+
+func main() {
+    declare (
+        n : 1 byte
+    );
+
+    block entry {
+        n = 0b1;
+        $ptr : 1 byte = mem.ptr(n);
+        debug.dump(n);
+    } return;
+}

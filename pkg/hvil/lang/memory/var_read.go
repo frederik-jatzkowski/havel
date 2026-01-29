@@ -64,7 +64,8 @@ func (node *VarRead) CalculateStatistics(ctx context.Context) {
 }
 
 func (node *VarRead) AllocateRegisters(scope registeralloc.Scope) ([]architecture.Register, error) {
-	if reg := node.NameResolutionPass.Decl.RegisterAllocationPass.BoundTo; reg != nil {
+	decl := node.NameResolutionPass.Decl
+	if reg := decl.RegisterAllocationPass.BoundTo; reg != nil && !decl.RegisterAllocationPass.Volatile {
 		node.RegisterAllocationPass.Register = reg
 
 		return nil, nil
@@ -81,7 +82,8 @@ func (node *VarRead) AllocateRegisters(scope registeralloc.Scope) ([]architectur
 }
 
 func (node *VarRead) GenerateVirtualMachineAssembly(p *assembly.P) error {
-	if reg := node.NameResolutionPass.Decl.RegisterAllocationPass.BoundTo; reg != nil {
+	decl := node.NameResolutionPass.Decl
+	if reg := decl.RegisterAllocationPass.BoundTo; reg != nil && !decl.RegisterAllocationPass.Volatile {
 		return nil
 	}
 

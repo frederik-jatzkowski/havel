@@ -1,0 +1,26 @@
+
+func main() {
+    declare (
+        n : 4 byte
+    );
+
+    block entry {
+        $ptr : ref = mem.ptr(n);
+
+        $one : 4 byte = 0b1;
+        mem.store($ptr, $one);
+
+        local.inc_ref($ptr);
+
+        debug.dump(n);
+    } return;
+}
+
+func inc_ref(value : ref) {
+    block entry {
+        $loaded : 4 byte = mem.load(value);
+        $one : 4 byte = 0b1;
+        $result : 4 byte = alu.add_u($loaded, $one);
+        mem.store(value, $result);
+    } return;
+}

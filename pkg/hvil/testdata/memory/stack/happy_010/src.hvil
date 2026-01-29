@@ -1,0 +1,17 @@
+
+func main() {
+    block entry {
+        $n : 1 byte = 0b1;
+        local.volatile($n);
+    } return;
+}
+
+func volatile(n : 1 byte) {
+    block entry {
+        $ptr : ref = mem.ptr(n);
+        debug.dump(n);
+        $val : 1 byte = 0b10;
+        mem.store($ptr, $val);
+        debug.dump(n);
+    } return;
+}

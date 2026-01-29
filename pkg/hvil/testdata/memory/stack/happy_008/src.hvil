@@ -1,0 +1,35 @@
+
+func main() {
+    block entry {
+        $ptr : ref = local.create_dangling();
+        local.print($ptr);
+        local.overwrite_dangling();
+        local.print($ptr);
+    } return;
+}
+
+func create_dangling() -> (result: ref) {
+    declare (n : 4 byte );
+
+    block entry {
+        n = 0b1;
+        result = mem.ptr(n);
+    } return;
+}
+
+func overwrite_dangling() -> (result: ref) {
+    declare (n : 4 byte );
+
+    block entry {
+        n = 0b10;
+        mem.ptr(n); // avoid optimizations
+    } return;
+}
+
+
+func print(ptr : ref) {
+    block entry {
+        $value : 4 byte = mem.load(ptr);
+        debug.dump($value);
+    } return;
+}

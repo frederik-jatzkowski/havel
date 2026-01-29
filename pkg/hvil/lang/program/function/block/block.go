@@ -17,6 +17,7 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/optimization/statistics"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
+	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/bytecode"
 )
 
 type Block struct {
@@ -147,6 +148,20 @@ func (node *Block) AllocateRegisters(scope registeralloc.Scope) error {
 
 func (node *Block) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	p.AddLabel(node.FullyQualifiedIdentifier(), node.Position())
+
+	temp := node.NameResolutionPass.Function.RegisterAllocationPass.Temp.(bytecode.R)
+	for _, param := range node.NameResolutionPass.Function.Params.Items {
+		if param.RegisterAllocationPass.Volatile {
+			p.AddI1RLit(bytecode.OPStackPtr, temp, uint16(param.AddressResolutionPass.RelAddr), node.Position())
+
+			op, err := bytecode.StoreForSize(param.Type().Bytes())
+			if err != nil {
+				return node.Wrap(err)
+			}
+
+			p.AddI2R(op, temp, param.RegisterAllocationPass.BoundTo.(bytecode.R), node.Position())
+		}
+	}
 
 	for i := range node.Instructions {
 		if err := node.Instructions[i].GenerateVirtualMachineAssembly(p); err != nil {

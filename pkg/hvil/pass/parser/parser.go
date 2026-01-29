@@ -26,11 +26,31 @@ var parser = participle.MustBuild[program.Program](
 	participle.Elide("Whitespace", "Comment"),
 	participle.UseLookahead(1),
 	participle.Union[function.Block](&block.Block{}),
-	participle.Union[types.Type](&types.ScalarType{}, &types.RefType{}, &types.FunctionType{}),
-	participle.Union[block.Terminator](&terminator.Return{}, &terminator.Jump{}, &terminator.Conditional{}),
-	participle.Union[instruction.MemoryWrite](&memory.RegWrite{}, &memory.VarWrite{}),
-	participle.Union[instruction.MemoryRead](&memory.RegRead{}, &memory.VarRead{}),
-	participle.Union[instruction.Operation](&literal.Scalar{}, &alu.Call{}, &local.Call{}, &debug.Call{}, &mem.Call{}),
+	participle.Union[types.Type](
+		&types.ScalarType{},
+		&types.RefType{},
+		&types.FunctionType{},
+	),
+	participle.Union[block.Terminator](
+		&terminator.Return{},
+		&terminator.Jump{},
+		&terminator.Conditional{},
+	),
+	participle.Union[instruction.MemoryWrite](
+		&memory.RegWrite{},
+		&memory.VarWrite{},
+	),
+	participle.Union[instruction.MemoryRead](
+		&memory.RegRead{},
+		&memory.VarRead{},
+	),
+	participle.Union[instruction.Operation](
+		&literal.Scalar{},
+		&alu.Call{},
+		&local.Call{},
+		&debug.Call{},
+		&mem.Call{},
+	),
 	participle.Union[alu.Operation](
 		&alu.Move{},
 		&alu.AddU{},
@@ -46,6 +66,7 @@ var parser = participle.MustBuild[program.Program](
 		&mem.Free{},
 		&mem.Store{},
 		&mem.Load{},
+		&mem.Ptr{},
 	),
 	participle.Union[debug.Operation](&debug.Dump{}),
 )

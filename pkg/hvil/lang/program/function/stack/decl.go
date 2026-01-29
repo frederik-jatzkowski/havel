@@ -15,6 +15,7 @@ import (
 type Decl struct {
 	tool.Node[Decl]
 	statistics.Statistics[struct {
+		PtrTaken   bool
 		Reads      map[statistics.BlockID][]statistics.InstructionID
 		Writes     map[statistics.BlockID][]statistics.InstructionID
 		LiveRanges map[statistics.BlockID][]controlflow.LiveRange
@@ -23,7 +24,8 @@ type Decl struct {
 		RelAddr int
 	}]
 	registeralloc.RegisterAllocation[struct {
-		BoundTo architecture.Register
+		BoundTo  architecture.Register
+		Volatile bool
 	}]
 
 	Name         string     `parser:"@Ident"`

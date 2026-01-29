@@ -1,0 +1,21 @@
+
+func main() {
+    declare (
+        n : ref
+    );
+
+    block entry {
+        $ptr : ref = mem.ptr(n);
+
+        local.inc_ref($ptr);
+
+        debug.dump(n);
+    } return;
+}
+
+func inc_ref(ptr : ref) {
+    block entry {
+        $value : ref = 0b111;
+        mem.store(ptr, $value);
+    } return;
+}
