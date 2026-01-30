@@ -3,7 +3,7 @@ func main() {
     block entry {
         $two : 1 byte = 0b10;
         $one : 1 byte = 0b1;
-        local.print($one);
+        call.local.print($one);
         debug.dump($two);
     } return;
 }

@@ -28,6 +28,7 @@ type Function struct {
 		InstructionCount  int
 		AddressTakenCount int
 		CalledCount       int
+		AddressTaken      int
 	}]
 	address.Resolution[struct {
 		FrameSize int

@@ -2,7 +2,7 @@
   "compiler": {
     "errors": [
       {
-        "contains": "src.hvil:4:9 function parameter count mismatch: expected 0, got 1"
+        "contains": "src.hvil:4:14 function parameter count mismatch: expected 0, got 1"
       }
     ]
   },

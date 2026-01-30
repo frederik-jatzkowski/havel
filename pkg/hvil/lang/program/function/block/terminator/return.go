@@ -89,6 +89,20 @@ func (node *Return) GenerateVirtualMachineAssembly(p *assembly.P) error {
 		p.AddLit(temp, 1, 0, node.Position())
 		p.AddI1R(bytecode.OPExit, temp, node.Position())
 	} else {
+		result := node.NameResolutionPass.Function.Result
+		if result != nil && result.RegisterAllocationPass.Volatile {
+			// store final result in register if it is kept in memory
+
+			p.AddI1RLit(bytecode.OPStackPtr, temp, uint16(result.AddressResolutionPass.RelAddr), node.Position())
+
+			op, err := bytecode.LoadForSize(result.Type().Bytes())
+			if err != nil {
+				return node.Wrap(err)
+			}
+
+			p.AddI2R(op, result.RegisterAllocationPass.BoundTo.(bytecode.R), temp, node.Position())
+		}
+
 		p.AddI1RLit(bytecode.OPStackPtr, temp, 0, node.Position())
 		p.AddI2R(bytecode.OPLoad64, bytecode.PC, temp, node.Position())
 	}

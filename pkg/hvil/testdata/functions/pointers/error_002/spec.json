@@ -1,0 +1,12 @@
+{
+  "compiler": {
+    "errors": [
+      {
+        "contains": "src.hvil:7:30 function parameter count mismatch: expected 2, got 1"
+      }
+    ]
+  },
+  "execution": {
+    "stdout_lines": []
+  }
+}

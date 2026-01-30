@@ -1,0 +1,16 @@
+func main() {
+    block entry {
+        $f : func(1 byte) -> (1 byte) = call.ptr(identity);
+        // This should fail because of parameter count mismatch
+        $arg1 : 1 byte = 0b1;
+        $arg2 : 1 byte = 0b10;
+        $res : 1 byte = call.dyn.$f($arg1, $arg2);
+        debug.dump($res);
+    } return;
+}
+
+func identity(x : 1 byte) -> (y : 1 byte) {
+    block entry {
+        y = alu.move(x);
+    } return;
+}

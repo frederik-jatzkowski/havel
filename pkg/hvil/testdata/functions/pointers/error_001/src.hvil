@@ -1,0 +1,7 @@
+func main() {
+    block entry {
+        $not_a_func : 1 byte = 0b1010;
+        // This should fail because $not_a_func is not a function pointer
+        call.dyn.$not_a_func();
+    } return;
+}

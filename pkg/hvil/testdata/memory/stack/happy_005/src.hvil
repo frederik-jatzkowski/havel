@@ -7,7 +7,7 @@ func main() {
     block entry {
         $ptr : ref = mem.ptr(n);
 
-        local.inc_ref($ptr);
+        call.local.inc_ref($ptr);
 
         debug.dump(n);
     } return;

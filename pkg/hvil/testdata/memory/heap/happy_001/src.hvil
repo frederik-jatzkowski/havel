@@ -5,7 +5,7 @@ func main() {
         $ptr : ref = mem.alloc($size);
         $one : 1 byte = 0b1;
         mem.store($ptr, $one);
-        local.inc_ref($ptr);
+        call.local.inc_ref($ptr);
         $n : 1 byte = mem.load($ptr);
         debug.dump($n);
         mem.free($ptr);

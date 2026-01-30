@@ -11,9 +11,9 @@ func main() {
 
         $ptr : ref = mem.alloc($total);
 
-        local.fill($ptr, $size, $len);
+        call.local.fill($ptr, $size, $len);
 
-        $sum : 4 byte = local.sum($ptr, $size, $len);
+        $sum : 4 byte = call.local.sum($ptr, $size, $len);
 
         debug.dump($sum);
     } return;

@@ -3,7 +3,7 @@ func main() {
     block entry {
         $n : 8 byte = 0b11010110;
         debug.dump($n);
-        $steps : 8 byte = local.solve_collatz($n);
+        $steps : 8 byte = call.local.solve_collatz($n);
         debug.dump($steps);
     } return;
 }
@@ -17,24 +17,24 @@ func solve_collatz(n : 8 byte) -> (steps : 8 byte) {
     } if $check then exit else decide;
 
     block decide {
-        $check : 1 byte = local.is_even(n);
+        $check : 1 byte = call.local.is_even(n);
     } if $check then divide else multiply;
 
     block divide {
         $two : 8 byte = 0b10;
         n = alu.div_u(n, $two);
-        steps = local.solve_collatz(n);
+        steps = call.local.solve_collatz(n);
     } goto exit;
 
     block multiply {
         $three : 8 byte = 0b11;
         n = alu.mul_u(n, $three);
-        n = local.inc(n);
-        steps = local.solve_collatz(n);
+        n = call.local.inc(n);
+        steps = call.local.solve_collatz(n);
     } goto exit;
 
     block exit {
-        steps = local.inc(steps);
+        steps = call.local.inc(steps);
     } return;
 }
 

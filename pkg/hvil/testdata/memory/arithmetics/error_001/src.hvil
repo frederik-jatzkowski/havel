@@ -13,7 +13,7 @@ func main() {
 
         $invalidsize : 8 byte = 0b10000;
 
-        local.fill($ptr, $invalidsize, $len); // segfault in here
+        call.local.fill($ptr, $invalidsize, $len); // segfault in here
     } return;
 }
 

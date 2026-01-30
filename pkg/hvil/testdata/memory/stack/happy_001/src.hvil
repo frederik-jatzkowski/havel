@@ -10,7 +10,7 @@ func main() {
         $one : 1 byte = 0b1;
         mem.store($ptr, $one);
 
-        local.inc_ref($ptr);
+        call.local.inc_ref($ptr);
 
         debug.dump(n);
     } return;

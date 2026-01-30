@@ -1,10 +1,10 @@
 
 func main() {
     block entry {
-        $ptr : ref = local.create_dangling();
-        local.print($ptr);
-        local.overwrite_dangling();
-        local.print($ptr);
+        $ptr : ref = call.local.create_dangling();
+        call.local.print($ptr);
+        call.local.overwrite_dangling();
+        call.local.print($ptr);
     } return;
 }
 

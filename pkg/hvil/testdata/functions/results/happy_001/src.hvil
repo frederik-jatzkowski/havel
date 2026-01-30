@@ -1,7 +1,7 @@
 
 func main() {
     block entry {
-        $dice : 1 byte = local.throw_dice();
+        $dice : 1 byte = call.local.throw_dice();
         debug.dump($dice);
     } return;
 }

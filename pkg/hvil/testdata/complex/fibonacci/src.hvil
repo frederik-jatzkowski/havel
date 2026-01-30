@@ -4,7 +4,7 @@ func main() {
         $n : 8 byte = 0b1011101;
         debug.dump($n);
 
-        $fib_n : 8 byte = local.fib($n);
+        $fib_n : 8 byte = call.local.fib($n);
         debug.dump($fib_n);
     } return;
 }
@@ -32,7 +32,7 @@ func fib(n : 8 byte) -> (result : 8 byte) {
         result = alu.move(next_fib);
         next_fib = alu.move($new_fib);
 
-        counter = local.inc(counter);
+        counter = call.local.inc(counter);
     } goto loop_head;
 
     block exit {} return;

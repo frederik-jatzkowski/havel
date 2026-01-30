@@ -2,7 +2,7 @@
 func main() {
     block entry {
         $two : 1 byte = 0b10;
-        local.print();
+        call.local.print();
         debug.dump($two);
     } return;
 }

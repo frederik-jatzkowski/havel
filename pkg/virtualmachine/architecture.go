@@ -77,7 +77,7 @@ func (a *Architecture) CalculateCallPlan(signature *types.FunctionType) architec
 	call.Result = architecture.MemoryAllocation{
 		BoundTo: a.resultRegisters[0],
 		RelAddr: offset,
-		Bytes:   signature.ReturnValue.Bytes(),
+		Bytes:   signature.ReturnType().Bytes(),
 	}
 
 	offset += call.Result.Bytes

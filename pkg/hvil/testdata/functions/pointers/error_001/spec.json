@@ -1,0 +1,12 @@
+{
+  "compiler": {
+    "errors": [
+      {
+        "contains": "src.hvil:5:14 1 byte is not a function type"
+      }
+    ]
+  },
+  "execution": {
+    "stdout_lines": []
+  }
+}

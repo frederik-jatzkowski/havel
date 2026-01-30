@@ -15,7 +15,7 @@ func main() {
     
     block entry {
         a10 = 0b1;
-        local.print(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
+        call.local.print(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
     } return;
 }
 

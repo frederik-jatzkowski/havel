@@ -11,9 +11,9 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block/instruction"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block/terminator"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime/alu"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime/call"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime/debug"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime/literal"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime/local"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime/mem"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/token"
@@ -47,7 +47,7 @@ var parser = participle.MustBuild[program.Program](
 	participle.Union[instruction.Operation](
 		&literal.Scalar{},
 		&alu.Call{},
-		&local.Call{},
+		&call.Call{},
 		&debug.Call{},
 		&mem.Call{},
 	),
@@ -67,6 +67,11 @@ var parser = participle.MustBuild[program.Program](
 		&mem.Store{},
 		&mem.Load{},
 		&mem.Ptr{},
+	),
+	participle.Union[call.Operation](
+		&call.Local{},
+		&call.Ptr{},
+		&call.Dyn{},
 	),
 	participle.Union[debug.Operation](&debug.Dump{}),
 )

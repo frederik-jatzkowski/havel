@@ -10,7 +10,7 @@ type FunctionType struct {
 	tool.Node[FunctionType]
 
 	Parameters  tool.List[Type] `parser:"'func' '(' @@ ')'"`
-	ReturnValue Type            `parser:"( '=>' @@ )?"`
+	ReturnValue Type            `parser:"( '->' '(' @@ ')' )?"`
 }
 
 func (node *FunctionType) CanBeAssigned(other Type) bool {
@@ -33,7 +33,7 @@ func (node *FunctionType) CanBeAssignedDetailed(other Type) error {
 		}
 	}
 
-	if err := node.ReturnValue.CanBeAssignedDetailed(otherFn.ReturnValue); err != nil {
+	if err := node.ReturnType().CanBeAssignedDetailed(otherFn.ReturnType()); err != nil {
 		return fmt.Errorf("function return value mismatch: %w", err)
 	}
 
@@ -60,7 +60,7 @@ func (node *FunctionType) EqualsDetailed(other Type) error {
 		}
 	}
 
-	if err := node.ReturnValue.EqualsDetailed(otherFn.ReturnValue); err != nil {
+	if err := node.ReturnType().EqualsDetailed(otherFn.ReturnType()); err != nil {
 		return fmt.Errorf("function return value mismatch: %w", err)
 	}
 
@@ -69,6 +69,14 @@ func (node *FunctionType) EqualsDetailed(other Type) error {
 
 func (node *FunctionType) Bytes() int {
 	return 8
+}
+
+func (node *FunctionType) ReturnType() Type {
+	if node.ReturnValue == nil {
+		return &Void{}
+	}
+
+	return node.ReturnValue
 }
 
 func (node *FunctionType) CanDoArithmetics() bool {

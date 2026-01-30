@@ -1,0 +1,24 @@
+func main() {
+    block entry {
+        $get_adder : func() -> (func(1 byte, 1 byte) -> (1 byte)) = call.ptr(get_adder);
+        $add : func(1 byte, 1 byte) -> (1 byte) = call.dyn.$get_adder();
+        
+        $a : 1 byte = 0b101; // 5
+        $b : 1 byte = 0b011; // 3
+        $res : 1 byte = call.dyn.$add($a, $b);
+        
+        debug.dump($res);
+    } return;
+}
+
+func get_adder() -> (f : func(1 byte, 1 byte) -> (1 byte)) {
+    block entry {
+        f = call.ptr(add);
+    } return;
+}
+
+func add(x : 1 byte, y : 1 byte) -> (z : 1 byte) {
+    block entry {
+        z = alu.add_u(x, y);
+    } return;
+}

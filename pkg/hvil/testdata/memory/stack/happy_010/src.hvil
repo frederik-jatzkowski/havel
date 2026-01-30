@@ -2,7 +2,7 @@
 func main() {
     block entry {
         $n : 1 byte = 0b1;
-        local.volatile($n);
+        call.local.volatile($n);
     } return;
 }
 

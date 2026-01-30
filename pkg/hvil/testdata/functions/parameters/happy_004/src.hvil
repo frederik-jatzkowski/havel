@@ -6,7 +6,7 @@ func main() {
     
     block entry {
         one = 0b1;
-        local.print(one);
+        call.local.print(one);
     } return;
 }
 
