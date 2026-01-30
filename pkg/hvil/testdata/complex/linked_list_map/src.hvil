@@ -1,0 +1,76 @@
+// This test implements a linked list where each node is allocated on the heap.
+// It then uses a 'map' function (using function pointers) to double each element in the list.
+
+func main() {
+    block entry {
+        // Create a list: [5, 10]
+        $val1 : 1 byte = 0b101;  // 5
+        $head : ref = call.local.create_node($val1);
+
+        $val2 : 1 byte = 0b1010; // 10
+        $node2 : ref = call.local.create_node($val2);
+        
+        // Link head -> node2
+        $offset : 8 byte = 0b1;
+        $next_ptr_in_head : ref = alu.add_u($head, $offset); // next is at offset 1
+        mem.store($next_ptr_in_head, $node2);
+
+        // Map function: double
+        $double_func : func(ref) = call.ptr(double_node);
+        call.local.map($head, $double_func);
+
+        // Verify values
+        $v1 : 1 byte = mem.load($head);
+        debug.dump($v1); // Should be 10
+
+        $v2 : 1 byte = mem.load($node2);
+        debug.dump($v2); // Should be 20
+    } return;
+}
+
+func create_node(val : 1 byte) -> (node : ref) {
+    block entry {
+        // Node structure: [value (1 byte), next (ref/8 bytes)] = 9 bytes
+        $size : 8 byte = 0b1001; 
+        node = mem.alloc($size);
+        mem.store(node, val);
+        
+        $offset : 8 byte = 0b1;
+        $next_ptr : ref = alu.add_u(node, $offset);
+        $null : ref = 0b0;
+        mem.store($next_ptr, $null);
+    } return;
+}
+
+func double_node(node_ptr : ref) {
+    block entry {
+        $val : 1 byte = mem.load(node_ptr);
+        $res : 1 byte = alu.add_u($val, $val);
+        mem.store(node_ptr, $res);
+    } return;
+}
+
+func map(head : ref, f : func(ref)) {
+    declare (
+        curr : ref
+    );
+    block entry {
+        curr = alu.move(head);
+    } goto loop_head;
+
+    block loop_head {
+        $null : ref = 0b0;
+        $is_null : 1 byte = alu.eq(curr, $null);
+    } if $is_null then exit else body;
+
+    block body {
+        call.dyn.f(curr);
+        
+        $offset : 8 byte = 0b1;
+        $next_ptr_addr : ref = alu.add_u(curr, $offset);
+        curr = mem.load($next_ptr_addr);
+    } goto loop_head;
+
+    block exit {
+    } return;
+}

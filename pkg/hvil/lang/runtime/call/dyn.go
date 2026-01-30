@@ -71,7 +71,11 @@ func (node *Dyn) ResolveNames(ctx context.Context) error {
 func (node *Dyn) ResolveTypes(target types.Type) error {
 	node.TypeCheckPass.Signature = calculateSignature(node.Args.Items, target)
 
-	if err := node.TypeCheckPass.Signature.CanBeAssignedDetailed(node.Target.Type()); err != nil {
+	if _, ok := node.Target.Type().(*types.FunctionType); !ok {
+		return node.Errorf("%s is not a function type", node.Target.Type())
+	}
+
+	if err := node.Target.Type().CanBeAssignedDetailed(node.TypeCheckPass.Signature); err != nil {
 		return node.Wrap(err)
 	}
 

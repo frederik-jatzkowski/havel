@@ -1,0 +1,366 @@
+// Dijkstra's algorithm implementation in HVIL.
+// Graph: 10 nodes, 15 edges.
+// Nodes are heap-allocated.
+
+func main() {
+    block entry {
+        // Node structure (11 bytes):
+        // [0] dist (1 byte)
+        // [1] visited (1 byte)
+        // [2] edge_count (1 byte)
+        // [3] edges_ptr (ref/8 bytes)
+
+        // Edge structure (9 bytes):
+        // [0] target_node (ref/8 bytes)
+        // [8] weight (1 byte)
+
+        // Create 10 nodes
+        $n0 : ref = call.local.init_node();
+        $n1 : ref = call.local.init_node();
+        $n2 : ref = call.local.init_node();
+        $n3 : ref = call.local.init_node();
+        $n4 : ref = call.local.init_node();
+        $n5 : ref = call.local.init_node();
+        $n6 : ref = call.local.init_node();
+        $n7 : ref = call.local.init_node();
+        $n8 : ref = call.local.init_node();
+        $n9 : ref = call.local.init_node();
+
+        // Add 15 edges (undirected, so 30 directed edges for simplicity)
+        // Actually, user asked for at least 15 edges. I'll make a directed graph for simplicity of implementation.
+        // 0 -> 1 (w:1), 0 -> 2 (w:4)
+        // 1 -> 2 (w:2), 1 -> 3 (w:6)
+        // 2 -> 3 (w:3)
+        // 3 -> 4 (w:1), 3 -> 5 (w:5)
+        // 4 -> 5 (w:2), 4 -> 6 (w:7)
+        // 5 -> 6 (w:1), 5 -> 7 (w:4)
+        // 6 -> 7 (w:3), 6 -> 8 (w:2)
+        // 7 -> 8 (w:1), 7 -> 9 (w:5)
+        // 8 -> 9 (w:2)
+        // Total 17 edges.
+
+        $w01 : 1 byte = 0b1;
+        call.local.add_edge($n0, $n1, $w01);
+        $w02 : 1 byte = 0b100;
+        call.local.add_edge($n0, $n2, $w02);
+        $w12 : 1 byte = 0b10;
+        call.local.add_edge($n1, $n2, $w12);
+        $w13 : 1 byte = 0b110;
+        call.local.add_edge($n1, $n3, $w13);
+        $w23 : 1 byte = 0b11;
+        call.local.add_edge($n2, $n3, $w23);
+        $w34 : 1 byte = 0b1;
+        call.local.add_edge($n3, $n4, $w34);
+        $w35 : 1 byte = 0b101;
+        call.local.add_edge($n3, $n5, $w35);
+        $w45 : 1 byte = 0b10;
+        call.local.add_edge($n4, $n5, $w45);
+        $w46 : 1 byte = 0b111;
+        call.local.add_edge($n4, $n6, $w46);
+        $w56 : 1 byte = 0b1;
+        call.local.add_edge($n5, $n6, $w56);
+        $w57 : 1 byte = 0b100;
+        call.local.add_edge($n5, $n7, $w57);
+        $w67 : 1 byte = 0b11;
+        call.local.add_edge($n6, $n7, $w67);
+        $w68 : 1 byte = 0b10;
+        call.local.add_edge($n6, $n8, $w68);
+        $w78 : 1 byte = 0b1;
+        call.local.add_edge($n7, $n8, $w78);
+        $w79 : 1 byte = 0b101;
+        call.local.add_edge($n7, $n9, $w79);
+        $w89 : 1 byte = 0b10;
+        call.local.add_edge($n8, $n9, $w89);
+
+        // Dijkstra from $n0
+        $start_dist : 1 byte = 0b0;
+        mem.store($n0, $start_dist);
+
+        // We need to store all nodes in an array for the outer loop (find min unvisited)
+        $nodes_array_size : 8 byte = 0b1010000; // 10 * 8 = 80 bytes
+        $nodes : ref = mem.alloc($nodes_array_size);
+        $o0 : 8 byte = 0b0;
+        $ptr0 : ref = alu.add_u($nodes, $o0);
+        mem.store($ptr0, $n0);
+        $o1 : 8 byte = 0b1000;
+        $ptr1 : ref = alu.add_u($nodes, $o1);
+        mem.store($ptr1, $n1);
+        $o2 : 8 byte = 0b10000;
+        $ptr2 : ref = alu.add_u($nodes, $o2);
+        mem.store($ptr2, $n2);
+        $o3 : 8 byte = 0b11000;
+        $ptr3 : ref = alu.add_u($nodes, $o3);
+        mem.store($ptr3, $n3);
+        $o4 : 8 byte = 0b100000;
+        $ptr4 : ref = alu.add_u($nodes, $o4);
+        mem.store($ptr4, $n4);
+        $o5 : 8 byte = 0b101000;
+        $ptr5 : ref = alu.add_u($nodes, $o5);
+        mem.store($ptr5, $n5);
+        $o6 : 8 byte = 0b110000;
+        $ptr6 : ref = alu.add_u($nodes, $o6);
+        mem.store($ptr6, $n6);
+        $o7 : 8 byte = 0b111000;
+        $ptr7 : ref = alu.add_u($nodes, $o7);
+        mem.store($ptr7, $n7);
+        $o8 : 8 byte = 0b1000000;
+        $ptr8 : ref = alu.add_u($nodes, $o8);
+        mem.store($ptr8, $n8);
+        $o9 : 8 byte = 0b1001000;
+        $ptr9 : ref = alu.add_u($nodes, $o9);
+        mem.store($ptr9, $n9);
+
+        $node_count : 1 byte = 0b1010; // 10
+        call.local.dijkstra_loop($nodes, $node_count);
+
+        // Result: shortest path to $n9
+        $d9 : 1 byte = mem.load($n9);
+        debug.dump($d9);
+    } return;
+}
+
+func init_node() -> (node : ref) {
+    block entry {
+        $size : 8 byte = 0b1011; // 11 bytes
+        node = mem.alloc($size);
+        $inf : 1 byte = 0b11111111; // 255
+        mem.store(node, $inf); // dist
+        $s1 : 8 byte = 0b1;
+        $visited_ptr : ref = alu.add_u(node, $s1);
+        $false : 1 byte = 0b0;
+        mem.store($visited_ptr, $false); // visited
+        $s2 : 8 byte = 0b10;
+        $count_ptr : ref = alu.add_u(node, $s2);
+        $zero : 1 byte = 0b0;
+        mem.store($count_ptr, $zero); // edge_count
+        $s3 : 8 byte = 0b11;
+        $edges_ptr_addr : ref = alu.add_u(node, $s3);
+        $null : ref = 0b0;
+        mem.store($edges_ptr_addr, $null); // edges_ptr
+    } return;
+}
+
+func add_edge(src : ref, dst : ref, weight : 1 byte) {
+    declare (
+        count : 1 byte,
+        old_ptr : ref,
+        new_ptr : ref,
+        edges_ptr_addr : ref,
+        old_size : 8 byte,
+        count_ptr : ref,
+        new_count : 1 byte
+    );
+    block entry {
+        $s2 : 8 byte = 0b10;
+        count_ptr = alu.add_u(src, $s2);
+        count = mem.load(count_ptr);
+        $s3 : 8 byte = 0b11;
+        edges_ptr_addr = alu.add_u(src, $s3);
+        old_ptr = mem.load(edges_ptr_addr);
+
+        $one : 1 byte = 0b1;
+        new_count = alu.add_u(count, $one);
+        
+        // New size = new_count * 9
+        $edge_size : 8 byte = 0b1001;
+        $s8tmp : 8 byte = 0b1000;
+        $tmp : ref = mem.alloc($s8tmp);
+        $zero8 : 8 byte = 0b0;
+        mem.store($tmp, $zero8);
+        mem.store($tmp, count);
+        $count8_loaded : 8 byte = mem.load($tmp);
+        old_size = alu.mul_u($count8_loaded, $edge_size);
+        $new_size : 8 byte = alu.add_u(old_size, $edge_size);
+        
+        new_ptr = mem.alloc($new_size);
+        
+        // Copy old edges if any
+        $zero1 : 1 byte = 0b0;
+        $is_zero : 1 byte = alu.eq(count, $zero1);
+    } if $is_zero then skip_copy else copy;
+
+    block copy {
+        call.local.memcpy(new_ptr, old_ptr, old_size);
+    } goto skip_copy;
+
+    block skip_copy {
+        // Append new edge at offset = old_size
+        $new_edge_addr : ref = alu.add_u(new_ptr, old_size);
+        mem.store($new_edge_addr, dst);
+        $s8 : 8 byte = 0b1000;
+        $w_addr : ref = alu.add_u($new_edge_addr, $s8);
+        mem.store($w_addr, weight);
+        
+        // Update src node
+        mem.store(count_ptr, new_count);
+        mem.store(edges_ptr_addr, new_ptr);
+    } return;
+}
+
+func memcpy(dst : ref, src : ref, size : 8 byte) {
+    declare (i : 8 byte);
+    block entry {
+        $zero : 8 byte = 0b0;
+        i = alu.move($zero);
+    } goto head;
+    block head { $done : 1 byte = alu.eq(i, size); } if $done then exit else body;
+    block body {
+        $s : ref = alu.add_u(src, i);
+        $d : ref = alu.add_u(dst, i);
+        $val : 1 byte = mem.load($s);
+        mem.store($d, $val);
+        $one : 8 byte = 0b1;
+        i = alu.add_u(i, $one);
+    } goto head;
+    block exit {} return;
+}
+
+func dijkstra_loop(nodes : ref, count : 1 byte) {
+    declare (
+        i : 1 byte,
+        u : ref
+    );
+    block entry {
+        $zero : 1 byte = 0b0;
+        i = alu.move($zero);
+    } goto head;
+    block head { $done : 1 byte = alu.eq(i, count); } if $done then exit else body;
+    block body {
+        u = call.local.find_min_unvisited(nodes, count);
+        $null : ref = 0b0;
+        $is_null : 1 byte = alu.eq(u, $null);
+    } if $is_null then exit else relax;
+
+    block relax {
+        // Mark u as visited
+        $s1 : 8 byte = 0b1;
+        $visited_ptr : ref = alu.add_u(u, $s1);
+        $true : 1 byte = 0b1;
+        mem.store($visited_ptr, $true);
+        
+        // For each neighbor of u
+        $s2 : 8 byte = 0b10;
+        $ptr_count : ref = alu.add_u(u, $s2);
+        $edge_count : 1 byte = mem.load($ptr_count);
+        $s3 : 8 byte = 0b11;
+        $ptr_edges : ref = alu.add_u(u, $s3);
+        $edges : ref = mem.load($ptr_edges);
+        
+        call.local.relax_neighbors(u, $edges, $edge_count);
+        
+        $one : 1 byte = 0b1;
+        i = alu.add_u(i, $one);
+    } goto head;
+
+    block exit {} return;
+}
+
+func find_min_unvisited(nodes : ref, count : 1 byte) -> (min_node : ref) {
+    declare (
+        i : 1 byte,
+        min_dist : 1 byte,
+        curr : ref,
+        is_equal : 1 byte
+    );
+    block entry {
+        $null : ref = 0b0;
+        min_node = alu.move($null);
+        $inf : 1 byte = 0b11111111;
+        min_dist = alu.move($inf); // 255
+        $zero : 1 byte = 0b0;
+        i = alu.move($zero);
+    } goto head;
+
+    block head { $done : 1 byte = alu.eq(i, count); } if $done then exit else body;
+
+    block body {
+        $s8 : 8 byte = 0b1000;
+        $s8tmp : 8 byte = 0b1000;
+        $tmp : ref = mem.alloc($s8tmp);
+        $zero8 : 8 byte = 0b0;
+        mem.store($tmp, $zero8);
+        mem.store($tmp, i);
+        $i8 : 8 byte = mem.load($tmp);
+        $offset : 8 byte = alu.mul_u($i8, $s8);
+        $curr_ptr : ref = alu.add_u(nodes, $offset);
+        curr = mem.load($curr_ptr);
+        
+        $dist : 1 byte = mem.load(curr);
+        $s1 : 8 byte = 0b1;
+        $ptr_v : ref = alu.add_u(curr, $s1);
+        $visited : 1 byte = mem.load($ptr_v);
+        
+        $zero1 : 1 byte = 0b0;
+        $unvisited : 1 byte = alu.eq($visited, $zero1);
+    } if $unvisited then check_dist else next;
+
+    block check_dist {
+        $dist : 1 byte = mem.load(curr);
+        $closer : 1 byte = alu.lt_u($dist, min_dist);
+        is_equal = alu.eq($dist, min_dist);
+    } if $closer then update else check_equal;
+
+    block check_equal {
+    } if is_equal then update else next;
+
+    block update {
+        min_node = alu.move(curr);
+        $dist : 1 byte = mem.load(curr);
+        min_dist = alu.move($dist);
+    } goto next;
+
+    block next {
+        $one : 1 byte = 0b1;
+        i = alu.add_u(i, $one);
+    } goto head;
+
+    block exit {} return;
+}
+
+func relax_neighbors(u : ref, edges : ref, count : 1 byte) {
+    declare (
+        i : 1 byte,
+        u_dist : 1 byte,
+        v : ref,
+        new_dist : 1 byte
+    );
+    block entry {
+        u_dist = mem.load(u);
+        $zero : 1 byte = 0b0;
+        i = alu.move($zero);
+    } goto head;
+
+    block head { $done : 1 byte = alu.eq(i, count); } if $done then exit else body;
+
+    block body {
+        $s9 : 8 byte = 0b1001; // 9 bytes per edge
+        $s8tmp : 8 byte = 0b1000;
+        $tmp : ref = mem.alloc($s8tmp);
+        $zero8 : 8 byte = 0b0;
+        mem.store($tmp, $zero8);
+        mem.store($tmp, i);
+        $i8 : 8 byte = mem.load($tmp);
+        $offset : 8 byte = alu.mul_u($i8, $s9);
+        $edge_addr : ref = alu.add_u(edges, $offset);
+        v = mem.load($edge_addr);
+        $s8 : 8 byte = 0b1000;
+        $ptr_w : ref = alu.add_u($edge_addr, $s8);
+        $w : 1 byte = mem.load($ptr_w);
+        
+        new_dist = alu.add_u(u_dist, $w);
+        $v_dist : 1 byte = mem.load(v);
+        
+        $better : 1 byte = alu.lt_u(new_dist, $v_dist);
+    } if $better then update else next;
+
+    block update {
+        mem.store(v, new_dist);
+    } goto next;
+
+    block next {
+        $one : 1 byte = 0b1;
+        i = alu.add_u(i, $one);
+    } goto head;
+
+    block exit {} return;
+}

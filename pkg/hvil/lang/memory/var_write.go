@@ -81,7 +81,7 @@ func (node *VarWrite) AllocateRegisters(scope registeralloc.Scope) ([]architectu
 	node.RegisterAllocationPass.Register = reg
 	node.RegisterAllocationPass.Temp = temp
 
-	scope.ReturnScratchRegisters(reg)
+	scope.ReturnScratchRegisters(reg, temp)
 
 	return nil, nil
 }

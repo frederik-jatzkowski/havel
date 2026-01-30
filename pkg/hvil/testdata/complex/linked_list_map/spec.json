@@ -1,0 +1,11 @@
+{
+  "compiler": {
+    "errors": []
+  },
+  "execution": {
+    "stdout_lines": [
+      "src.hvil:24:15 register content: 10",
+      "src.hvil:27:15 register content: 20"
+    ]
+  }
+}

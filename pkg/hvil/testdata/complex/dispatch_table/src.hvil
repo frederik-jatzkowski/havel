@@ -1,0 +1,70 @@
+// This test implements a simple dispatch table on the heap.
+// A dispatch table is a common way to implement polymorphism and dynamic dispatch.
+// It stores function pointers in memory and calls them based on an index.
+
+func main() {
+    block entry {
+        // Allocate space for 3 function pointers (8 bytes each)
+        $table_size : 8 byte = 0b11000; // 24 bytes
+        $table : ref = mem.alloc($table_size);
+
+        // Fill table: [0]=add, [1]=sub, [2]=mul
+        $f_add : func(1 byte, 1 byte) -> (1 byte) = call.ptr(op_add);
+        $f_sub : func(1 byte, 1 byte) -> (1 byte) = call.ptr(op_sub);
+        $f_mul : func(1 byte, 1 byte) -> (1 byte) = call.ptr(op_mul);
+
+        $offset0 : 8 byte = 0b0;
+        $p0 : ref = alu.add_u($table, $offset0);
+        mem.store($p0, $f_add);
+
+        $offset1 : 8 byte = 0b1000; // 8 bytes
+        $p1 : ref = alu.add_u($table, $offset1);
+        mem.store($p1, $f_sub);
+
+        $offset2 : 8 byte = 0b10000; // 16 bytes
+        $p2 : ref = alu.add_u($table, $offset2);
+        mem.store($p2, $f_mul);
+
+        // Perform dynamic dispatch
+        $a : 1 byte = 0b110; // 6
+        $b : 1 byte = 0b11;  // 3
+
+        // Call [0] (add)
+        $r0 : 1 byte = call.local.dispatch($table, $offset0, $a, $b);
+        debug.dump($r0); // Should be 9
+
+        // Call [1] (sub)
+        $r1 : 1 byte = call.local.dispatch($table, $offset1, $a, $b);
+        debug.dump($r1); // Should be 3
+
+        // Call [2] (mul)
+        $r2 : 1 byte = call.local.dispatch($table, $offset2, $a, $b);
+        debug.dump($r2); // Should be 18
+    } return;
+}
+
+func dispatch(table : ref, offset : 8 byte, x : 1 byte, y : 1 byte) -> (res : 1 byte) {
+    block entry {
+        $ptr : ref = alu.add_u(table, offset);
+        $f : func(1 byte, 1 byte) -> (1 byte) = mem.load($ptr);
+        res = call.dyn.$f(x, y);
+    } return;
+}
+
+func op_add(x : 1 byte, y : 1 byte) -> (z : 1 byte) {
+    block entry {
+        z = alu.add_u(x, y);
+    } return;
+}
+
+func op_sub(x : 1 byte, y : 1 byte) -> (z : 1 byte) {
+    block entry {
+        z = alu.sub_u(x, y);
+    } return;
+}
+
+func op_mul(x : 1 byte, y : 1 byte) -> (z : 1 byte) {
+    block entry {
+        z = alu.mul_u(x, y);
+    } return;
+}

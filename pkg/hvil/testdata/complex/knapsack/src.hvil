@@ -1,0 +1,266 @@
+// 0-1 Knapsack using recursion (Branch and Bound)
+// We use a global variable (on heap) to store the maximum value found so far.
+// Items are also stored on the heap.
+
+func main() {
+    block entry {
+        // Capacity: 178
+        $capacity : 8 byte = 0b10110010;
+
+        // Number of items: 25
+        $n : 8 byte = 0b11001;
+
+        // Allocate items array
+        // Each item: [weight (8 byte), value (8 byte)] = 16 bytes
+        // 25 items * 16 bytes = 400 bytes
+        $items_size : 8 byte = 0b110010000;
+        $items : ref = mem.alloc($items_size);
+
+        // Item 0: weight 10, value 60
+        $i0 : 8 byte = 0b0;
+        $w0 : 8 byte = 0b1010;
+        $v0 : 8 byte = 0b111100;
+        call.local.add_item($items, $i0, $w0, $v0);
+
+        // Item 1: weight 20, value 100
+        $i1 : 8 byte = 0b1;
+        $w1 : 8 byte = 0b10100;
+        $v1 : 8 byte = 0b1100100;
+        call.local.add_item($items, $i1, $w1, $v1);
+
+        // Item 2: weight 30, value 120
+        $i2 : 8 byte = 0b10;
+        $w2 : 8 byte = 0b11110;
+        $v2 : 8 byte = 0b1111000;
+        call.local.add_item($items, $i2, $w2, $v2);
+
+        // Item 3: weight 15, value 70
+        $i3 : 8 byte = 0b11;
+        $w3 : 8 byte = 0b1111;
+        $v3 : 8 byte = 0b1000110;
+        call.local.add_item($items, $i3, $w3, $v3);
+
+        // Item 4: weight 5, value 30
+        $i4 : 8 byte = 0b100;
+        $w4 : 8 byte = 0b101;
+        $v4 : 8 byte = 0b11110;
+        call.local.add_item($items, $i4, $w4, $v4);
+
+        // Item 5: weight 25, value 80
+        $i5 : 8 byte = 0b101;
+        $w5 : 8 byte = 0b11001;
+        $v5 : 8 byte = 0b1010000;
+        call.local.add_item($items, $i5, $w5, $v5);
+
+        // Item 6: weight 8, value 40
+        $i6 : 8 byte = 0b110;
+        $w6 : 8 byte = 0b1000;
+        $v6 : 8 byte = 0b101000;
+        call.local.add_item($items, $i6, $w6, $v6);
+
+        // Item 7: weight 12, value 50
+        $i7 : 8 byte = 0b111;
+        $w7 : 8 byte = 0b1100;
+        $v7 : 8 byte = 0b110010;
+        call.local.add_item($items, $i7, $w7, $v7);
+
+        // Item 8: weight 18, value 90
+        $i8 : 8 byte = 0b1000;
+        $w8 : 8 byte = 0b10010;
+        $v8 : 8 byte = 0b1011010;
+        call.local.add_item($items, $i8, $w8, $v8);
+
+        // Item 9: weight 7, value 45
+        $i9 : 8 byte = 0b1001;
+        $w9 : 8 byte = 0b111;
+        $v9 : 8 byte = 0b101101;
+        call.local.add_item($items, $i9, $w9, $v9);
+
+        // Item 10: weight 11, value 55
+        $i10 : 8 byte = 0b1010;
+        $w10 : 8 byte = 0b1011;
+        $v10 : 8 byte = 0b110111;
+        call.local.add_item($items, $i10, $w10, $v10);
+
+        // Item 11: weight 14, value 65
+        $i11 : 8 byte = 0b1011;
+        $w11 : 8 byte = 0b1110;
+        $v11 : 8 byte = 0b1000001;
+        call.local.add_item($items, $i11, $w11, $v11);
+
+        // Item 12: weight 9, value 48
+        $i12 : 8 byte = 0b1100;
+        $w12 : 8 byte = 0b1001;
+        $v12 : 8 byte = 0b110000;
+        call.local.add_item($items, $i12, $w12, $v12);
+
+        // Item 13: weight 22, value 95
+        $i13 : 8 byte = 0b1101;
+        $w13 : 8 byte = 0b10110;
+        $v13 : 8 byte = 0b1011111;
+        call.local.add_item($items, $i13, $w13, $v13);
+
+        // Item 14: weight 6, value 38
+        $i14 : 8 byte = 0b1110;
+        $w14 : 8 byte = 0b110;
+        $v14 : 8 byte = 0b100110;
+        call.local.add_item($items, $i14, $w14, $v14);
+
+        // Item 15: weight 13, value 52
+        $i15 : 8 byte = 0b1111;
+        $w15 : 8 byte = 0b1101;
+        $v15 : 8 byte = 0b110100;
+        call.local.add_item($items, $i15, $w15, $v15);
+
+        // Item 16: weight 17, value 75
+        $i16 : 8 byte = 0b10000;
+        $w16 : 8 byte = 0b10001;
+        $v16 : 8 byte = 0b1001011;
+        call.local.add_item($items, $i16, $w16, $v16);
+
+        // Item 17: weight 21, value 88
+        $i17 : 8 byte = 0b10001;
+        $w17 : 8 byte = 0b10101;
+        $v17 : 8 byte = 0b1011000;
+        call.local.add_item($items, $i17, $w17, $v17);
+
+        // Item 18: weight 19, value 82
+        $i18 : 8 byte = 0b10010;
+        $w18 : 8 byte = 0b10011;
+        $v18 : 8 byte = 0b1010010;
+        call.local.add_item($items, $i18, $w18, $v18);
+
+        // Item 19: weight 4, value 25
+        $i19 : 8 byte = 0b10011;
+        $w19 : 8 byte = 0b100;
+        $v19 : 8 byte = 0b11001;
+        call.local.add_item($items, $i19, $w19, $v19);
+
+        // Item 20: weight 28, value 110
+        $i20 : 8 byte = 0b10100;
+        $w20 : 8 byte = 0b11100;
+        $v20 : 8 byte = 0b1101110;
+        call.local.add_item($items, $i20, $w20, $v20);
+
+        // Item 21: weight 24, value 105
+        $i21 : 8 byte = 0b10101;
+        $w21 : 8 byte = 0b11000;
+        $v21 : 8 byte = 0b1101001;
+        call.local.add_item($items, $i21, $w21, $v21);
+
+        // Item 22: weight 16, value 68
+        $i22 : 8 byte = 0b10110;
+        $w22 : 8 byte = 0b10000;
+        $v22 : 8 byte = 0b1000100;
+        call.local.add_item($items, $i22, $w22, $v22);
+
+        // Item 23: weight 11, value 58
+        $i23 : 8 byte = 0b10111;
+        $w23 : 8 byte = 0b1011;
+        $v23 : 8 byte = 0b111010;
+        call.local.add_item($items, $i23, $w23, $v23);
+
+        // Item 24: weight 32, value 130
+        $i24 : 8 byte = 0b11000;
+        $w24 : 8 byte = 0b100000;
+        $v24 : 8 byte = 0b10000010;
+        call.local.add_item($items, $i24, $w24, $v24);
+
+        // Allocate memory for max_value (result)
+        $res_size : 8 byte = 0b1000;
+        $max_val_ptr : ref = mem.alloc($res_size);
+        $zero : 8 byte = 0b0;
+        mem.store($max_val_ptr, $zero);
+
+        // call solve(index, current_weight, current_value, items, n, capacity, max_val_ptr)
+        $idx : 8 byte = 0b0;
+        $cw : 8 byte = 0b0;
+        $cv : 8 byte = 0b0;
+        call.local.solve($idx, $cw, $cv, $items, $n, $capacity, $max_val_ptr);
+
+        // Dump result
+        $final_max : 8 byte = mem.load($max_val_ptr);
+        debug.dump($final_max);
+    } return;
+}
+
+func add_item(items : ref, index : 8 byte, weight : 8 byte, value : 8 byte) {
+    block entry {
+        $stride : 8 byte = 0b10000; // 16 bytes
+        $offset : 8 byte = alu.mul_u(index, $stride);
+        $item_ptr : ref = alu.add_u(items, $offset);
+        mem.store($item_ptr, weight);
+
+        $v_off : 8 byte = 0b1000; // 8 bytes
+        $v_ptr : ref = alu.add_u($item_ptr, $v_off);
+        mem.store($v_ptr, value);
+    } return;
+}
+
+func solve(
+    index : 8 byte,
+    curr_w : 8 byte,
+    curr_v : 8 byte,
+    items : ref,
+    n : 8 byte,
+    capacity : 8 byte,
+    max_val_ptr : ref
+) {
+    declare (
+        new_w : 8 byte,
+        new_v : 8 byte
+    );
+    block entry {
+        // Base case: index == n
+        $at_end : 1 byte = alu.eq(index, n);
+    } if $at_end then update_max else check_weight;
+
+    block check_weight {
+        // If current weight > capacity, return
+        $too_heavy : 1 byte = alu.lt_u(capacity, curr_w);
+    } if $too_heavy then ret_block else branch;
+
+    block update_max {
+        $best_so_far : 8 byte = mem.load(max_val_ptr);
+        $is_better : 1 byte = alu.lt_u($best_so_far, curr_v);
+    } if $is_better then set_new_best else ret_block;
+
+    block set_new_best {
+        mem.store(max_val_ptr, curr_v);
+    } goto ret_block;
+
+    block branch {
+        // Recursive calls
+        $one : 8 byte = 0b1;
+        $next_idx_val : 8 byte = alu.add_u(index, $one);
+
+        // Option 1: Don't include items[index]
+        call.local.solve($next_idx_val, curr_w, curr_v, items, n, capacity, max_val_ptr);
+
+        // Option 2: Include items[index] (if it fits)
+        $stride : 8 byte = 0b10000; // 16 bytes
+        $item_off : 8 byte = alu.mul_u(index, $stride);
+        $item_ptr : ref = alu.add_u(items, $item_off);
+        $w : 8 byte = mem.load($item_ptr);
+        
+        $v_off : 8 byte = 0b1000; // 8 bytes
+        $v_ptr : ref = alu.add_u($item_ptr, $v_off);
+        $v : 8 byte = mem.load($v_ptr);
+
+        new_w = alu.add_u(curr_w, $w);
+        new_v = alu.add_u(curr_v, $v);
+
+        // Simple bound: only recurse if new_w <= capacity
+        // new_w <= capacity is equivalent to NOT (capacity < new_w)
+        $too_heavy_to_include : 1 byte = alu.lt_u(capacity, new_w);
+    } if $too_heavy_to_include then ret_block else include_item;
+
+    block include_item {
+        $one : 8 byte = 0b1;
+        $next_idx_val_inc : 8 byte = alu.add_u(index, $one);
+        call.local.solve($next_idx_val_inc, new_w, new_v, items, n, capacity, max_val_ptr);
+    } goto ret_block;
+
+    block ret_block {
+    } return;
+}
