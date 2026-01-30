@@ -11,7 +11,10 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/assembly"
 )
 
-type Operation instruction.Operation
+type Operation interface {
+	tool.NodeLike
+	instruction.Operation
+}
 
 type Call struct {
 	tool.Node[Call]

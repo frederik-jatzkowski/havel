@@ -34,7 +34,7 @@ func (node *Move) ResolveTypes(target types.Type) error {
 	arg := node.Arg.Type()
 
 	if !target.CanBeAssigned(arg) {
-		return node.Errorf("cannot assign %s result to %s", arg, target)
+		return node.Errorf("cannot assign %s to %s", arg, target)
 	}
 
 	node.TypeCheckPass.Type = target

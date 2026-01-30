@@ -2,7 +2,7 @@
   "compiler": {
     "errors": [
       {
-        "contains": "src.hvil:6:27: cannot assign void to ref"
+        "contains": "src.hvil:6:27 cannot assign void to ref"
       }
     ]
   }

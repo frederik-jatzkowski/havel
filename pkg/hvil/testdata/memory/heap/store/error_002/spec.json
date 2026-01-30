@@ -2,7 +2,7 @@
   "compiler": {
     "errors": [
       {
-        "contains": "src.hvil:6:13: 2 byte is not a ref type"
+        "contains": "src.hvil:6:13 2 byte is not a ref type"
       }
     ]
   }

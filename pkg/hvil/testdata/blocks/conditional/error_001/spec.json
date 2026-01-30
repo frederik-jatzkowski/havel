@@ -2,7 +2,7 @@
   "compiler": {
     "errors": [
       {
-        "contains": "src.hvil:9:7: condition must be 1 byte but was 2 byte"
+        "contains": "src.hvil:9:7 condition must be 1 byte but was 2 byte"
       }
     ]
   },

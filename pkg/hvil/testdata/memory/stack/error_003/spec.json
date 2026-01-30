@@ -2,7 +2,7 @@
   "compiler": {
     "errors": [
       {
-        "contains": "src.hvil:9:29: cannot assign ref to 4 byte"
+        "contains": "src.hvil:9:29 cannot assign ref to 4 byte"
       }
     ]
   }

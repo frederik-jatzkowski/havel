@@ -44,3 +44,7 @@ func (node *RefType) EqualsDetailed(other Type) error {
 func (node *RefType) Bytes() int {
 	return 8
 }
+
+func (node *RefType) CanDoArithmetics() bool {
+	return true
+}

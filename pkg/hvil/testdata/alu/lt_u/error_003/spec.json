@@ -2,7 +2,7 @@
   "compiler": {
     "errors": [
       {
-        "contains": "src.hvil:5:27: cannot compare 2 byte and 4 byte"
+        "contains": "src.hvil:5:27 unequally sized parameters 2 byte and 4 byte"
       }
     ]
   }

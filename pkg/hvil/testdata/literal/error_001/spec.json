@@ -2,7 +2,7 @@
   "compiler": {
     "errors": [
       {
-        "contains": "src.hvil:4:23: cannot assign scalar literal 256 to 1 byte: value too big"
+        "contains": "src.hvil:4:23 cannot assign scalar literal 256 to 1 byte: value too big"
       }
     ]
   }

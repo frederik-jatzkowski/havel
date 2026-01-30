@@ -2,7 +2,7 @@
   "compiler": {
     "errors": [
       {
-        "contains": "src.hvil:5:9: register 'n' is redeclared"
+        "contains": "src.hvil:5:9 register 'n' is redeclared"
       }
     ]
   }

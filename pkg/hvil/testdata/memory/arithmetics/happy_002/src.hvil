@@ -1,0 +1,75 @@
+
+func main() {
+    declare (
+        n : 1 byte
+    );
+
+    block entry {
+        $size : 8 byte = 0b10;
+        $len : 8 byte = 0b101;
+        $total : 8 byte = alu.mul_u($size, $len);
+
+        $ptr : ref = mem.alloc($total);
+
+        local.fill($ptr, $size, $len);
+
+        $sum : 2 byte = local.sum($ptr, $size, $len);
+
+        debug.dump($sum);
+    } return;
+}
+
+func fill(ptr : ref, size : 8 byte, len : 8 byte) {
+    declare (
+        i : 8 byte
+    );
+
+    block entry {
+        i = 0b0;
+    } goto head;
+
+    block head {
+        $done : 1 byte = alu.eq(i, len);
+    } if $done then exit else body;
+
+    block body {
+        $offset : 8 byte = alu.mul_u(size, i);
+        $elem : ref = alu.add_u(ptr, $offset);
+
+        $two : 2 byte = 0b10;
+        mem.store($elem, $two);
+
+        $one : 8 byte = 0b1;
+        i = alu.add_u(i, $one);
+    } goto head;
+
+    block exit {} return;
+}
+
+func sum(ptr : ref, size : 8 byte, len : 8 byte) -> (sum : 2 byte) {
+    declare (
+        i : 8 byte
+    );
+
+    block entry {
+        i = 0b0;
+        sum = 0b0;
+    } goto head;
+
+    block head {
+        $done : 1 byte = alu.eq(i, len);
+    } if $done then exit else body;
+
+    block body {
+        $offset : 8 byte = alu.mul_u(size, i);
+        $elem : ref = alu.add_u(ptr, $offset);
+
+        $loaded : 2 byte = mem.load($elem);
+        sum = alu.add_u(sum, $loaded);
+
+        $one : 8 byte = 0b1;
+        i = alu.add_u(i, $one);
+    } goto head;
+
+    block exit {} return;
+}

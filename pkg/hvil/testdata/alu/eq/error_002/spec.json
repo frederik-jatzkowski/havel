@@ -2,7 +2,7 @@
   "compiler": {
     "errors": [
       {
-        "contains": "src.hvil:5:27: cannot assign 1 byte result to 4 byte"
+        "contains": "src.hvil:5:27 invalid target type: wants to assign 1 byte to 4 byte"
       }
     ]
   }

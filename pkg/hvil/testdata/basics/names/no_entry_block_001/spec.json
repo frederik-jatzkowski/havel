@@ -2,7 +2,7 @@
   "compiler": {
     "errors": [
       {
-        "contains": "src.hvil:2:1: no entry block defined"
+        "contains": "src.hvil:2:1 no entry block defined"
       }
     ]
   }

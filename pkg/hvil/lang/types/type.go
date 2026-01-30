@@ -9,4 +9,5 @@ type Type interface {
 	Equals(Type) bool
 	EqualsDetailed(Type) error
 	Bytes() int
+	CanDoArithmetics() bool
 }

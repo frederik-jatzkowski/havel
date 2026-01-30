@@ -2,7 +2,7 @@
   "compiler": {
     "errors": [
       {
-        "contains": "src.hvil:6:27: cannot divide 2 byte by 4 byte"
+        "contains": "src.hvil:6:27 unequally sized parameters 2 byte and 4 byte"
       }
     ]
   }

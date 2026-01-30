@@ -40,25 +40,9 @@ func (node *SubU) ResolveNames(ctx context.Context) error {
 }
 
 func (node *SubU) ResolveTypes(target types.Type) error {
-	left := node.Left.Type()
-	right := node.Right.Type()
+	node.TypeCheckPass.Type = target
 
-	_, ok := left.(*types.ScalarType)
-	if !ok {
-		return node.Errorf("operands must be a scalar type but was %s", left)
-	}
-
-	if !left.Equals(right) {
-		return node.Errorf("cannot add %s and %s", left, right)
-	}
-
-	if !target.CanBeAssigned(left) {
-		return node.Errorf("cannot assign %s result to %s", left, target)
-	}
-
-	node.TypeCheckPass.Type = left
-
-	return nil
+	return resolveBinOpTypesWithTarget(node, node.Left, node.Right, target)
 }
 
 func (node *SubU) CalculateStatistics(ctx context.Context) {

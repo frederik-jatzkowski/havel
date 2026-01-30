@@ -2,7 +2,7 @@
   "compiler": {
     "errors": [
       {
-        "contains": "src.hvil:9:7: block 'a' not found"
+        "contains": "src.hvil:9:7 block 'a' not found"
       }
     ]
   },

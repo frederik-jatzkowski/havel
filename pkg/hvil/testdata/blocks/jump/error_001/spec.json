@@ -2,7 +2,7 @@
   "compiler": {
     "errors": [
       {
-        "contains": "src.hvil:10:7: block 'invalid' not found"
+        "contains": "src.hvil:10:7 block 'invalid' not found"
       }
     ]
   },

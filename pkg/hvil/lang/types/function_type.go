@@ -70,3 +70,7 @@ func (node *FunctionType) EqualsDetailed(other Type) error {
 func (node *FunctionType) Bytes() int {
 	return 8
 }
+
+func (node *FunctionType) CanDoArithmetics() bool {
+	return false
+}

@@ -38,3 +38,7 @@ func (node *Void) EqualsDetailed(other Type) error {
 func (node *Void) Bytes() int {
 	return 0
 }
+
+func (node *Void) CanDoArithmetics() bool {
+	return false
+}

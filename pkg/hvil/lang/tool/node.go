@@ -34,9 +34,9 @@ func (n Node[TKind]) Position() lexer.Position {
 }
 
 func (n Node[TKind]) Errorf(format string, a ...any) error {
-	return fmt.Errorf("%s: "+format, append([]any{n.Position()}, a...)...)
+	return fmt.Errorf("%s "+format, append([]any{n.Position()}, a...)...)
 }
 
 func (n Node[TKind]) Wrap(err error) error {
-	return fmt.Errorf("%s: %w", n.Position(), err)
+	return fmt.Errorf("%s %w", n.Position(), err)
 }

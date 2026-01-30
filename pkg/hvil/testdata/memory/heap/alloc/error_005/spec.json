@@ -2,7 +2,7 @@
   "compiler": {
     "errors": [
       {
-        "contains": "src.hvil:5:32: ref is not a scalar type"
+        "contains": "src.hvil:5:32 ref is not a scalar type"
       }
     ]
   }

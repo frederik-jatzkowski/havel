@@ -53,3 +53,7 @@ func (node *ScalarType) Bytes() int {
 
 	return node.Size
 }
+
+func (node *ScalarType) CanDoArithmetics() bool {
+	return true
+}

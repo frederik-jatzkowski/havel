@@ -40,27 +40,13 @@ func (node *LtU) ResolveNames(ctx context.Context) error {
 }
 
 func (node *LtU) ResolveTypes(target types.Type) error {
-	left := node.Left.Type()
-	right := node.Right.Type()
-
-	_, ok := left.(*types.ScalarType)
-	if !ok {
-		return node.Errorf("operands must be a scalar type but was %s", left)
+	if !target.Equals(&types.ScalarType{Size: 1}) {
+		return node.Errorf("invalid target type: wants to assign 1 byte to %s", target)
 	}
 
-	if !left.Equals(right) {
-		return node.Errorf("cannot compare %s and %s", left, right)
-	}
+	node.TypeCheckPass.Type = target
 
-	result := &types.ScalarType{Size: 1}
-
-	if !target.CanBeAssigned(result) {
-		return node.Errorf("cannot assign %s result to %s", result, target)
-	}
-
-	node.TypeCheckPass.Type = left
-
-	return nil
+	return resolveBinOpTypes(node, node.Left, node.Right)
 }
 
 func (node *LtU) CalculateStatistics(ctx context.Context) {

@@ -2,7 +2,7 @@
   "compiler": {
     "errors": [
       {
-        "contains": "src.hvil:5:20: register 'm' not found"
+        "contains": "src.hvil:5:20 register 'm' not found"
       }
     ]
   }
