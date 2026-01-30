@@ -6,7 +6,7 @@ import (
 	"iter"
 	"maps"
 
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/tool"
+	"github.com/frederik-jatzkowski/havel/pkg/tool"
 )
 
 type ScopedObject interface {

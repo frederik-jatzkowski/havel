@@ -3,9 +3,9 @@ package registeralloc
 import (
 	"fmt"
 
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
+	"github.com/frederik-jatzkowski/havel/pkg/architecture"
+	"github.com/frederik-jatzkowski/havel/pkg/architecture/virtualmachine/bytecode"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/optimization/statistics"
-	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine/bytecode"
 )
 
 type Scope interface {

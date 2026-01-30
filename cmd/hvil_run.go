@@ -5,8 +5,8 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/frederik-jatzkowski/havel/pkg/architecture/virtualmachine"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil"
-	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine"
 )
 
 func NewHvilRunCmd() *cobra.Command {

@@ -4,9 +4,9 @@ import (
 	"context"
 	"io"
 
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program"
+	"github.com/frederik-jatzkowski/havel/pkg/architecture/virtualmachine"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/parser"
-	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/program"
 )
 
 type Compiler struct {

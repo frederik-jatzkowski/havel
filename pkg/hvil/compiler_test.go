@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/frederik-jatzkowski/havel/pkg/virtualmachine"
+	"github.com/frederik-jatzkowski/havel/pkg/architecture/virtualmachine"
 )
 
 func TestCompiler_VirtualMachine(t *testing.T) {

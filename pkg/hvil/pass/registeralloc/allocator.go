@@ -1,7 +1,7 @@
 package registeralloc
 
 import (
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/architecture"
+	"github.com/frederik-jatzkowski/havel/pkg/architecture"
 )
 
 type Allocator interface {

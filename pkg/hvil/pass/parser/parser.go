@@ -4,19 +4,18 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/memory"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block/instruction"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/program/function/block/terminator"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime/alu"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime/call"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime/debug"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime/literal"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/runtime/mem"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/lang/types"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/token"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/program"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/program/function"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/program/function/block"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/program/function/block/instruction"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/program/function/block/instruction/alu"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/program/function/block/instruction/call"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/program/function/block/instruction/debug"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/program/function/block/instruction/literal"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/program/function/block/instruction/mem"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/program/function/block/terminator"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/types"
 
 	"github.com/alecthomas/participle/v2"
 )
@@ -27,9 +26,9 @@ var parser = participle.MustBuild[program.Program](
 	participle.UseLookahead(1),
 	participle.Union[function.Block](&block.Block{}),
 	participle.Union[types.Type](
-		&types.ScalarType{},
-		&types.RefType{},
-		&types.FunctionType{},
+		&types.Scalar{},
+		&types.Ref{},
+		&types.Function{},
 	),
 	participle.Union[block.Terminator](
 		&terminator.Return{},
@@ -37,12 +36,12 @@ var parser = participle.MustBuild[program.Program](
 		&terminator.Conditional{},
 	),
 	participle.Union[instruction.MemoryWrite](
-		&memory.RegWrite{},
-		&memory.VarWrite{},
+		&instruction.RegWrite{},
+		&instruction.VarWrite{},
 	),
 	participle.Union[instruction.MemoryRead](
-		&memory.RegRead{},
-		&memory.VarRead{},
+		&instruction.RegRead{},
+		&instruction.VarRead{},
 	),
 	participle.Union[instruction.Operation](
 		&literal.Scalar{},
