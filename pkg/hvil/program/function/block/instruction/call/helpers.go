@@ -41,8 +41,8 @@ func calculateSavedMemory(
 	toSave := make([]architecture.MemoryAllocation, 0)
 
 	for _, param := range current.Params.Items {
-		r := param.RegisterAllocationPass.BoundTo
-		if r == nil || param.RegisterAllocationPass.Volatile {
+		r := param.BoundTo()
+		if r == nil || param.Volatile() {
 			continue
 		}
 
@@ -55,28 +55,28 @@ func calculateSavedMemory(
 
 		toSave = append(toSave, architecture.MemoryAllocation{
 			BoundTo: r,
-			RelAddr: param.AddressResolutionPass.RelAddr,
+			RelAddr: param.RelAddr(),
 			Bytes:   param.Type().Bytes(),
 		})
 	}
 
 	result := current.Result
 	if result != nil {
-		if r := result.RegisterAllocationPass.BoundTo; r != nil && !result.RegisterAllocationPass.Volatile && controlflow.MustBeSavedAt(
+		if r := result.BoundTo(); r != nil && !result.Volatile() && controlflow.MustBeSavedAt(
 			result.StatisticsPass.LiveRanges[blockID],
 			instructionID,
 		) {
 			toSave = append(toSave, architecture.MemoryAllocation{
 				BoundTo: r,
-				RelAddr: result.AddressResolutionPass.RelAddr,
+				RelAddr: result.RelAddr(),
 				Bytes:   result.Type().Bytes(),
 			})
 		}
 	}
 
 	for _, local := range current.Locals.Items {
-		r := local.RegisterAllocationPass.BoundTo
-		if r == nil || local.RegisterAllocationPass.Volatile {
+		r := local.BoundTo()
+		if r == nil || local.Volatile() {
 			continue
 		}
 
@@ -89,7 +89,7 @@ func calculateSavedMemory(
 
 		toSave = append(toSave, architecture.MemoryAllocation{
 			BoundTo: r,
-			RelAddr: local.AddressResolutionPass.RelAddr,
+			RelAddr: local.RelAddr(),
 			Bytes:   local.Type().Bytes(),
 		})
 	}

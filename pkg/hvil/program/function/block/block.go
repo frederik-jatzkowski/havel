@@ -150,15 +150,15 @@ func (node *Block) GenerateVirtualMachineAssembly(p *assembly.P) error {
 
 	temp := node.NameResolutionPass.Function.RegisterAllocationPass.Temp.(bytecode.R)
 	for _, param := range node.NameResolutionPass.Function.Params.Items {
-		if param.RegisterAllocationPass.Volatile {
-			p.AddI1RLit(bytecode.OPStackPtr, temp, uint16(param.AddressResolutionPass.RelAddr), node.Position())
+		if param.Volatile() {
+			p.AddI1RLit(bytecode.OPStackPtr, temp, uint16(param.RelAddr()), node.Position())
 
 			op, err := bytecode.StoreForSize(param.Type().Bytes())
 			if err != nil {
 				return node.Wrap(err)
 			}
 
-			p.AddI2R(op, temp, param.RegisterAllocationPass.BoundTo.(bytecode.R), node.Position())
+			p.AddI2R(op, temp, param.BoundTo().(bytecode.R), node.Position())
 		}
 	}
 

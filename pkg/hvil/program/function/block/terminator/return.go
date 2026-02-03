@@ -54,19 +54,13 @@ func (node *Return) CalculateStatistics(ctx context.Context) {
 		if err != nil {
 			panic(err)
 		}
+
 		instructionID, err := contexttool.CurrentFromContext[statistics.InstructionID](ctx)
 		if err != nil {
 			panic(err)
 		}
 
-		if result.StatisticsPass.Reads == nil {
-			result.StatisticsPass.Reads = make(map[statistics.BlockID][]statistics.InstructionID)
-		}
-
-		result.StatisticsPass.Reads[blockID] = append(
-			result.StatisticsPass.Reads[blockID],
-			instructionID,
-		)
+		result.AddReadToStatistic(blockID, instructionID)
 	}
 }
 
@@ -90,17 +84,17 @@ func (node *Return) GenerateVirtualMachineAssembly(p *assembly.P) error {
 		p.AddI1R(bytecode.OPExit, temp, node.Position())
 	} else {
 		result := node.NameResolutionPass.Function.Result
-		if result != nil && result.RegisterAllocationPass.Volatile {
+		if result != nil && result.Volatile() {
 			// store final result in register if it is kept in memory
 
-			p.AddI1RLit(bytecode.OPStackPtr, temp, uint16(result.AddressResolutionPass.RelAddr), node.Position())
+			p.AddI1RLit(bytecode.OPStackPtr, temp, uint16(result.RelAddr()), node.Position())
 
 			op, err := bytecode.LoadForSize(result.Type().Bytes())
 			if err != nil {
 				return node.Wrap(err)
 			}
 
-			p.AddI2R(op, result.RegisterAllocationPass.BoundTo.(bytecode.R), temp, node.Position())
+			p.AddI2R(op, result.BoundTo().(bytecode.R), temp, node.Position())
 		}
 
 		p.AddI1RLit(bytecode.OPStackPtr, temp, 0, node.Position())

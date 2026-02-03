@@ -9,7 +9,6 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/optimization/statistics"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/program/function/stack"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/types"
 	"github.com/frederik-jatzkowski/havel/pkg/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/tool/contexttool"
@@ -18,7 +17,7 @@ import (
 type VarRead struct {
 	tool.Node[VarRead]
 	names.NameResolution[struct {
-		Decl *stack.Decl
+		Decl VarDecl
 	}]
 	registeralloc.RegisterAllocation[struct {
 		Register architecture.Register
@@ -32,7 +31,7 @@ func (node *VarRead) Identifier() string {
 }
 
 func (node *VarRead) ResolveNames(ctx context.Context) error {
-	decl, err := contexttool.FromCtx[*stack.Decl](ctx, node.Ident)
+	decl, err := contexttool.FromCtx[VarDecl](ctx, node.Ident)
 	if err != nil {
 		return node.Wrap(err)
 	}
@@ -53,19 +52,12 @@ func (node *VarRead) CalculateStatistics(ctx context.Context) {
 		panic(err)
 	}
 
-	if node.NameResolutionPass.Decl.StatisticsPass.Reads == nil {
-		node.NameResolutionPass.Decl.StatisticsPass.Reads = make(map[statistics.BlockID][]statistics.InstructionID)
-	}
-
-	node.NameResolutionPass.Decl.StatisticsPass.Reads[blockID] = append(
-		node.NameResolutionPass.Decl.StatisticsPass.Reads[blockID],
-		instructionID,
-	)
+	node.NameResolutionPass.Decl.AddReadToStatistic(blockID, instructionID)
 }
 
 func (node *VarRead) AllocateRegisters(scope registeralloc.Scope) ([]architecture.Register, error) {
 	decl := node.NameResolutionPass.Decl
-	if reg := decl.RegisterAllocationPass.BoundTo; reg != nil && !decl.RegisterAllocationPass.Volatile {
+	if reg := decl.BoundTo(); reg != nil && !decl.Volatile() {
 		node.RegisterAllocationPass.Register = reg
 
 		return nil, nil
@@ -83,11 +75,11 @@ func (node *VarRead) AllocateRegisters(scope registeralloc.Scope) ([]architectur
 
 func (node *VarRead) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	decl := node.NameResolutionPass.Decl
-	if reg := decl.RegisterAllocationPass.BoundTo; reg != nil && !decl.RegisterAllocationPass.Volatile {
+	if reg := decl.BoundTo(); reg != nil && !decl.Volatile() {
 		return nil
 	}
 
-	p.AddI1RLit(bytecode.OPStackPtr, node.Register().(bytecode.R), uint16(node.NameResolutionPass.Decl.AddressResolutionPass.RelAddr), node.Position())
+	p.AddI1RLit(bytecode.OPStackPtr, node.Register().(bytecode.R), uint16(node.NameResolutionPass.Decl.RelAddr()), node.Position())
 
 	op, err := bytecode.LoadForSize(node.NameResolutionPass.Decl.Type().Bytes())
 	if err != nil {

@@ -46,7 +46,7 @@ func (node *Ptr) ResolveTypes(target types.Type) error {
 
 func (node *Ptr) CalculateStatistics(ctx context.Context) {
 	node.Var.CalculateStatistics(ctx)
-	node.Var.NameResolutionPass.Decl.StatisticsPass.PtrTaken = true
+	node.Var.NameResolutionPass.Decl.SetPtrTaken()
 }
 
 func (node *Ptr) AllocateRegisters(scope registeralloc.Scope) ([]architecture.Register, error) {
@@ -59,7 +59,7 @@ func (node *Ptr) SetResultRegister(r architecture.Register) {
 
 func (node *Ptr) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	if !node.TypeCheckPass.IsVoid {
-		p.AddI1RLit(bytecode.OPStackPtr, node.RegisterAllocationPass.Result.(bytecode.R), uint16(node.Var.NameResolutionPass.Decl.AddressResolutionPass.RelAddr), node.Position())
+		p.AddI1RLit(bytecode.OPStackPtr, node.RegisterAllocationPass.Result.(bytecode.R), uint16(node.Var.NameResolutionPass.Decl.RelAddr()), node.Position())
 	}
 
 	return nil

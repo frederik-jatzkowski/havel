@@ -24,8 +24,7 @@ type Decl struct {
 		RelAddr int
 	}]
 	registeralloc.RegisterAllocation[struct {
-		BoundTo  architecture.Register
-		Volatile bool
+		BoundTo architecture.Register
 	}]
 
 	Name         string     `parser:"@Ident"`
@@ -40,6 +39,38 @@ func (node *Decl) Type() types.Type {
 	return node.DeclaredType
 }
 
+func (node *Decl) AddReadToStatistic(blockID statistics.BlockID, instructionID statistics.InstructionID) {
+	if node.StatisticsPass.Reads == nil {
+		node.StatisticsPass.Reads = make(map[statistics.BlockID][]statistics.InstructionID)
+	}
+
+	node.StatisticsPass.Reads[blockID] = append(node.StatisticsPass.Reads[blockID], instructionID)
+}
+
+func (node *Decl) AddWriteToStatistic(blockID statistics.BlockID, instructionID statistics.InstructionID) {
+	if node.StatisticsPass.Writes == nil {
+		node.StatisticsPass.Writes = make(map[statistics.BlockID][]statistics.InstructionID)
+	}
+
+	node.StatisticsPass.Writes[blockID] = append(node.StatisticsPass.Writes[blockID], instructionID)
+}
+
 func (node *Decl) CalculateStatistics(_ context.Context, entry controlflow.Node) {
 	node.StatisticsPass.LiveRanges = controlflow.ComputeLiveRanges(entry, node.StatisticsPass.Reads, node.StatisticsPass.Writes)
+}
+
+func (node *Decl) BoundTo() architecture.Register {
+	return node.RegisterAllocationPass.BoundTo
+}
+
+func (node *Decl) RelAddr() int {
+	return node.AddressResolutionPass.RelAddr
+}
+
+func (node *Decl) SetPtrTaken() {
+	node.StatisticsPass.PtrTaken = true
+}
+
+func (node *Decl) Volatile() bool {
+	return node.StatisticsPass.PtrTaken
 }

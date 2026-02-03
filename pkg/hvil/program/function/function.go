@@ -10,6 +10,7 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/optimization/statistics"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/program/function/block/instruction"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/program/function/stack"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/types"
 	"github.com/frederik-jatzkowski/havel/pkg/tool"
@@ -21,7 +22,7 @@ type Function struct {
 	names.NameResolution[struct {
 		Entry  Block
 		Blocks names.Scope[Block]
-		Vars   names.Scope[*stack.Decl]
+		Vars   names.Scope[instruction.VarDecl]
 	}]
 	statistics.Statistics[struct {
 		BlockCount        int
@@ -54,7 +55,7 @@ func (node *Function) Identifier() string {
 func (node *Function) ResolveNames(ctx context.Context) error {
 	ctx = contexttool.WithCurrent(ctx, node)
 
-	node.NameResolutionPass.Vars = names.NewRootScope[*stack.Decl](names.KindVariable)
+	node.NameResolutionPass.Vars = names.NewRootScope[instruction.VarDecl](names.KindVariable)
 	ctx = contexttool.WithScope(ctx, node.NameResolutionPass.Vars)
 
 	for _, param := range node.Params.Items {
@@ -158,13 +159,11 @@ func (node *Function) ResolveAddresses(arch architecture.Architecture) error {
 	for i, paramPlan := range callPlan.Params {
 		param := node.Params.Items[i]
 		param.AddressResolutionPass.RelAddr = paramPlan.RelAddr
-		param.RegisterAllocationPass.Volatile = node.Params.Items[i].StatisticsPass.PtrTaken
 		param.RegisterAllocationPass.BoundTo = paramPlan.BoundTo
 	}
 
 	if node.Result != nil {
 		node.Result.AddressResolutionPass.RelAddr = callPlan.Result.RelAddr
-		node.Result.RegisterAllocationPass.Volatile = node.Result.StatisticsPass.PtrTaken
 		node.Result.RegisterAllocationPass.BoundTo = callPlan.Result.BoundTo
 	}
 
@@ -218,8 +217,8 @@ func (node *Function) AllocateRegisters(allocator registeralloc.Allocator) error
 func (node *Function) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	temp := node.RegisterAllocationPass.Temp.(bytecode.R)
 	for _, param := range node.Params.Items {
-		if param.RegisterAllocationPass.Volatile {
-			p.AddI1RLit(bytecode.OPStackPtr, temp, uint16(param.AddressResolutionPass.RelAddr), node.Position())
+		if param.Volatile() {
+			p.AddI1RLit(bytecode.OPStackPtr, temp, uint16(param.RelAddr()), node.Position())
 
 			op, err := bytecode.StoreForSize(param.Type().Bytes())
 			if err != nil {
