@@ -1,4 +1,4 @@
-package stack
+package global
 
 import (
 	"context"
@@ -7,34 +7,43 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/architecture/virtualmachine/assembly"
 	"github.com/frederik-jatzkowski/havel/pkg/architecture/virtualmachine/bytecode"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/address"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/optimization/controlflow"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/optimization/statistics"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/program/function/block/instruction"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/types"
 	"github.com/frederik-jatzkowski/havel/pkg/tool"
+	"github.com/frederik-jatzkowski/havel/pkg/tool/contexttool"
 )
 
 type Decl struct {
 	tool.Node[Decl]
-	statistics.Statistics[struct {
-		PtrTaken   bool
-		Reads      map[statistics.BlockID][]statistics.InstructionID
-		Writes     map[statistics.BlockID][]statistics.InstructionID
-		LiveRanges map[statistics.BlockID][]controlflow.LiveRange
-	}]
 	address.Resolution[struct {
 		RelAddr int
 	}]
-	registeralloc.RegisterAllocation[struct {
-		BoundTo architecture.Register
+	statistics.Statistics[struct {
+		PtrTaken bool
+		Reads    map[statistics.BlockID][]statistics.InstructionID
+		Writes   map[statistics.BlockID][]statistics.InstructionID
 	}]
 
-	Name         string     `parser:"@Ident"`
-	DeclaredType types.Type `parser:"':' @@"`
+	Name         string      `parser:"@Ident"`
+	DeclaredType types.Type  `parser:"':' @@"`
+	Initializer  Initializer `parser:"'=' @@"`
 }
 
 func (node *Decl) Identifier() string {
 	return node.Name
+}
+
+func (node *Decl) ResolveNames(ctx context.Context) error {
+	if err := node.Initializer.ResolveNames(ctx); err != nil {
+		return err
+	}
+
+	return contexttool.DefineInScope[instruction.VarDecl](ctx, node)
+}
+
+func (node *Decl) ResolveTypes() error {
+	return node.Initializer.ResolveTypes(node.DeclaredType)
 }
 
 func (node *Decl) Type() types.Type {
@@ -57,26 +66,26 @@ func (node *Decl) AddWriteToStatistic(blockID statistics.BlockID, instructionID 
 	node.StatisticsPass.Writes[blockID] = append(node.StatisticsPass.Writes[blockID], instructionID)
 }
 
-func (node *Decl) CalculateStatistics(_ context.Context, entry controlflow.Node) {
-	node.StatisticsPass.LiveRanges = controlflow.ComputeLiveRanges(entry, node.StatisticsPass.Reads, node.StatisticsPass.Writes)
+func (node *Decl) SetPtrTaken() {
+	node.StatisticsPass.PtrTaken = true
 }
 
 func (node *Decl) BoundTo() architecture.Register {
-	return node.RegisterAllocationPass.BoundTo
+	return nil
+}
+
+func (node *Decl) Volatile() bool {
+	return true
 }
 
 func (node *Decl) RelAddr() int {
 	return node.AddressResolutionPass.RelAddr
 }
 
-func (node *Decl) SetPtrTaken() {
-	node.StatisticsPass.PtrTaken = true
-}
-
-func (node *Decl) Volatile() bool {
-	return node.StatisticsPass.PtrTaken
+func (node *Decl) GenerateVirtualMachineAssembly(p *assembly.P) error {
+	return node.Initializer.GenerateVirtualMachineAssembly(p)
 }
 
 func (node *Decl) AddBytecodeVirtualmachinePtrInstruction(p *assembly.P, target bytecode.R) {
-	p.AddI1RLit(bytecode.OPStackPtr, target, uint16(node.RelAddr()), node.Position())
+	p.AddI1RLit(bytecode.OPStaticPtr, target, uint16(node.RelAddr()), node.Position())
 }

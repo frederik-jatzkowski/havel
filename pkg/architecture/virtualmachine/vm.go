@@ -40,7 +40,7 @@ func New(
 	vm.sp = (*int64)(unsafe.Pointer(&vm.registers[1]))
 
 	vm.heap = &Heap{}
-	vm.heap.Alloc(uint64(vm.stackSize))
+	vm.heap.data = [][]byte{make([]byte, 0), make([]byte, uint64(vm.stackSize))}
 
 	return vm
 }
@@ -50,12 +50,17 @@ func (vm *VM) Execute(p *bytecode.P) (err error) {
 	vm.exitCode = 0
 
 	*vm.pc = 0
-	*vm.sp = 0
+	*vm.sp = int64(NewFatPtr(1, 0).ToUint64())
 
 	if len(vm.heap.data) > 1 {
 		vm.heap.data = [][]byte{vm.heap.data[0]}
 		vm.heap.free = nil
 	}
+
+	vm.heap.data = [][]byte{make([]byte, len(p.StaticData)), make([]byte, uint64(vm.stackSize))}
+	vm.heap.free = nil
+
+	copy(vm.heap.data[0], p.StaticData)
 
 	defer func() {
 		r := recover()
@@ -146,6 +151,8 @@ func (vm *VM) execI(p *bytecode.P) {
 		vm.execOPAlloc(p, i)
 	case bytecode.OPFree:
 		vm.execOPFree(p, i)
+	case bytecode.OPStaticPtr:
+		vm.execOPStaticPtr(p, i)
 	case bytecode.OPStackPtr:
 		vm.execOPStackPtr(p, i)
 	case bytecode.OPStore8:
@@ -200,13 +207,15 @@ func (vm *VM) execOPCall(p *bytecode.P, i bytecode.I) {
 	fp, frameSize := i.R1Uint16()
 
 	// advance stack pointer
-	vm.heap.Store64(NewFatPtr(0, uint32(*vm.sp+int64(frameSize)+8)), uint64(*vm.sp))
+	vm.heap.Store64(NewFatPtr(1, uint32(*vm.sp+int64(frameSize)+8)), uint64(*vm.sp))
 	*vm.sp += int64(frameSize)
 
 	// prepare return address
-	vm.heap.Store64(NewFatPtr(0, uint32(*vm.sp)), uint64(*vm.pc))
+	vm.heap.Store64(NewFatPtr(1, uint32(*vm.sp)), uint64(*vm.pc))
 
-	*vm.pc = int64(vm.registers[fp])
+	newPC := int64(vm.registers[fp])
+
+	*vm.pc = newPC
 }
 
 //go:inline
@@ -450,9 +459,17 @@ func (vm *VM) execOPFree(p *bytecode.P, i bytecode.I) {
 }
 
 //go:inline
-func (vm *VM) execOPStackPtr(p *bytecode.P, i bytecode.I) {
+func (vm *VM) execOPStaticPtr(p *bytecode.P, i bytecode.I) {
 	r1, offset := i.R1Uint16()
 	ptr := NewFatPtr(0, uint32(offset)+uint32(*vm.sp))
+	vm.registers[r1] = ptr.ToUint64()
+	*vm.pc++
+}
+
+//go:inline
+func (vm *VM) execOPStackPtr(p *bytecode.P, i bytecode.I) {
+	r1, offset := i.R1Uint16()
+	ptr := NewFatPtr(1, uint32(offset)+uint32(*vm.sp))
 	vm.registers[r1] = ptr.ToUint64()
 	*vm.pc++
 }

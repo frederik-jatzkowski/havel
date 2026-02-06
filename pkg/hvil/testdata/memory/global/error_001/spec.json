@@ -1,0 +1,9 @@
+{
+  "compiler": {
+    "errors": [
+      {
+        "contains": "src.hvil:9:32 unequally sized parameters 1 byte and 2 byte"
+      }
+    ]
+  }
+}

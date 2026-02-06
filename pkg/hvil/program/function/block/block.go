@@ -17,12 +17,13 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/program/function/block/instruction"
 	"github.com/frederik-jatzkowski/havel/pkg/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/tool/contexttool"
+	"github.com/frederik-jatzkowski/havel/pkg/tool/scope"
 )
 
 type Block struct {
 	tool.Node[Block]
 	names.NameResolution[struct {
-		Regs     names.Scope[*instruction.RegWrite]
+		Regs     scope.Scope[*instruction.RegWrite]
 		Function *function.Function
 	}]
 	statistics.Statistics[struct {
@@ -48,8 +49,7 @@ func (node *Block) FullyQualifiedIdentifier() string {
 }
 
 func (node *Block) ResolveNames(ctx context.Context) error {
-	node.NameResolutionPass.Regs = names.NewRootScope[*instruction.RegWrite](names.KindRegister)
-	ctx = contexttool.WithScope(ctx, node.NameResolutionPass.Regs)
+	node.NameResolutionPass.Regs, ctx = contexttool.WithScope[*instruction.RegWrite](ctx, names.KindRegister)
 	ctx = contexttool.WithCurrent(ctx, node)
 
 	for _, i := range node.Instructions {
@@ -83,7 +83,7 @@ func (node *Block) ResolveAddresses(offset int) int {
 	return blockRegSize
 }
 
-func (node *Block) RegisterScope() names.Scope[*instruction.RegWrite] {
+func (node *Block) RegisterScope() scope.Scope[*instruction.RegWrite] {
 	return node.NameResolutionPass.Regs
 }
 
@@ -151,7 +151,7 @@ func (node *Block) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	temp := node.NameResolutionPass.Function.RegisterAllocationPass.Temp.(bytecode.R)
 	for _, param := range node.NameResolutionPass.Function.Params.Items {
 		if param.Volatile() {
-			p.AddI1RLit(bytecode.OPStackPtr, temp, uint16(param.RelAddr()), node.Position())
+			param.AddBytecodeVirtualmachinePtrInstruction(p, temp)
 
 			op, err := bytecode.StoreForSize(param.Type().Bytes())
 			if err != nil {

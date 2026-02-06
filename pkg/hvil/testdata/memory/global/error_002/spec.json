@@ -1,0 +1,9 @@
+{
+  "compiler": {
+    "errors": [
+      {
+        "contains": "src.hvil:10:22 cannot assign 1 byte to 2 byte"
+      }
+    ]
+  }
+}

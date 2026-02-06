@@ -26,10 +26,6 @@ type RegRead struct {
 	Ident string `parser:"'$' @Ident"`
 }
 
-func (node *RegRead) Identifier() string {
-	return node.NameResolutionPass.Decl.Identifier()
-}
-
 func (node *RegRead) ResolveNames(ctx context.Context) error {
 	decl, err := contexttool.FromCtx[*RegWrite](ctx, node.Ident)
 	if err != nil {

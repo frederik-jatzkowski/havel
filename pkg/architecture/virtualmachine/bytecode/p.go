@@ -8,6 +8,7 @@ import (
 
 type P struct {
 	Positions    []lexer.Position
+	StaticData   []byte
 	Instructions []I
 }
 

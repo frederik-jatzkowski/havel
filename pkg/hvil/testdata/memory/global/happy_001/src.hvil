@@ -1,0 +1,12 @@
+
+declare (
+    one : 1 byte = 0b1
+);
+
+func main() {
+    block entry {
+        $two : 1 byte = 0b10;
+        $result : 1 byte = alu.add_u(one, $two);
+        debug.dump($result);
+    } return;
+}

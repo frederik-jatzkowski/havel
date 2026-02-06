@@ -15,14 +15,15 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/types"
 	"github.com/frederik-jatzkowski/havel/pkg/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/tool/contexttool"
+	"github.com/frederik-jatzkowski/havel/pkg/tool/scope"
 )
 
 type Function struct {
 	tool.Node[Function]
 	names.NameResolution[struct {
 		Entry  Block
-		Blocks names.Scope[Block]
-		Vars   names.Scope[instruction.VarDecl]
+		Blocks scope.Scope[Block]
+		Vars   scope.Scope[instruction.VarDecl]
 	}]
 	statistics.Statistics[struct {
 		BlockCount        int
@@ -55,8 +56,7 @@ func (node *Function) Identifier() string {
 func (node *Function) ResolveNames(ctx context.Context) error {
 	ctx = contexttool.WithCurrent(ctx, node)
 
-	node.NameResolutionPass.Vars = names.NewRootScope[instruction.VarDecl](names.KindVariable)
-	ctx = contexttool.WithScope(ctx, node.NameResolutionPass.Vars)
+	node.NameResolutionPass.Vars, ctx = contexttool.WithScope[instruction.VarDecl](ctx, names.KindVariable)
 
 	for _, param := range node.Params.Items {
 		if err := node.NameResolutionPass.Vars.Define(param); err != nil {
@@ -76,8 +76,7 @@ func (node *Function) ResolveNames(ctx context.Context) error {
 		}
 	}
 
-	node.NameResolutionPass.Blocks = names.NewRootScope[Block](names.KindBlock)
-	ctx = contexttool.WithScope(ctx, node.NameResolutionPass.Blocks)
+	node.NameResolutionPass.Blocks, ctx = contexttool.WithScope[Block](ctx, names.KindBlock)
 
 	for _, b := range node.Blocks {
 		if err := node.NameResolutionPass.Blocks.Define(b); err != nil {
@@ -218,7 +217,7 @@ func (node *Function) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	temp := node.RegisterAllocationPass.Temp.(bytecode.R)
 	for _, param := range node.Params.Items {
 		if param.Volatile() {
-			p.AddI1RLit(bytecode.OPStackPtr, temp, uint16(param.RelAddr()), node.Position())
+			param.AddBytecodeVirtualmachinePtrInstruction(p, temp)
 
 			op, err := bytecode.StoreForSize(param.Type().Bytes())
 			if err != nil {

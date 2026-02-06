@@ -26,10 +26,6 @@ type VarRead struct {
 	Ident string `parser:"@Ident"`
 }
 
-func (node *VarRead) Identifier() string {
-	return node.NameResolutionPass.Decl.Identifier()
-}
-
 func (node *VarRead) ResolveNames(ctx context.Context) error {
 	decl, err := contexttool.FromCtx[VarDecl](ctx, node.Ident)
 	if err != nil {
@@ -79,7 +75,7 @@ func (node *VarRead) GenerateVirtualMachineAssembly(p *assembly.P) error {
 		return nil
 	}
 
-	p.AddI1RLit(bytecode.OPStackPtr, node.Register().(bytecode.R), uint16(node.NameResolutionPass.Decl.RelAddr()), node.Position())
+	node.NameResolutionPass.Decl.AddBytecodeVirtualmachinePtrInstruction(p, node.Register().(bytecode.R))
 
 	op, err := bytecode.LoadForSize(node.NameResolutionPass.Decl.Type().Bytes())
 	if err != nil {

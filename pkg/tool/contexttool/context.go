@@ -6,17 +6,25 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
+	"github.com/frederik-jatzkowski/havel/pkg/tool/scope"
 )
 
 type contextKeyScope[T any] struct{}
 
-func WithScope[T names.ScopedObject](ctx context.Context, scope names.Scope[T]) context.Context {
-	return context.WithValue(ctx, contextKeyScope[T]{}, scope)
+func WithScope[T scope.Object](ctx context.Context, kind fmt.Stringer) (scope.Scope[T], context.Context) {
+	parent, ok := ctx.Value(contextKeyScope[T]{}).(scope.Scope[T])
+	if !ok {
+		root := scope.NewRoot[T](kind)
+		return root, context.WithValue(ctx, contextKeyScope[T]{}, root)
+	}
+
+	child := parent.Child()
+
+	return child, context.WithValue(ctx, contextKeyScope[T]{}, child)
 }
 
-func DefineInScope[T names.ScopedObject](ctx context.Context, node T) error {
-	scope, ok := ctx.Value(contextKeyScope[T]{}).(names.Scope[T])
+func DefineInScope[T scope.Object](ctx context.Context, node T) error {
+	scope, ok := ctx.Value(contextKeyScope[T]{}).(scope.Scope[T])
 	if !ok {
 		return errors.New("no scope found in context")
 	}
@@ -24,8 +32,8 @@ func DefineInScope[T names.ScopedObject](ctx context.Context, node T) error {
 	return scope.Define(node)
 }
 
-func FromCtx[T names.ScopedObject](ctx context.Context, name string) (value T, err error) {
-	scope, ok := ctx.Value(contextKeyScope[T]{}).(names.Scope[T])
+func FromCtx[T scope.Object](ctx context.Context, name string) (value T, err error) {
+	scope, ok := ctx.Value(contextKeyScope[T]{}).(scope.Scope[T])
 	if !ok {
 		return value, fmt.Errorf("no scope found in context for %s", reflect.TypeFor[T]())
 	}

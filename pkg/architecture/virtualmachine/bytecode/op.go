@@ -42,6 +42,7 @@ import "fmt"
 //		alu_move,
 //		alloc,
 //		free,
+//		static_ptr,
 //		stack_ptr,
 //		store_8,
 //		store_16,

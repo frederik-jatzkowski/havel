@@ -83,7 +83,7 @@ func (node *VarWrite) GenerateVirtualMachineAssembly(p *assembly.P) error {
 		return nil
 	}
 
-	p.AddI1RLit(bytecode.OPStackPtr, node.RegisterAllocationPass.Temp.(bytecode.R), uint16(node.NameResolutionPass.Decl.RelAddr()), node.Position())
+	node.NameResolutionPass.Decl.AddBytecodeVirtualmachinePtrInstruction(p, node.RegisterAllocationPass.Temp.(bytecode.R))
 
 	op, err := bytecode.StoreForSize(node.NameResolutionPass.Decl.Type().Bytes())
 	if err != nil {

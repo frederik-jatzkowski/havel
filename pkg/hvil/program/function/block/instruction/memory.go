@@ -11,7 +11,6 @@ import (
 
 type MemoryRead interface {
 	tool.NodeLike
-	names.ScopedObject
 	names.Resolver
 	statistics.Calculator
 	registeralloc.Value

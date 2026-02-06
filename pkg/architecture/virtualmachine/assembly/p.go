@@ -1,7 +1,8 @@
 package assembly
 
 import (
-	"fmt"
+	"bytes"
+	"strings"
 
 	"github.com/alecthomas/participle/v2/lexer"
 
@@ -10,6 +11,7 @@ import (
 
 type P struct {
 	Positions    []lexer.Position
+	StaticData   []S
 	Instructions []I
 }
 
@@ -18,12 +20,23 @@ func NewP() *P {
 }
 
 func (p *P) String() string {
-	result := ""
-	for _, instruction := range p.Instructions {
-		result += fmt.Sprintf("%s\n", instruction.String())
+	var result strings.Builder
+
+	result.WriteString(".static\n")
+
+	for _, data := range p.StaticData {
+		result.WriteString(data.String())
+		result.WriteString("\n")
 	}
 
-	return result
+	result.WriteString("\n.code\n")
+
+	for _, instruction := range p.Instructions {
+		result.WriteString(instruction.String())
+		result.WriteString("\n")
+	}
+
+	return result.String()
 }
 
 func (p *P) Assemble() (*bytecode.P, error) {
@@ -43,6 +56,15 @@ func (p *P) Assemble() (*bytecode.P, error) {
 	byteCode := &bytecode.P{
 		Positions: p.Positions,
 	}
+
+	buf := bytes.NewBuffer(nil)
+	for _, s := range p.StaticData {
+		if _, err := s.WriteTo(buf); err != nil {
+			return nil, err
+		}
+	}
+
+	byteCode.StaticData = buf.Bytes()
 
 	i = 0
 	for _, instr := range p.Instructions {

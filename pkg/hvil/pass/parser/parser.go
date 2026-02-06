@@ -15,6 +15,7 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/program/function/block/instruction/literal"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/program/function/block/instruction/mem"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/program/function/block/terminator"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/program/global"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/types"
 
 	"github.com/alecthomas/participle/v2"
@@ -71,6 +72,11 @@ var parser = participle.MustBuild[program.Program](
 		&call.Local{},
 		&call.Ptr{},
 		&call.Dyn{},
+	),
+	participle.Union[global.Initializer](
+		&global.InitializerLiteral{},
+		&global.InitializerMemPtr{},
+		&global.InitializerCallPtr{},
 	),
 	participle.Union[debug.Operation](&debug.Dump{}),
 )
