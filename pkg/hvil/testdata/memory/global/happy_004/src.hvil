@@ -1,0 +1,15 @@
+
+declare (
+    one : 1 byte = 0b1,
+    two : 1 byte = 0b10,
+    result : 1 byte = 0b0
+);
+
+func main() {
+    block entry {
+        $indirect : ref = mem.ptr(result);
+        $result : 1 byte = alu.add_u(one, two);
+        mem.store($indirect, $result);
+        debug.dump(result);
+    } return;
+}
