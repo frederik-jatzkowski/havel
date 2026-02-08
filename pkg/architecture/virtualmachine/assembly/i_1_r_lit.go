@@ -33,6 +33,6 @@ func (i *i1RLit) ByteCode(_ int, _ map[string]int) []bytecode.I {
 	return []bytecode.I{*(*bytecode.I)(unsafe.Pointer(&buf))}
 }
 
-func (i *i1RLit) String() string {
+func (i *i1RLit) String(_ map[string]int) string {
 	return fmt.Sprintf("  %s %s %d", i.op, i.r1, i.lit)
 }

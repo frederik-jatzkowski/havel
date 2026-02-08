@@ -31,6 +31,6 @@ func (i *i1R) ByteCode(_ int, _ map[string]int) []bytecode.I {
 	}
 }
 
-func (i *i1R) String() string {
+func (i *i1R) String(_ map[string]int) string {
 	return fmt.Sprintf("  %s %s", i.op, i.r1)
 }

@@ -32,6 +32,6 @@ func (i *call) ByteCode(_ int, _ map[string]int) []bytecode.I {
 	return []bytecode.I{*(*bytecode.I)(unsafe.Pointer(&buf))}
 }
 
-func (i *call) String() string {
+func (i *call) String(_ map[string]int) string {
 	return fmt.Sprintf("  call %s %d", i.fp, i.frameSize)
 }

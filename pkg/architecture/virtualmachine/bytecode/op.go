@@ -17,6 +17,8 @@ import "fmt"
 //		lit32,
 //		lit64,
 //		debug_dump,
+//		debug_stack_push,
+//		debug_stack_pop,
 //		alu_add_u8,
 //		alu_add_u16,
 //		alu_add_u32,

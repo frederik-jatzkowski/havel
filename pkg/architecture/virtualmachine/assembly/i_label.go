@@ -26,6 +26,6 @@ func (i *label) ByteCode(_ int, _ map[string]int) []bytecode.I {
 	return nil
 }
 
-func (i *label) String() string {
-	return fmt.Sprintf("%s:", i.name)
+func (i *label) String(labels map[string]int) string {
+	return fmt.Sprintf("%s (pc %d):", i.name, labels[i.name])
 }

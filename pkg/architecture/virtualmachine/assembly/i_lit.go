@@ -67,6 +67,6 @@ func (i *lit) ByteCode(_ int, _ map[string]int) []bytecode.I {
 	}
 }
 
-func (i *lit) String() string {
+func (i *lit) String(_ map[string]int) string {
 	return fmt.Sprintf("  lit%d %s %d", i.size*8, i.target, i.value)
 }

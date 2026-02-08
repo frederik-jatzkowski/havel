@@ -20,19 +20,21 @@ func NewP() *P {
 }
 
 func (p *P) String() string {
+	labelMap := p.labelMap()
+
 	var result strings.Builder
 
 	result.WriteString(".static\n")
 
 	for _, data := range p.StaticData {
-		result.WriteString(data.String())
+		result.WriteString(data.String(labelMap))
 		result.WriteString("\n")
 	}
 
 	result.WriteString("\n.code\n")
 
 	for _, instruction := range p.Instructions {
-		result.WriteString(instruction.String())
+		result.WriteString(instruction.String(labelMap))
 		result.WriteString("\n")
 	}
 
@@ -40,6 +42,31 @@ func (p *P) String() string {
 }
 
 func (p *P) Assemble() (*bytecode.P, error) {
+	labelMap := p.labelMap()
+
+	byteCode := &bytecode.P{
+		Positions: p.Positions,
+	}
+
+	buf := bytes.NewBuffer(nil)
+	for _, s := range p.StaticData {
+		if _, err := s.WriteTo(buf, labelMap); err != nil {
+			return nil, err
+		}
+	}
+
+	byteCode.StaticData = buf.Bytes()
+
+	i := 0
+	for _, instr := range p.Instructions {
+		byteCode.Instructions = append(byteCode.Instructions, instr.ByteCode(i, labelMap)...)
+		i += instr.ByteCodeLen()
+	}
+
+	return byteCode, nil
+}
+
+func (p *P) labelMap() map[string]int {
 	labelMap := make(map[string]int)
 	i := 0
 	for _, instr := range p.Instructions {
@@ -53,24 +80,5 @@ func (p *P) Assemble() (*bytecode.P, error) {
 		labelMap[l.name] = i
 	}
 
-	byteCode := &bytecode.P{
-		Positions: p.Positions,
-	}
-
-	buf := bytes.NewBuffer(nil)
-	for _, s := range p.StaticData {
-		if _, err := s.WriteTo(buf); err != nil {
-			return nil, err
-		}
-	}
-
-	byteCode.StaticData = buf.Bytes()
-
-	i = 0
-	for _, instr := range p.Instructions {
-		byteCode.Instructions = append(byteCode.Instructions, instr.ByteCode(i, labelMap)...)
-		i += instr.ByteCodeLen()
-	}
-
-	return byteCode, nil
+	return labelMap
 }

@@ -33,6 +33,6 @@ func (i *loadLabel) ByteCode(_ int, labels map[string]int) []bytecode.I {
 	return bc
 }
 
-func (i *loadLabel) String() string {
+func (i *loadLabel) String(_ map[string]int) string {
 	return fmt.Sprintf("  load_label %s %s", i.result, i.target)
 }

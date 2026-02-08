@@ -21,11 +21,11 @@ func (s *sLit) Bytes() int {
 	return s.size
 }
 
-func (s *sLit) String() string {
+func (s *sLit) String(_ map[string]int) string {
 	return fmt.Sprintf("  %d (%d byte)", s.value, s.size)
 }
 
-func (s *sLit) WriteTo(w io.Writer) (n int64, err error) {
+func (s *sLit) WriteTo(w io.Writer, _ map[string]int) (n int64, err error) {
 	data := make([]byte, s.size)
 
 	switch s.size {

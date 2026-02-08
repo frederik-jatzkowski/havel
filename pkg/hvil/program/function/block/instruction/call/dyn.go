@@ -139,6 +139,8 @@ func (node *Dyn) GenerateVirtualMachineAssembly(p *assembly.P) error {
 
 	temp := node.RegisterAllocationPass.Temp.(bytecode.R)
 
+	p.AddI0R(bytecode.OPDebugStackPush, node.Position())
+
 	if err := generateVirtualMachineAssemblySaveCode(node, temp, toSave, p); err != nil {
 		return err
 	}
@@ -167,6 +169,8 @@ func (node *Dyn) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	if err := generateVirtualMachineAssemblyRestoreCode(node, temp, toSave, p); err != nil {
 		return err
 	}
+
+	p.AddI0R(bytecode.OPDebugStackPop, node.Position())
 
 	return nil
 }

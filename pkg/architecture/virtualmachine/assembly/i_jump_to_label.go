@@ -37,6 +37,6 @@ func (i *jumpToLabel) ByteCode(index int, labels map[string]int) []bytecode.I {
 	return []bytecode.I{*(*bytecode.I)(unsafe.Pointer(&buf))}
 }
 
-func (i *jumpToLabel) String() string {
+func (i *jumpToLabel) String(_ map[string]int) string {
 	return fmt.Sprintf("  jump_to_label %s", i.target)
 }

@@ -3,7 +3,10 @@ package virtualmachine
 import (
 	"fmt"
 	"io"
+	"os"
 	"unsafe"
+
+	"github.com/alecthomas/participle/v2/lexer"
 
 	"github.com/frederik-jatzkowski/havel/pkg/architecture/virtualmachine/bytecode"
 )
@@ -16,7 +19,8 @@ type VM struct {
 
 	registers [32]uint64
 
-	stackSize int
+	stackSize  int
+	stackTrace []lexer.Position
 
 	heap *Heap
 
@@ -51,6 +55,7 @@ func (vm *VM) Execute(p *bytecode.P) (err error) {
 
 	*vm.pc = 0
 	*vm.sp = int64(NewFatPtr(1, 0).ToUint64())
+	vm.stackTrace = make([]lexer.Position, 0)
 
 	if len(vm.heap.data) > 1 {
 		vm.heap.data = [][]byte{vm.heap.data[0]}
@@ -65,7 +70,17 @@ func (vm *VM) Execute(p *bytecode.P) (err error) {
 	defer func() {
 		r := recover()
 		if r != nil {
-			fmt.Fprintln(vm.stdout, r)
+			out := io.MultiWriter(vm.stdout, os.Stderr)
+
+			if int(*vm.pc) < len(p.Positions) {
+				vm.stackTrace = append(vm.stackTrace, p.Positions[*vm.pc])
+			}
+
+			fmt.Fprintln(out, "panic occurred at pc ", *vm.pc, ":", r)
+			for _, position := range vm.stackTrace {
+				fmt.Fprintln(out, position)
+			}
+
 			if e, ok := r.(error); ok {
 				err = e
 			}
@@ -101,6 +116,10 @@ func (vm *VM) execI(p *bytecode.P) {
 		vm.execOPLit64(p, i)
 	case bytecode.OPDebugDump:
 		vm.execOPDebugDump(p, i)
+	case bytecode.OPDebugStackPush:
+		vm.execOPDebugStackPush(p, i)
+	case bytecode.OPDebugStackPop:
+		vm.execOPDebugStackPop(p, i)
 	case bytecode.OPAluAddU8:
 		vm.execOPAluAddU8(p, i)
 	case bytecode.OPAluAddU16:
@@ -252,6 +271,18 @@ func (vm *VM) execOPDebugDump(p *bytecode.P, i bytecode.I) {
 	if _, err := fmt.Fprintf(vm.stdout, "%s register content: %d\n", p.Positions[*vm.pc], vm.registers[r1]); err != nil {
 		panic(err)
 	}
+	*vm.pc++
+}
+
+//go:inline
+func (vm *VM) execOPDebugStackPush(p *bytecode.P, i bytecode.I) {
+	vm.stackTrace = append(vm.stackTrace, p.Positions[*vm.pc])
+	*vm.pc++
+}
+
+//go:inline
+func (vm *VM) execOPDebugStackPop(p *bytecode.P, i bytecode.I) {
+	vm.stackTrace = vm.stackTrace[:len(vm.stackTrace)-1]
 	*vm.pc++
 }
 
@@ -461,7 +492,7 @@ func (vm *VM) execOPFree(p *bytecode.P, i bytecode.I) {
 //go:inline
 func (vm *VM) execOPStaticPtr(p *bytecode.P, i bytecode.I) {
 	r1, offset := i.R1Uint16()
-	ptr := NewFatPtr(0, uint32(offset)+uint32(*vm.sp))
+	ptr := NewFatPtr(0, uint32(offset))
 	vm.registers[r1] = ptr.ToUint64()
 	*vm.pc++
 }
