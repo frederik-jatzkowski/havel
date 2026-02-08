@@ -10,7 +10,7 @@ import (
 type Scalar struct {
 	tool.Node[Scalar]
 
-	Size int `parser:"@Size? 'byte'"`
+	Size int `parser:"@Number? 'byte'"`
 }
 
 func (node *Scalar) String() string {
@@ -47,11 +47,14 @@ func (node *Scalar) EqualsDetailed(other Type) error {
 }
 
 func (node *Scalar) Bytes() int {
-	if node.Size == 0 {
+	switch node.Size {
+	case 1, 2, 4, 8:
+		return node.Size
+	case 0:
 		return 1
+	default:
+		panic(fmt.Sprintf("invalid size: %d", node.Size))
 	}
-
-	return node.Size
 }
 
 func (node *Scalar) CanDoArithmetics() bool {

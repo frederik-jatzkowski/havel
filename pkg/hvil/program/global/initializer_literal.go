@@ -15,7 +15,7 @@ type InitializerLiteral struct {
 		Size int
 	}]
 
-	Value uint64 `parser:"@BitLiteral"`
+	Value uint64 `parser:"@Number"`
 }
 
 func (node *InitializerLiteral) ResolveNames(ctx context.Context) error {

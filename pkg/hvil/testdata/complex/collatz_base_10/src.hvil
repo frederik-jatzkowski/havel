@@ -1,0 +1,54 @@
+
+func main() {
+    block entry {
+        $n : 8 byte = 13;
+        $steps : 8 byte = call.local.solve_collatz($n);
+        debug.dump($steps);
+    } return;
+}
+
+func solve_collatz(n : 8 byte) -> (steps : 8 byte) {
+    block entry {
+        debug.dump(n);
+        $one : 8 byte = 1;
+        $check : 1 byte = alu.eq(n, $one);
+        steps = 0;
+    } if $check then exit else decide;
+
+    block decide {
+        $check : 1 byte = call.local.is_even(n);
+    } if $check then divide else multiply;
+
+    block divide {
+        $two : 8 byte = 2;
+        n = alu.div_u(n, $two);
+        steps = call.local.solve_collatz(n);
+    } goto exit;
+
+    block multiply {
+        $three : 8 byte = 3;
+        n = alu.mul_u(n, $three);
+        n = call.local.inc(n);
+        steps = call.local.solve_collatz(n);
+    } goto exit;
+
+    block exit {
+        steps = call.local.inc(steps);
+    } return;
+}
+
+func is_even(n : 8 byte) -> (result : 1 byte) {
+    block entry {
+        $two : 8 byte = 2;
+        $n_mod_two : 8 byte = alu.mod_u(n, $two);
+        $zero : 8 byte = 0;
+        result = alu.eq($n_mod_two, $zero);
+    } return;
+}
+
+func inc(value : 8 byte) -> (result : 8 byte) {
+    block entry {
+        $one : 8 byte = 1;
+        result = alu.add_u(value, $one);
+    } return;
+}

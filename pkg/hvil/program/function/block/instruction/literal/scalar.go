@@ -22,7 +22,7 @@ type Scalar struct {
 		Target architecture.Register
 	}]
 
-	Value uint64 `parser:"@BitLiteral"`
+	Value uint64 `parser:"@Number"`
 }
 
 func (node *Scalar) CalculateStatistics(ctx context.Context) {}
