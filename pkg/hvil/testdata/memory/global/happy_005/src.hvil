@@ -1,0 +1,67 @@
+
+declare (
+    fill : func(ref, ref) = call.ptr(fill),
+    sum : func(ref, ref) = call.ptr(sum),
+    size : 8 byte = 0b1,
+    len : 8 byte = 0b101,
+    zero : 1 byte = 0b0
+);
+
+func main() {
+    block entry {
+        $total : 8 byte = alu.mul_u(size, len);
+
+        $ptr : ref = mem.alloc($total);
+
+        call.local.reduce($ptr, zero, fill);
+
+        $result : 1 byte = call.local.reduce($ptr, zero, sum);
+
+        debug.dump($result);
+    } return;
+}
+
+func fill(total : ref, curr : ref) {
+    block entry {
+        $two : 1 byte = 0b10;
+        mem.store(curr, $two);
+    } return;
+}
+
+func sum(total : ref, curr : ref) {
+    block entry {
+        $total : 1 byte = mem.load(total);
+        $curr : 1 byte = mem.load(curr);
+        $result : 1 byte = alu.add_u($total, $curr);
+        mem.store(total, $result);
+    } return;
+}
+
+func reduce(ptr : ref, init : 1 byte, action : func(ref, ref)) -> (result : 1 byte) {
+    declare (
+        i : 8 byte
+    );
+
+    block entry {
+        i = 0b0;
+        result = alu.move(init);
+    } goto head;
+
+    block head {
+        $done : 1 byte = alu.eq(i, len);
+    } if $done then exit else body;
+
+    block body {
+        $offset : 8 byte = alu.mul_u(size, i);
+        $elem : ref = alu.add_u(ptr, $offset);
+
+        $result : ref = mem.ptr(result);
+
+        call.dyn.action($result, $elem);
+
+        $one : 8 byte = 0b1;
+        i = alu.add_u(i, $one);
+    } goto head;
+
+    block exit {} return;
+}
