@@ -21,14 +21,6 @@ func (node *Scalar) MarshalText() ([]byte, error) {
 	return []byte(node.String()), nil
 }
 
-func (node *Scalar) CanBeAssigned(other Type) bool {
-	return node.Equals(other)
-}
-
-func (node *Scalar) CanBeAssignedDetailed(other Type) error {
-	return node.EqualsDetailed(other)
-}
-
 func (node *Scalar) Equals(other Type) bool {
 	return node.EqualsDetailed(other) == nil
 }

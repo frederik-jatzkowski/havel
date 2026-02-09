@@ -37,7 +37,7 @@ func (node *Store) ResolveNames(ctx context.Context) error {
 }
 
 func (node *Store) ResolveTypes(target types.Type) error {
-	if !target.CanBeAssigned(&types.Void{}) {
+	if !target.Equals(&types.Void{}) {
 		return node.Errorf("cannot assign void to %s", target)
 	}
 

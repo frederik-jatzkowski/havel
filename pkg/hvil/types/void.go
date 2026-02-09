@@ -14,14 +14,6 @@ func (node *Void) String() string {
 	return "void"
 }
 
-func (node *Void) CanBeAssigned(_ Type) bool {
-	return true
-}
-
-func (node *Void) CanBeAssignedDetailed(_ Type) error {
-	return nil
-}
-
 func (node *Void) Equals(other Type) bool {
 	return node.EqualsDetailed(other) == nil
 }

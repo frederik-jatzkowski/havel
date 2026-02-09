@@ -33,7 +33,7 @@ func (node *Move) ResolveNames(ctx context.Context) error {
 func (node *Move) ResolveTypes(target types.Type) error {
 	arg := node.Arg.Type()
 
-	if !target.CanBeAssigned(arg) {
+	if !target.Equals(arg) {
 		return node.Errorf("cannot assign %s to %s", arg, target)
 	}
 

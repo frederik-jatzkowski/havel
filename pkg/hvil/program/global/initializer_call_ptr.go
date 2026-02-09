@@ -32,7 +32,7 @@ func (node *InitializerCallPtr) ResolveNames(ctx context.Context) error {
 }
 
 func (node *InitializerCallPtr) ResolveTypes(expected types.Type) error {
-	if err := expected.CanBeAssignedDetailed(node.NameResolutionPass.Function.Signature()); err != nil {
+	if err := expected.EqualsDetailed(node.NameResolutionPass.Function.Signature()); err != nil {
 		return node.Wrap(err)
 	}
 

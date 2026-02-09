@@ -38,7 +38,7 @@ func (node *Ptr) ResolveNames(ctx context.Context) error {
 }
 
 func (node *Ptr) ResolveTypes(target types.Type) error {
-	if err := target.CanBeAssignedDetailed(node.NameResolutionPass.Target.Signature()); err != nil {
+	if err := target.EqualsDetailed(node.NameResolutionPass.Target.Signature()); err != nil {
 		return node.Wrap(err)
 	}
 

@@ -32,7 +32,7 @@ func (node *Free) ResolveNames(ctx context.Context) error {
 }
 
 func (node *Free) ResolveTypes(target types.Type) error {
-	if !target.CanBeAssigned(&types.Void{}) {
+	if !target.Equals(&types.Void{}) {
 		return node.Errorf("cannot assign void to %s", target)
 	}
 

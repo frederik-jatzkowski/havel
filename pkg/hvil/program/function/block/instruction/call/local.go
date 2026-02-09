@@ -70,13 +70,13 @@ func (node *Local) ResolveNames(ctx context.Context) error {
 }
 
 func (node *Local) ResolveTypes(target types.Type) error {
-	if !target.CanBeAssigned(&types.Void{}) {
+	if !target.Equals(&types.Void{}) {
 		return node.Errorf("cannot assign void to %s", target)
 	}
 
 	node.TypeCheckPass.Signature = calculateSignature(node.Args.Items)
 
-	if err := node.TypeCheckPass.Signature.CanBeAssignedDetailed(node.NameResolutionPass.Called.Signature()); err != nil {
+	if err := node.TypeCheckPass.Signature.EqualsDetailed(node.NameResolutionPass.Called.Signature()); err != nil {
 		return node.Wrap(err)
 	}
 

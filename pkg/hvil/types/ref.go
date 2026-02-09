@@ -20,14 +20,6 @@ func (node *Ref) MarshalText() ([]byte, error) {
 	return []byte(node.String()), nil
 }
 
-func (node *Ref) CanBeAssigned(other Type) bool {
-	return node.Equals(other)
-}
-
-func (node *Ref) CanBeAssignedDetailed(other Type) error {
-	return node.EqualsDetailed(other)
-}
-
 func (node *Ref) Equals(other Type) bool {
 	return node.EqualsDetailed(other) == nil
 }

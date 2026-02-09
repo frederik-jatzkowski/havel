@@ -68,7 +68,7 @@ func (node *Dyn) ResolveNames(ctx context.Context) error {
 }
 
 func (node *Dyn) ResolveTypes(target types.Type) error {
-	if !target.CanBeAssigned(&types.Void{}) {
+	if !target.Equals(&types.Void{}) {
 		return node.Errorf("cannot assign void to %s", target)
 	}
 
@@ -78,7 +78,7 @@ func (node *Dyn) ResolveTypes(target types.Type) error {
 		return node.Errorf("%s is not a function type", node.Target.Type())
 	}
 
-	if err := node.Target.Type().CanBeAssignedDetailed(node.TypeCheckPass.Signature); err != nil {
+	if err := node.Target.Type().EqualsDetailed(node.TypeCheckPass.Signature); err != nil {
 		return node.Wrap(err)
 	}
 
