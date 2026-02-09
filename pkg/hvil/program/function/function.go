@@ -44,7 +44,6 @@ type Function struct {
 
 	Name   string                 `parser:"'func':Keyword @Ident"`
 	Params tool.List[*stack.Decl] `parser:"'(' @@ ')'"`
-	Result *stack.Decl            `parser:"( '->' '(' @@ ')' )?"`
 	Locals tool.List[*stack.Decl] `parser:"'{' ( 'declare':Keyword '(' @@ ')' ';' )?"`
 	Blocks []Block                `parser:"@@+  '}'"`
 }
@@ -61,12 +60,6 @@ func (node *Function) ResolveNames(ctx context.Context) error {
 	for _, param := range node.Params.Items {
 		if err := node.NameResolutionPass.Vars.Define(param); err != nil {
 			return param.Wrap(err)
-		}
-	}
-
-	if node.Result != nil {
-		if err := node.NameResolutionPass.Vars.Define(node.Result); err != nil {
-			return node.Result.Wrap(err)
 		}
 	}
 
@@ -121,12 +114,6 @@ func (node *Function) Signature() *types.Function {
 		signature.Parameters.Items = append(signature.Parameters.Items, item.Type())
 	}
 
-	if node.Result == nil {
-		signature.ReturnValue = &types.Void{}
-	} else {
-		signature.ReturnValue = node.Result.Type()
-	}
-
 	return signature
 }
 
@@ -142,10 +129,6 @@ func (node *Function) CalculateStatistics(ctx context.Context) {
 		param.CalculateStatistics(ctx, node.NameResolutionPass.Entry)
 	}
 
-	if node.Result != nil {
-		node.Result.CalculateStatistics(ctx, node.NameResolutionPass.Entry)
-	}
-
 	for _, local := range node.Locals.Items {
 		local.CalculateStatistics(ctx, node.NameResolutionPass.Entry)
 	}
@@ -159,11 +142,6 @@ func (node *Function) ResolveAddresses(arch architecture.Architecture) error {
 		param := node.Params.Items[i]
 		param.AddressResolutionPass.RelAddr = paramPlan.RelAddr
 		param.RegisterAllocationPass.BoundTo = paramPlan.BoundTo
-	}
-
-	if node.Result != nil {
-		node.Result.AddressResolutionPass.RelAddr = callPlan.Result.RelAddr
-		node.Result.RegisterAllocationPass.BoundTo = callPlan.Result.BoundTo
 	}
 
 	offset := callPlan.Offset

@@ -74,14 +74,6 @@ func (a *Architecture) CalculateCallPlan(signature *types.Function) architecture
 		offset += param.Bytes()
 	}
 
-	call.Result = architecture.MemoryAllocation{
-		BoundTo: a.resultRegisters[0],
-		RelAddr: offset,
-		Bytes:   signature.ReturnType().Bytes(),
-	}
-
-	offset += call.Result.Bytes
-
 	call.Offset = offset
 
 	return call

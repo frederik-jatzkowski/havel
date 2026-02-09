@@ -9,5 +9,4 @@ type MemoryAllocation struct {
 type CallPlan struct {
 	Offset int
 	Params []MemoryAllocation
-	Result MemoryAllocation
 }

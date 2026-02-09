@@ -35,7 +35,6 @@ type Local struct {
 	registeralloc.RegisterAllocation[struct {
 		Scope    registeralloc.Scope
 		Temp     architecture.Register
-		Result   architecture.Register
 		CallPlan architecture.CallPlan
 	}]
 
@@ -71,7 +70,11 @@ func (node *Local) ResolveNames(ctx context.Context) error {
 }
 
 func (node *Local) ResolveTypes(target types.Type) error {
-	node.TypeCheckPass.Signature = calculateSignature(node.Args.Items, target)
+	if !target.CanBeAssigned(&types.Void{}) {
+		return node.Errorf("cannot assign void to %s", target)
+	}
+
+	node.TypeCheckPass.Signature = calculateSignature(node.Args.Items)
 
 	if err := node.TypeCheckPass.Signature.CanBeAssignedDetailed(node.NameResolutionPass.Called.Signature()); err != nil {
 		return node.Wrap(err)
@@ -117,7 +120,7 @@ func (node *Local) AllocateRegisters(scope registeralloc.Scope) ([]architecture.
 }
 
 func (node *Local) SetResultRegister(r architecture.Register) {
-	node.RegisterAllocationPass.Result = r
+	panic(fmt.Sprintf("target register assigned to %T, which returns void", node))
 }
 
 func (node *Local) GenerateVirtualMachineAssembly(p *assembly.P) error {
@@ -149,14 +152,6 @@ func (node *Local) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	// restore stack pointer
 	p.AddI1RLit(bytecode.OPStackPtr, temp, 8, node.Position())
 	p.AddI2R(bytecode.OPLoad64, bytecode.SP, temp, node.Position())
-
-	result := node.RegisterAllocationPass.Result
-
-	if result != nil {
-		if err := generateVirtualMachineAssemblyResultCode(node, temp, frameSize, callPlan, result.(bytecode.R), p); err != nil {
-			return err
-		}
-	}
 
 	if err := generateVirtualMachineAssemblyRestoreCode(node, temp, toSave, p); err != nil {
 		return err

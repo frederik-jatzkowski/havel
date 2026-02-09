@@ -1,19 +1,26 @@
 
 func main() {
+    declare (
+        fib_n : 8 byte
+    );
+
     block entry {
         $n : 8 byte = 0b1011101;
         debug.dump($n);
 
-        $fib_n : 8 byte = call.local.fib($n);
-        debug.dump($fib_n);
+        $fib_n_ptr : ref = mem.ptr(fib_n);
+        call.local.fib($n, $fib_n_ptr);
+        debug.dump(fib_n);
     } return;
 }
 
 // fib returns the n-ths fibonacci number
-func fib(n : 8 byte) -> (result : 8 byte) {
+func fib(n : 8 byte, result_ptr : ref) {
     declare (
         counter : 8 byte,
-        next_fib : 8 byte
+        next_fib : 8 byte,
+        result : 8 byte,
+        new_counter : 8 byte
     );
 
     block entry {
@@ -32,15 +39,20 @@ func fib(n : 8 byte) -> (result : 8 byte) {
         result = alu.move(next_fib);
         next_fib = alu.move($new_fib);
 
-        counter = call.local.inc(counter);
+        $new_counter_ptr : ref = mem.ptr(new_counter);
+        call.local.inc(counter, $new_counter_ptr);
+        counter = alu.move(new_counter);
     } goto loop_head;
 
-    block exit {} return;
+    block exit {
+        mem.store(result_ptr, result);
+    } return;
 }
 
-func inc(value : 8 byte) -> (result : 8 byte) {
+func inc(value : 8 byte, result_ptr : ref) {
     block entry {
         $one : 8 byte = 0b1;
-        result = alu.add_u(value, $one);
+        $res : 8 byte = alu.add_u(value, $one);
+        mem.store(result_ptr, $res);
     } return;
 }

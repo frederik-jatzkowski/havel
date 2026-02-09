@@ -13,9 +13,10 @@ func main() {
 
         call.local.fill($ptr, $size, $len);
 
-        $sum : 1 byte = call.local.sum($ptr, $size, $len);
+        $sum_ptr : ref = mem.ptr(n);
+        call.local.sum($ptr, $size, $len, $sum_ptr);
 
-        debug.dump($sum);
+        debug.dump(n);
     } return;
 }
 
@@ -46,14 +47,15 @@ func fill(ptr : ref, size : 8 byte, len : 8 byte) {
     block exit {} return;
 }
 
-func sum(ptr : ref, size : 8 byte, len : 8 byte) -> (sum : 1 byte) {
+func sum(ptr : ref, size : 8 byte, len : 8 byte, result_ptr : ref) {
     declare (
-        i : 8 byte
+        i : 8 byte,
+        sum_val : 1 byte
     );
 
     block entry {
         i = 0b0;
-        sum = 0b0;
+        sum_val = 0b0;
     } goto head;
 
     block head {
@@ -65,11 +67,13 @@ func sum(ptr : ref, size : 8 byte, len : 8 byte) -> (sum : 1 byte) {
         $elem : ref = alu.add_u(ptr, $offset);
 
         $loaded : 1 byte = mem.load($elem);
-        sum = alu.add_u(sum, $loaded);
+        sum_val = alu.add_u(sum_val, $loaded);
 
         $one : 8 byte = 0b1;
         i = alu.add_u(i, $one);
     } goto head;
 
-    block exit {} return;
+    block exit {
+        mem.store(result_ptr, sum_val);
+    } return;
 }

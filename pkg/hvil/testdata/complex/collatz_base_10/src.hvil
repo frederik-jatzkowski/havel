@@ -1,13 +1,24 @@
 
 func main() {
+    declare (
+        steps : 8 byte
+    );
+
     block entry {
         $n : 8 byte = 13;
-        $steps : 8 byte = call.local.solve_collatz($n);
-        debug.dump($steps);
+        $steps_ptr : ref = mem.ptr(steps);
+        call.local.solve_collatz($n, $steps_ptr);
+        debug.dump(steps);
     } return;
 }
 
-func solve_collatz(n : 8 byte) -> (steps : 8 byte) {
+func solve_collatz(n : 8 byte, steps_ptr : ref) {
+    declare (
+        steps : 8 byte,
+        is_even_res : 1 byte,
+        inc_res : 8 byte
+    );
+
     block entry {
         debug.dump(n);
         $one : 8 byte = 1;
@@ -16,39 +27,47 @@ func solve_collatz(n : 8 byte) -> (steps : 8 byte) {
     } if $check then exit else decide;
 
     block decide {
-        $check : 1 byte = call.local.is_even(n);
-    } if $check then divide else multiply;
+        $is_even_res_ptr : ref = mem.ptr(is_even_res);
+        call.local.is_even(n, $is_even_res_ptr);
+    } if is_even_res then divide else multiply;
 
     block divide {
         $two : 8 byte = 2;
         n = alu.div_u(n, $two);
-        steps = call.local.solve_collatz(n);
+        $steps_ptr_inner : ref = mem.ptr(steps);
+        call.local.solve_collatz(n, $steps_ptr_inner);
     } goto exit;
 
     block multiply {
         $three : 8 byte = 3;
         n = alu.mul_u(n, $three);
-        n = call.local.inc(n);
-        steps = call.local.solve_collatz(n);
+        $n_ptr : ref = mem.ptr(n);
+        call.local.inc(n, $n_ptr);
+        $steps_ptr_inner_2 : ref = mem.ptr(steps);
+        call.local.solve_collatz(n, $steps_ptr_inner_2);
     } goto exit;
 
     block exit {
-        steps = call.local.inc(steps);
+        $steps_ptr_inner_3 : ref = mem.ptr(steps);
+        call.local.inc(steps, $steps_ptr_inner_3);
+        mem.store(steps_ptr, steps);
     } return;
 }
 
-func is_even(n : 8 byte) -> (result : 1 byte) {
+func is_even(n : 8 byte, result_ptr : ref) {
     block entry {
         $two : 8 byte = 2;
         $n_mod_two : 8 byte = alu.mod_u(n, $two);
         $zero : 8 byte = 0;
-        result = alu.eq($n_mod_two, $zero);
+        $res : 1 byte = alu.eq($n_mod_two, $zero);
+        mem.store(result_ptr, $res);
     } return;
 }
 
-func inc(value : 8 byte) -> (result : 8 byte) {
+func inc(value : 8 byte, result_ptr : ref) {
     block entry {
         $one : 8 byte = 1;
-        result = alu.add_u(value, $one);
+        $res : 8 byte = alu.add_u(value, $one);
+        mem.store(result_ptr, $res);
     } return;
 }

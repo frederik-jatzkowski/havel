@@ -2,33 +2,44 @@
 // It then uses a 'map' function (using function pointers) to double each element in the list.
 
 func main() {
+    declare (
+        head : ref,
+        node2 : ref
+    );
+
     block entry {
         // Create a list: [5, 10]
         $val1 : 1 byte = 0b101;  // 5
-        $head : ref = call.local.create_node($val1);
+        $head_ptr : ref = mem.ptr(head);
+        call.local.create_node($val1, $head_ptr);
 
         $val2 : 1 byte = 0b1010; // 10
-        $node2 : ref = call.local.create_node($val2);
+        $node2_ptr : ref = mem.ptr(node2);
+        call.local.create_node($val2, $node2_ptr);
         
         // Link head -> node2
         $offset : 8 byte = 0b1;
-        $next_ptr_in_head : ref = alu.add_u($head, $offset); // next is at offset 1
-        mem.store($next_ptr_in_head, $node2);
+        $next_ptr_in_head : ref = alu.add_u(head, $offset); // next is at offset 1
+        mem.store($next_ptr_in_head, node2);
 
         // Map function: double
         $double_func : func(ref) = call.ptr(double_node);
-        call.local.map($head, $double_func);
+        call.local.map(head, $double_func);
 
         // Verify values
-        $v1 : 1 byte = mem.load($head);
+        $v1 : 1 byte = mem.load(head);
         debug.dump($v1); // Should be 10
 
-        $v2 : 1 byte = mem.load($node2);
+        $v2 : 1 byte = mem.load(node2);
         debug.dump($v2); // Should be 20
     } return;
 }
 
-func create_node(val : 1 byte) -> (node : ref) {
+func create_node(val : 1 byte, result_ptr : ref) {
+    declare (
+        node : ref
+    );
+
     block entry {
         // Node structure: [value (1 byte), next (ref/8 bytes)] = 9 bytes
         $size : 8 byte = 0b1001; 
@@ -39,6 +50,7 @@ func create_node(val : 1 byte) -> (node : ref) {
         $next_ptr : ref = alu.add_u(node, $offset);
         $null : ref = 0b0;
         mem.store($next_ptr, $null);
+        mem.store(result_ptr, node);
     } return;
 }
 

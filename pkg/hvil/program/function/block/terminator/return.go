@@ -8,7 +8,6 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/architecture/virtualmachine/bytecode"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/optimization/controlflow"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/optimization/statistics"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/program/function"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/program/function/block"
@@ -48,20 +47,7 @@ func (node *Return) ResolveTypes() error {
 }
 
 func (node *Return) CalculateStatistics(ctx context.Context) {
-	result := node.NameResolutionPass.Function.Result
-	if result != nil {
-		blockID, err := contexttool.CurrentFromContext[statistics.BlockID](ctx)
-		if err != nil {
-			panic(err)
-		}
 
-		instructionID, err := contexttool.CurrentFromContext[statistics.InstructionID](ctx)
-		if err != nil {
-			panic(err)
-		}
-
-		result.AddReadToStatistic(blockID, instructionID)
-	}
 }
 
 func (node *Return) AllocateRegisters(scope registeralloc.Scope) error {
@@ -83,20 +69,6 @@ func (node *Return) GenerateVirtualMachineAssembly(p *assembly.P) error {
 		p.AddLit(temp, 1, 0, node.Position())
 		p.AddI1R(bytecode.OPExit, temp, node.Position())
 	} else {
-		result := node.NameResolutionPass.Function.Result
-		if result != nil && result.Volatile() {
-			// store final result in register if it is kept in memory
-
-			p.AddI1RLit(bytecode.OPStackPtr, temp, uint16(result.RelAddr()), node.Position())
-
-			op, err := bytecode.LoadForSize(result.Type().Bytes())
-			if err != nil {
-				return node.Wrap(err)
-			}
-
-			p.AddI2R(op, result.BoundTo().(bytecode.R), temp, node.Position())
-		}
-
 		p.AddI1RLit(bytecode.OPStackPtr, temp, 0, node.Position())
 		p.AddI2R(bytecode.OPLoad64, bytecode.PC, temp, node.Position())
 	}

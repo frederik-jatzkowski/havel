@@ -1,13 +1,23 @@
 
 func main() {
+    declare (
+        dice : 1 byte
+    );
+
     block entry {
-        call.local.throw_dice();
+        $dice_ptr : ref = mem.ptr(dice);
+        call.local.throw_dice($dice_ptr);
     } return;
 }
 
-func throw_dice() -> (result : 1 byte) {
+func throw_dice(result_ptr : ref) {
+    declare (
+        result : 1 byte
+    );
+
     block entry {
         result = 0b101010;
         debug.dump(result);
+        mem.store(result_ptr, result);
     } return;
 }

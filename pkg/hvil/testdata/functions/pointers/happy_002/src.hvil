@@ -1,24 +1,39 @@
 func main() {
+    declare (
+        add : func(1 byte, 1 byte, ref),
+        res : 1 byte
+    );
     block entry {
-        $get_adder : func() -> (func(1 byte, 1 byte) -> (1 byte)) = call.ptr(get_adder);
-        $add : func(1 byte, 1 byte) -> (1 byte) = call.dyn.$get_adder();
+        $get_adder : func(ref) = call.ptr(get_adder);
+        $add_ptr : ref = mem.ptr(add);
+        call.dyn.$get_adder($add_ptr);
         
         $a : 1 byte = 0b101; // 5
         $b : 1 byte = 0b011; // 3
-        $res : 1 byte = call.dyn.$add($a, $b);
+        $res_ptr : ref = mem.ptr(res);
+        $add_val : func(1 byte, 1 byte, ref) = alu.move(add);
+        call.dyn.$add_val($a, $b, $res_ptr);
         
-        debug.dump($res);
+        debug.dump(res);
     } return;
 }
 
-func get_adder() -> (f : func(1 byte, 1 byte) -> (1 byte)) {
+func get_adder(result_ptr : ref) {
+    declare (
+        f : func(1 byte, 1 byte, ref)
+    );
     block entry {
         f = call.ptr(add);
+        mem.store(result_ptr, f);
     } return;
 }
 
-func add(x : 1 byte, y : 1 byte) -> (z : 1 byte) {
+func add(x : 1 byte, y : 1 byte, result_ptr : ref) {
+    declare (
+        z : 1 byte
+    );
     block entry {
         z = alu.add_u(x, y);
+        mem.store(result_ptr, z);
     } return;
 }

@@ -1,23 +1,30 @@
 
 func main() {
+    declare (
+        dangling : ref
+    );
+
     block entry {
-        $ptr : ref = call.local.create_dangling();
-        call.local.print($ptr);
-        call.local.overwrite_dangling();
-        call.local.print($ptr);
+        $ptr : ref = mem.ptr(dangling);
+        call.local.create_dangling($ptr);
+
+        call.local.print(dangling);
+        call.local.overwrite_dangling($ptr);
+        call.local.print(dangling);
     } return;
 }
 
-func create_dangling() -> (result: ref) {
+func create_dangling(result: ref) {
     declare (n : 1 byte );
 
     block entry {
         n = 0b1;
-        result = mem.ptr(n);
+        $result : ref = mem.ptr(n);
+        mem.store(result, $result);
     } return;
 }
 
-func overwrite_dangling() -> (result: ref) {
+func overwrite_dangling(result: ref) {
     declare (n : 1 byte );
 
     block entry {

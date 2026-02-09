@@ -34,7 +34,6 @@ type Dyn struct {
 	registeralloc.RegisterAllocation[struct {
 		Scope    registeralloc.Scope
 		Temp     architecture.Register
-		Result   architecture.Register
 		CallPlan architecture.CallPlan
 	}]
 
@@ -69,7 +68,11 @@ func (node *Dyn) ResolveNames(ctx context.Context) error {
 }
 
 func (node *Dyn) ResolveTypes(target types.Type) error {
-	node.TypeCheckPass.Signature = calculateSignature(node.Args.Items, target)
+	if !target.CanBeAssigned(&types.Void{}) {
+		return node.Errorf("cannot assign void to %s", target)
+	}
+
+	node.TypeCheckPass.Signature = calculateSignature(node.Args.Items)
 
 	if _, ok := node.Target.Type().(*types.Function); !ok {
 		return node.Errorf("%s is not a function type", node.Target.Type())
@@ -126,7 +129,7 @@ func (node *Dyn) AllocateRegisters(scope registeralloc.Scope) ([]architecture.Re
 }
 
 func (node *Dyn) SetResultRegister(r architecture.Register) {
-	node.RegisterAllocationPass.Result = r
+	panic(fmt.Sprintf("target register assigned to %T, which returns void", node))
 }
 
 func (node *Dyn) GenerateVirtualMachineAssembly(p *assembly.P) error {
@@ -157,14 +160,6 @@ func (node *Dyn) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	// restore stack pointer
 	p.AddI1RLit(bytecode.OPStackPtr, temp, 8, node.Position())
 	p.AddI2R(bytecode.OPLoad64, bytecode.SP, temp, node.Position())
-
-	result := node.RegisterAllocationPass.Result
-
-	if result != nil {
-		if err := generateVirtualMachineAssemblyResultCode(node, temp, frameSize, callPlan, result.(bytecode.R), p); err != nil {
-			return err
-		}
-	}
 
 	if err := generateVirtualMachineAssemblyRestoreCode(node, temp, toSave, p); err != nil {
 		return err

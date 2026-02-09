@@ -9,8 +9,7 @@ import (
 type Function struct {
 	tool.Node[Function]
 
-	Parameters  tool.List[Type] `parser:"'func' '(' @@ ')'"`
-	ReturnValue Type            `parser:"( '->' '(' @@ ')' )?"`
+	Parameters tool.List[Type] `parser:"'func' '(' @@ ')'"`
 }
 
 func (node *Function) CanBeAssigned(other Type) bool {
@@ -31,10 +30,6 @@ func (node *Function) CanBeAssignedDetailed(other Type) error {
 		if err := param.EqualsDetailed(otherFn.Parameters.Items[i]); err != nil {
 			return fmt.Errorf("function parameter %d mismatch: expected %s, got %s", i, param, otherFn.Parameters.Items[i])
 		}
-	}
-
-	if err := node.ReturnType().CanBeAssignedDetailed(otherFn.ReturnType()); err != nil {
-		return fmt.Errorf("function return value mismatch: %w", err)
 	}
 
 	return nil
@@ -60,23 +55,11 @@ func (node *Function) EqualsDetailed(other Type) error {
 		}
 	}
 
-	if err := node.ReturnType().EqualsDetailed(otherFn.ReturnType()); err != nil {
-		return fmt.Errorf("function return value mismatch: %w", err)
-	}
-
 	return nil
 }
 
 func (node *Function) Bytes() int {
 	return 8
-}
-
-func (node *Function) ReturnType() Type {
-	if node.ReturnValue == nil {
-		return &Void{}
-	}
-
-	return node.ReturnValue
 }
 
 func (node *Function) CanDoArithmetics() bool {

@@ -14,7 +14,7 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/tool"
 )
 
-func calculateSignature(args []instruction.MemoryRead, target types.Type) *types.Function {
+func calculateSignature(args []instruction.MemoryRead) *types.Function {
 	signature := &types.Function{
 		Parameters: tool.List[types.Type]{
 			Items: make([]types.Type, 0, len(args)),
@@ -24,8 +24,6 @@ func calculateSignature(args []instruction.MemoryRead, target types.Type) *types
 	for _, item := range args {
 		signature.Parameters.Items = append(signature.Parameters.Items, item.Type())
 	}
-
-	signature.ReturnValue = target
 
 	return signature
 }
@@ -58,20 +56,6 @@ func calculateSavedMemory(
 			RelAddr: param.RelAddr(),
 			Bytes:   param.Type().Bytes(),
 		})
-	}
-
-	result := current.Result
-	if result != nil {
-		if r := result.BoundTo(); r != nil && !result.Volatile() && controlflow.MustBeSavedAt(
-			result.StatisticsPass.LiveRanges[blockID],
-			instructionID,
-		) {
-			toSave = append(toSave, architecture.MemoryAllocation{
-				BoundTo: r,
-				RelAddr: result.RelAddr(),
-				Bytes:   result.Type().Bytes(),
-			})
-		}
 	}
 
 	for _, local := range current.Locals.Items {
@@ -157,37 +141,6 @@ func generateVirtualMachineAssemblyParamsCode(
 
 			p.AddI2R(op, temp, arg.Register().(bytecode.R), node.Position())
 		}
-	}
-
-	return nil
-}
-
-func generateVirtualMachineAssemblyResultCode(
-	node tool.NodeLike,
-	temp bytecode.R,
-	frameSize int,
-	callPlan architecture.CallPlan,
-	result bytecode.R,
-	p *assembly.P,
-) error {
-	if callPlan.Result.Bytes > 0 {
-		plan := callPlan.Result
-		if plan.BoundTo != nil {
-			if plan.BoundTo != result {
-				p.AddI2R(bytecode.OPAluMove, result, plan.BoundTo.(bytecode.R), node.Position())
-			}
-
-			return nil
-		}
-
-		p.AddI1RLit(bytecode.OPStackPtr, temp, uint16(frameSize+callPlan.Result.RelAddr), node.Position())
-
-		op, err := bytecode.LoadForSize(callPlan.Result.Bytes)
-		if err != nil {
-			return node.Wrap(err)
-		}
-
-		p.AddI2R(op, result, temp, node.Position())
 	}
 
 	return nil

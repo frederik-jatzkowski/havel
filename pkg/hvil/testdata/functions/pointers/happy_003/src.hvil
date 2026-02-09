@@ -1,22 +1,30 @@
 func main() {
+    declare (
+        res : 1 byte
+    );
     block entry {
         $size : 8 byte = 0b1000; // 8 bytes for a pointer
         $ptr : ref = mem.alloc($size);
         
-        $f : func(1 byte) -> (1 byte) = call.ptr(double);
+        $f : func(1 byte, ref) = call.ptr(double);
         mem.store($ptr, $f);
         
-        $f_loaded : func(1 byte) -> (1 byte) = mem.load($ptr);
+        $f_loaded : func(1 byte, ref) = mem.load($ptr);
         
         $val : 1 byte = 0b101; // 5
-        $res : 1 byte = call.dyn.$f_loaded($val);
+        $res_ptr : ref = mem.ptr(res);
+        call.dyn.$f_loaded($val, $res_ptr);
         
-        debug.dump($res);
+        debug.dump(res);
     } return;
 }
 
-func double(x : 1 byte) -> (y : 1 byte) {
+func double(x : 1 byte, result_ptr : ref) {
+    declare (
+        y : 1 byte
+    );
     block entry {
         y = alu.add_u(x, x);
+        mem.store(result_ptr, y);
     } return;
 }

@@ -1,27 +1,39 @@
 
 func main() {
+    declare (
+        steps : 8 byte
+    );
+
     block entry {
         $n : 8 byte = 0b1101;
-        $steps : 8 byte = call.local.solve_collatz($n);
-        debug.dump($steps);
+        $steps : ref = mem.ptr(steps);
+        call.local.solve_collatz($n, $steps);
+        debug.dump(steps);
     } return;
 }
 
-func solve_collatz(n : 8 byte) -> (steps : 8 byte) {
+func solve_collatz(n : 8 byte, steps_ptr : ref) {
+    declare (
+        check : 1 byte,
+        steps : 8 byte
+    );
+
     block entry {
-        steps = 0b0;
+        steps = 0;
     } goto loop_head;
 
     block loop_head {
         debug.dump(n);
-        steps = call.local.inc(steps);
-        $one : 8 byte = 0b1;
+
+        $one : 8 byte = 1;
+        steps = alu.add_u(steps, $one);
         $check : 1 byte = alu.eq(n, $one);
     } if $check then exit else decide;
 
     block decide {
-        $check : 1 byte = call.local.is_even(n);
-    } if $check then divide else multiply;
+        $check : ref = mem.ptr(check);
+        call.local.is_even(n, $check);
+    } if check then divide else multiply;
 
     block divide {
         $two : 8 byte = 0b10;
@@ -31,24 +43,21 @@ func solve_collatz(n : 8 byte) -> (steps : 8 byte) {
     block multiply {
         $three : 8 byte = 0b11;
         n = alu.mul_u(n, $three);
-        n = call.local.inc(n);
+        $one : 8 byte = 0b1;
+        n = alu.add_u(n, $one);
     } goto loop_head;
 
-    block exit {} return;
+    block exit {
+        mem.store(steps_ptr, steps);
+    } return;
 }
 
-func is_even(n : 8 byte) -> (result : 1 byte) {
+func is_even(n : 8 byte, even_ptr : ref) {
     block entry {
         $two : 8 byte = 0b10;
         $n_mod_two : 8 byte = alu.mod_u(n, $two);
         $zero : 8 byte = 0b0;
-        result = alu.eq($n_mod_two, $zero);
-    } return;
-}
-
-func inc(value : 8 byte) -> (result : 8 byte) {
-    block entry {
-        $one : 8 byte = 0b1;
-        result = alu.add_u(value, $one);
+        $result : 1 byte = alu.eq($n_mod_two, $zero);
+        mem.store(even_ptr, $result);
     } return;
 }

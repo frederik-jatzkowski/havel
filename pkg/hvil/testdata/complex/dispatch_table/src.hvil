@@ -3,15 +3,21 @@
 // It stores function pointers in memory and calls them based on an index.
 
 func main() {
+    declare (
+        r0 : 1 byte,
+        r1 : 1 byte,
+        r2 : 1 byte
+    );
+
     block entry {
         // Allocate space for 3 function pointers (8 bytes each)
         $table_size : 8 byte = 0b11000; // 24 bytes
         $table : ref = mem.alloc($table_size);
 
         // Fill table: [0]=add, [1]=sub, [2]=mul
-        $f_add : func(1 byte, 1 byte) -> (1 byte) = call.ptr(op_add);
-        $f_sub : func(1 byte, 1 byte) -> (1 byte) = call.ptr(op_sub);
-        $f_mul : func(1 byte, 1 byte) -> (1 byte) = call.ptr(op_mul);
+        $f_add : func(1 byte, 1 byte, ref) = call.ptr(op_add);
+        $f_sub : func(1 byte, 1 byte, ref) = call.ptr(op_sub);
+        $f_mul : func(1 byte, 1 byte, ref) = call.ptr(op_mul);
 
         $offset0 : 8 byte = 0b0;
         $p0 : ref = alu.add_u($table, $offset0);
@@ -30,41 +36,47 @@ func main() {
         $b : 1 byte = 0b11;  // 3
 
         // Call [0] (add)
-        $r0 : 1 byte = call.local.dispatch($table, $offset0, $a, $b);
-        debug.dump($r0); // Should be 9
+        $r0_ptr : ref = mem.ptr(r0);
+        call.local.dispatch($table, $offset0, $a, $b, $r0_ptr);
+        debug.dump(r0); // Should be 9
 
         // Call [1] (sub)
-        $r1 : 1 byte = call.local.dispatch($table, $offset1, $a, $b);
-        debug.dump($r1); // Should be 3
+        $r1_ptr : ref = mem.ptr(r1);
+        call.local.dispatch($table, $offset1, $a, $b, $r1_ptr);
+        debug.dump(r1); // Should be 3
 
         // Call [2] (mul)
-        $r2 : 1 byte = call.local.dispatch($table, $offset2, $a, $b);
-        debug.dump($r2); // Should be 18
+        $r2_ptr : ref = mem.ptr(r2);
+        call.local.dispatch($table, $offset2, $a, $b, $r2_ptr);
+        debug.dump(r2); // Should be 18
     } return;
 }
 
-func dispatch(table : ref, offset : 8 byte, x : 1 byte, y : 1 byte) -> (res : 1 byte) {
+func dispatch(table : ref, offset : 8 byte, x : 1 byte, y : 1 byte, result_ptr : ref) {
     block entry {
         $ptr : ref = alu.add_u(table, offset);
-        $f : func(1 byte, 1 byte) -> (1 byte) = mem.load($ptr);
-        res = call.dyn.$f(x, y);
+        $f : func(1 byte, 1 byte, ref) = mem.load($ptr);
+        call.dyn.$f(x, y, result_ptr);
     } return;
 }
 
-func op_add(x : 1 byte, y : 1 byte) -> (z : 1 byte) {
+func op_add(x : 1 byte, y : 1 byte, result_ptr : ref) {
     block entry {
-        z = alu.add_u(x, y);
+        $res : 1 byte = alu.add_u(x, y);
+        mem.store(result_ptr, $res);
     } return;
 }
 
-func op_sub(x : 1 byte, y : 1 byte) -> (z : 1 byte) {
+func op_sub(x : 1 byte, y : 1 byte, result_ptr : ref) {
     block entry {
-        z = alu.sub_u(x, y);
+        $res : 1 byte = alu.sub_u(x, y);
+        mem.store(result_ptr, $res);
     } return;
 }
 
-func op_mul(x : 1 byte, y : 1 byte) -> (z : 1 byte) {
+func op_mul(x : 1 byte, y : 1 byte, result_ptr : ref) {
     block entry {
-        z = alu.mul_u(x, y);
+        $res : 1 byte = alu.mul_u(x, y);
+        mem.store(result_ptr, $res);
     } return;
 }

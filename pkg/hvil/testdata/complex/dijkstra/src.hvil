@@ -3,6 +3,10 @@
 // Nodes are heap-allocated.
 
 func main() {
+    declare (
+        n0 : ref, n1 : ref, n2 : ref, n3 : ref, n4 : ref,
+        n5 : ref, n6 : ref, n7 : ref, n8 : ref, n9 : ref
+    );
     block entry {
         // Node structure (11 bytes):
         // [0] dist (1 byte)
@@ -15,16 +19,26 @@ func main() {
         // [8] weight (1 byte)
 
         // Create 10 nodes
-        $n0 : ref = call.local.init_node();
-        $n1 : ref = call.local.init_node();
-        $n2 : ref = call.local.init_node();
-        $n3 : ref = call.local.init_node();
-        $n4 : ref = call.local.init_node();
-        $n5 : ref = call.local.init_node();
-        $n6 : ref = call.local.init_node();
-        $n7 : ref = call.local.init_node();
-        $n8 : ref = call.local.init_node();
-        $n9 : ref = call.local.init_node();
+        $n0_ptr : ref = mem.ptr(n0);
+        call.local.init_node($n0_ptr);
+        $n1_ptr : ref = mem.ptr(n1);
+        call.local.init_node($n1_ptr);
+        $n2_ptr : ref = mem.ptr(n2);
+        call.local.init_node($n2_ptr);
+        $n3_ptr : ref = mem.ptr(n3);
+        call.local.init_node($n3_ptr);
+        $n4_ptr : ref = mem.ptr(n4);
+        call.local.init_node($n4_ptr);
+        $n5_ptr : ref = mem.ptr(n5);
+        call.local.init_node($n5_ptr);
+        $n6_ptr : ref = mem.ptr(n6);
+        call.local.init_node($n6_ptr);
+        $n7_ptr : ref = mem.ptr(n7);
+        call.local.init_node($n7_ptr);
+        $n8_ptr : ref = mem.ptr(n8);
+        call.local.init_node($n8_ptr);
+        $n9_ptr : ref = mem.ptr(n9);
+        call.local.init_node($n9_ptr);
 
         // Add 15 edges (undirected, so 30 directed edges for simplicity)
         // Actually, user asked for at least 15 edges. I'll make a directed graph for simplicity of implementation.
@@ -40,86 +54,89 @@ func main() {
         // Total 17 edges.
 
         $w01 : 1 byte = 0b1;
-        call.local.add_edge($n0, $n1, $w01);
+        call.local.add_edge(n0, n1, $w01);
         $w02 : 1 byte = 0b100;
-        call.local.add_edge($n0, $n2, $w02);
+        call.local.add_edge(n0, n2, $w02);
         $w12 : 1 byte = 0b10;
-        call.local.add_edge($n1, $n2, $w12);
+        call.local.add_edge(n1, n2, $w12);
         $w13 : 1 byte = 0b110;
-        call.local.add_edge($n1, $n3, $w13);
+        call.local.add_edge(n1, n3, $w13);
         $w23 : 1 byte = 0b11;
-        call.local.add_edge($n2, $n3, $w23);
+        call.local.add_edge(n2, n3, $w23);
         $w34 : 1 byte = 0b1;
-        call.local.add_edge($n3, $n4, $w34);
+        call.local.add_edge(n3, n4, $w34);
         $w35 : 1 byte = 0b101;
-        call.local.add_edge($n3, $n5, $w35);
+        call.local.add_edge(n3, n5, $w35);
         $w45 : 1 byte = 0b10;
-        call.local.add_edge($n4, $n5, $w45);
+        call.local.add_edge(n4, n5, $w45);
         $w46 : 1 byte = 0b111;
-        call.local.add_edge($n4, $n6, $w46);
+        call.local.add_edge(n4, n6, $w46);
         $w56 : 1 byte = 0b1;
-        call.local.add_edge($n5, $n6, $w56);
+        call.local.add_edge(n5, n6, $w56);
         $w57 : 1 byte = 0b100;
-        call.local.add_edge($n5, $n7, $w57);
+        call.local.add_edge(n5, n7, $w57);
         $w67 : 1 byte = 0b11;
-        call.local.add_edge($n6, $n7, $w67);
+        call.local.add_edge(n6, n7, $w67);
         $w68 : 1 byte = 0b10;
-        call.local.add_edge($n6, $n8, $w68);
+        call.local.add_edge(n6, n8, $w68);
         $w78 : 1 byte = 0b1;
-        call.local.add_edge($n7, $n8, $w78);
+        call.local.add_edge(n7, n8, $w78);
         $w79 : 1 byte = 0b101;
-        call.local.add_edge($n7, $n9, $w79);
+        call.local.add_edge(n7, n9, $w79);
         $w89 : 1 byte = 0b10;
-        call.local.add_edge($n8, $n9, $w89);
+        call.local.add_edge(n8, n9, $w89);
 
-        // Dijkstra from $n0
+        // Dijkstra from n0
         $start_dist : 1 byte = 0b0;
-        mem.store($n0, $start_dist);
+        mem.store(n0, $start_dist);
 
         // We need to store all nodes in an array for the outer loop (find min unvisited)
         $nodes_array_size : 8 byte = 0b1010000; // 10 * 8 = 80 bytes
         $nodes : ref = mem.alloc($nodes_array_size);
         $o0 : 8 byte = 0b0;
         $ptr0 : ref = alu.add_u($nodes, $o0);
-        mem.store($ptr0, $n0);
+        mem.store($ptr0, n0);
         $o1 : 8 byte = 0b1000;
         $ptr1 : ref = alu.add_u($nodes, $o1);
-        mem.store($ptr1, $n1);
+        mem.store($ptr1, n1);
         $o2 : 8 byte = 0b10000;
         $ptr2 : ref = alu.add_u($nodes, $o2);
-        mem.store($ptr2, $n2);
+        mem.store($ptr2, n2);
         $o3 : 8 byte = 0b11000;
         $ptr3 : ref = alu.add_u($nodes, $o3);
-        mem.store($ptr3, $n3);
+        mem.store($ptr3, n3);
         $o4 : 8 byte = 0b100000;
         $ptr4 : ref = alu.add_u($nodes, $o4);
-        mem.store($ptr4, $n4);
+        mem.store($ptr4, n4);
         $o5 : 8 byte = 0b101000;
         $ptr5 : ref = alu.add_u($nodes, $o5);
-        mem.store($ptr5, $n5);
+        mem.store($ptr5, n5);
         $o6 : 8 byte = 0b110000;
         $ptr6 : ref = alu.add_u($nodes, $o6);
-        mem.store($ptr6, $n6);
+        mem.store($ptr6, n6);
         $o7 : 8 byte = 0b111000;
         $ptr7 : ref = alu.add_u($nodes, $o7);
-        mem.store($ptr7, $n7);
+        mem.store($ptr7, n7);
         $o8 : 8 byte = 0b1000000;
         $ptr8 : ref = alu.add_u($nodes, $o8);
-        mem.store($ptr8, $n8);
+        mem.store($ptr8, n8);
         $o9 : 8 byte = 0b1001000;
         $ptr9 : ref = alu.add_u($nodes, $o9);
-        mem.store($ptr9, $n9);
+        mem.store($ptr9, n9);
 
         $node_count : 1 byte = 0b1010; // 10
         call.local.dijkstra_loop($nodes, $node_count);
 
-        // Result: shortest path to $n9
-        $d9 : 1 byte = mem.load($n9);
+        // Result: shortest path to n9
+        $d9 : 1 byte = mem.load(n9);
         debug.dump($d9);
     } return;
 }
 
-func init_node() -> (node : ref) {
+func init_node(result_ptr : ref) {
+    declare (
+        node : ref
+    );
     block entry {
         $size : 8 byte = 0b1011; // 11 bytes
         node = mem.alloc($size);
@@ -137,6 +154,7 @@ func init_node() -> (node : ref) {
         $edges_ptr_addr : ref = alu.add_u(node, $s3);
         $null : ref = 0b0;
         mem.store($edges_ptr_addr, $null); // edges_ptr
+        mem.store(result_ptr, node);
     } return;
 }
 
@@ -226,7 +244,8 @@ func dijkstra_loop(nodes : ref, count : 1 byte) {
     } goto head;
     block head { $done : 1 byte = alu.eq(i, count); } if $done then exit else body;
     block body {
-        u = call.local.find_min_unvisited(nodes, count);
+        $u_ptr : ref = mem.ptr(u);
+        call.local.find_min_unvisited(nodes, count, $u_ptr);
         $null : ref = 0b0;
         $is_null : 1 byte = alu.eq(u, $null);
     } if $is_null then exit else relax;
@@ -255,12 +274,13 @@ func dijkstra_loop(nodes : ref, count : 1 byte) {
     block exit {} return;
 }
 
-func find_min_unvisited(nodes : ref, count : 1 byte) -> (min_node : ref) {
+func find_min_unvisited(nodes : ref, count : 1 byte, result_ptr : ref) {
     declare (
         i : 1 byte,
         min_dist : 1 byte,
         curr : ref,
-        is_equal : 1 byte
+        is_equal : 1 byte,
+        min_node : ref
     );
     block entry {
         $null : ref = 0b0;
@@ -314,7 +334,9 @@ func find_min_unvisited(nodes : ref, count : 1 byte) -> (min_node : ref) {
         i = alu.add_u(i, $one);
     } goto head;
 
-    block exit {} return;
+    block exit {
+        mem.store(result_ptr, min_node);
+    } return;
 }
 
 func relax_neighbors(u : ref, edges : ref, count : 1 byte) {
