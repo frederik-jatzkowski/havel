@@ -68,6 +68,7 @@ var parser = participle.MustBuild[program.Program](
 		&mem.Store{},
 		&mem.Load{},
 		&mem.Ptr{},
+		&mem.SizeOf{},
 	),
 	participle.Union[call.Operation](
 		&call.Local{},
