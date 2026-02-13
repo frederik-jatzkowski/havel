@@ -1,0 +1,52 @@
+
+declare (
+    sum : 8 byte = 0,
+    arr : {
+        8 byte,
+        8 byte,
+        8 byte,
+        8 byte,
+        8 byte,
+        8 byte,
+        2 byte
+    }
+);
+
+func main() {
+    block entry {
+        arr[0] = 1;
+        arr[1] = 2;
+        arr[2] = 4;
+        arr[3] = 8;
+        arr[4] = 16;
+        arr[5] = 32;
+        arr[6] = 255;
+
+        call.local.sum_up(arr);
+
+        debug.dump(sum);
+    } return;
+}
+
+func sum_up(
+    arr : {
+        8 byte,
+        8 byte,
+        8 byte,
+        8 byte,
+        8 byte,
+        8 byte,
+        2 byte
+    }
+) {
+    block entry {
+        sum = 0;
+
+        sum = alu.add_u(sum, arr[0]);
+        sum = alu.add_u(sum, arr[1]);
+        sum = alu.add_u(sum, arr[2]);
+        sum = alu.add_u(sum, arr[3]);
+        sum = alu.add_u(sum, arr[4]);
+        sum = alu.add_u(sum, arr[5]);
+    } return;
+}

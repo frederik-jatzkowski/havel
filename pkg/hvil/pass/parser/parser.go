@@ -30,6 +30,7 @@ var parser = participle.MustBuild[program.Program](
 		&types.Scalar{},
 		&types.Ref{},
 		&types.Function{},
+		&types.Composite{},
 	),
 	participle.Union[block.Terminator](
 		&terminator.Return{},

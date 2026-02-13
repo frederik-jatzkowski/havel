@@ -5,7 +5,6 @@ import (
 
 	"github.com/frederik-jatzkowski/havel/pkg/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/architecture/virtualmachine/assembly"
-	"github.com/frederik-jatzkowski/havel/pkg/architecture/virtualmachine/bytecode"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/address"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/optimization/statistics"
@@ -34,9 +33,9 @@ type Function struct {
 	}]
 	address.Resolution[struct {
 		FrameSize int
+		ParamSize int
 		VarsSize  int
 		RegsSize  int
-		CallPlan  architecture.CallPlan
 	}]
 	registeralloc.RegisterAllocation[struct {
 		Temp architecture.Register
@@ -135,24 +134,28 @@ func (node *Function) CalculateStatistics(ctx context.Context) {
 }
 
 func (node *Function) ResolveAddresses(arch architecture.Architecture) error {
-	callPlan := arch.CalculateCallPlan(node.Signature())
-	node.AddressResolutionPass.CallPlan = callPlan
+	offset := 16
 
-	for i, paramPlan := range callPlan.Params {
-		param := node.Params.Items[i]
-		param.AddressResolutionPass.RelAddr = paramPlan.RelAddr
-		param.RegisterAllocationPass.BoundTo = paramPlan.BoundTo
-	}
+	node.resolveParamsAddresses(offset)
+	offset += node.AddressResolutionPass.ParamSize
 
-	offset := callPlan.Offset
 	node.resolveLocalsAddresses(offset)
 	offset += node.AddressResolutionPass.VarsSize
+
 	node.resolveRegisterAddresses(offset)
 	offset += node.AddressResolutionPass.RegsSize
 
 	node.AddressResolutionPass.FrameSize = offset
 
 	return nil
+}
+
+func (node *Function) resolveParamsAddresses(offset int) {
+	for _, param := range node.Params.Items {
+		size := param.Type().Bytes()
+		param.AddressResolutionPass.RelAddr = offset + node.AddressResolutionPass.ParamSize
+		node.AddressResolutionPass.ParamSize += size
+	}
 }
 
 func (node *Function) resolveLocalsAddresses(offset int) {
@@ -192,20 +195,6 @@ func (node *Function) AllocateRegisters(allocator registeralloc.Allocator) error
 }
 
 func (node *Function) GenerateVirtualMachineAssembly(p *assembly.P) error {
-	temp := node.RegisterAllocationPass.Temp.(bytecode.R)
-	for _, param := range node.Params.Items {
-		if param.Volatile() {
-			param.AddBytecodeVirtualmachinePtrInstruction(p, temp)
-
-			op, err := bytecode.StoreForSize(param.Type().Bytes())
-			if err != nil {
-				return node.Wrap(err)
-			}
-
-			p.AddI2R(op, temp, param.RegisterAllocationPass.BoundTo.(bytecode.R), node.Position())
-		}
-	}
-
 	for i := 0; i < len(node.Blocks); i++ {
 		if err := node.Blocks[i].GenerateVirtualMachineAssembly(p); err != nil {
 			return err

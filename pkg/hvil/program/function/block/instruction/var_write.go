@@ -17,13 +17,16 @@ import (
 type VarWrite struct {
 	tool.Node[MemoryWrite]
 	names.NameResolution[struct {
-		Decl VarDecl
+		Decl   VarDecl
+		Type   types.Type
+		Offset uint
 	}]
 	registeralloc.RegisterAllocation[struct {
 		Register, Temp architecture.Register
 	}]
 
-	Ident string `parser:"@Ident"`
+	Ident        string `parser:"@Ident"`
+	Dereferences []uint `parser:"( '[' @Number ']' )*"`
 }
 
 func (node *VarWrite) ResolveNames(ctx context.Context) error {
@@ -33,6 +36,14 @@ func (node *VarWrite) ResolveNames(ctx context.Context) error {
 	}
 
 	node.NameResolutionPass.Decl = decl
+
+	dereferenced, offset, err := node.NameResolutionPass.Decl.Type().Dereference(node.Dereferences)
+	if err != nil {
+		return node.Wrap(err)
+	}
+
+	node.NameResolutionPass.Type = dereferenced
+	node.NameResolutionPass.Offset = offset
 
 	return nil
 }
@@ -52,13 +63,6 @@ func (node *VarWrite) CalculateStatistics(ctx context.Context) {
 }
 
 func (node *VarWrite) AllocateRegisters(scope registeralloc.Scope) ([]architecture.Register, error) {
-	decl := node.NameResolutionPass.Decl
-	if reg := decl.BoundTo(); reg != nil && !decl.Volatile() {
-		node.RegisterAllocationPass.Register = reg
-
-		return nil, nil
-	}
-
 	reg, ok := scope.GetScratchRegister()
 	if !ok {
 		return nil, node.Errorf("cannot allocate variable store register")
@@ -78,14 +82,15 @@ func (node *VarWrite) AllocateRegisters(scope registeralloc.Scope) ([]architectu
 }
 
 func (node *VarWrite) GenerateVirtualMachineAssembly(p *assembly.P) error {
-	decl := node.NameResolutionPass.Decl
-	if reg := decl.BoundTo(); reg != nil && !decl.Volatile() {
-		return nil
+	if err := node.NameResolutionPass.Decl.AddBytecodeVirtualmachinePtrInstruction(
+		p,
+		node.RegisterAllocationPass.Temp.(bytecode.R),
+		node.Dereferences,
+	); err != nil {
+		return node.Wrap(err)
 	}
 
-	node.NameResolutionPass.Decl.AddBytecodeVirtualmachinePtrInstruction(p, node.RegisterAllocationPass.Temp.(bytecode.R))
-
-	op, err := bytecode.StoreForSize(node.NameResolutionPass.Decl.Type().Bytes())
+	op, err := bytecode.StoreForSize(node.NameResolutionPass.Type.Bytes())
 	if err != nil {
 		return node.Wrap(err)
 	}
@@ -100,5 +105,5 @@ func (node *VarWrite) Register() architecture.Register {
 }
 
 func (node *VarWrite) Type() types.Type {
-	return node.NameResolutionPass.Decl.Type()
+	return node.NameResolutionPass.Type
 }

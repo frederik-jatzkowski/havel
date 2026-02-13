@@ -8,4 +8,5 @@ type Type interface {
 	EqualsDetailed(Type) error
 	Bytes() int
 	CanDoArithmetics() bool
+	Dereference(fields []uint) (t Type, offset uint, err error)
 }

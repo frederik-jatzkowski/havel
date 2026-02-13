@@ -67,6 +67,13 @@ func (h *Heap) Load64(ptr FatPtr) uint64 {
 	return binary.LittleEndian.Uint64(h.data[ptr.handle][ptr.offset : ptr.offset+8])
 }
 
+func (h *Heap) Copy(dest, source FatPtr, size uint32) {
+	destSlice := h.data[dest.handle][dest.offset : dest.offset+size]
+	sourceSlice := h.data[source.handle][source.offset : source.offset+size]
+
+	copy(destSlice, sourceSlice)
+}
+
 type FatPtr struct {
 	handle uint32
 	offset uint32

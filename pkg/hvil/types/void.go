@@ -34,3 +34,11 @@ func (node *Void) Bytes() int {
 func (node *Void) CanDoArithmetics() bool {
 	return false
 }
+
+func (node *Void) Dereference(fields []uint) (Type, uint, error) {
+	if len(fields) == 0 {
+		return node, 0, nil
+	}
+
+	return nil, 0, fmt.Errorf("cannot dereference into %T", node)
+}

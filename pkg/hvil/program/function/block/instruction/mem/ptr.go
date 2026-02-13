@@ -59,7 +59,13 @@ func (node *Ptr) SetResultRegister(r architecture.Register) {
 
 func (node *Ptr) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	if !node.TypeCheckPass.IsVoid {
-		node.Var.NameResolutionPass.Decl.AddBytecodeVirtualmachinePtrInstruction(p, node.RegisterAllocationPass.Result.(bytecode.R))
+		if err := node.Var.NameResolutionPass.Decl.AddBytecodeVirtualmachinePtrInstruction(
+			p,
+			node.RegisterAllocationPass.Result.(bytecode.R),
+			nil,
+		); err != nil {
+			return node.Wrap(err)
+		}
 	}
 
 	return nil

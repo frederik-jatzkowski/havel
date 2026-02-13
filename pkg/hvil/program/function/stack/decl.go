@@ -3,13 +3,11 @@ package stack
 import (
 	"context"
 
-	"github.com/frederik-jatzkowski/havel/pkg/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/architecture/virtualmachine/assembly"
 	"github.com/frederik-jatzkowski/havel/pkg/architecture/virtualmachine/bytecode"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/address"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/optimization/controlflow"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/optimization/statistics"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/types"
 	"github.com/frederik-jatzkowski/havel/pkg/tool"
 )
@@ -24,9 +22,6 @@ type Decl struct {
 	}]
 	address.Resolution[struct {
 		RelAddr int
-	}]
-	registeralloc.RegisterAllocation[struct {
-		BoundTo architecture.Register
 	}]
 
 	Name         string     `parser:"@Ident"`
@@ -61,10 +56,6 @@ func (node *Decl) CalculateStatistics(_ context.Context, entry controlflow.Node)
 	node.StatisticsPass.LiveRanges = controlflow.ComputeLiveRanges(entry, node.StatisticsPass.Reads, node.StatisticsPass.Writes)
 }
 
-func (node *Decl) BoundTo() architecture.Register {
-	return node.RegisterAllocationPass.BoundTo
-}
-
 func (node *Decl) RelAddr() int {
 	return node.AddressResolutionPass.RelAddr
 }
@@ -73,10 +64,13 @@ func (node *Decl) SetPtrTaken() {
 	node.StatisticsPass.PtrTaken = true
 }
 
-func (node *Decl) Volatile() bool {
-	return node.StatisticsPass.PtrTaken
-}
+func (node *Decl) AddBytecodeVirtualmachinePtrInstruction(p *assembly.P, target bytecode.R, dereferences []uint) error {
+	_, offset, err := node.DeclaredType.Dereference(dereferences)
+	if err != nil {
+		return err
+	}
 
-func (node *Decl) AddBytecodeVirtualmachinePtrInstruction(p *assembly.P, target bytecode.R) {
-	p.AddI1RLit(bytecode.OPStackPtr, target, uint16(node.RelAddr()), node.Position())
+	p.AddI1RLit(bytecode.OPStackPtr, target, uint16(node.RelAddr()+int(offset)), node.Position())
+
+	return nil
 }

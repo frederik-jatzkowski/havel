@@ -1,7 +1,6 @@
 package instruction
 
 import (
-	"github.com/frederik-jatzkowski/havel/pkg/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/architecture/virtualmachine/assembly"
 	"github.com/frederik-jatzkowski/havel/pkg/architecture/virtualmachine/bytecode"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/optimization/statistics"
@@ -16,7 +15,5 @@ type VarDecl interface {
 	AddReadToStatistic(blockID statistics.BlockID, instructionID statistics.InstructionID)
 	AddWriteToStatistic(blockID statistics.BlockID, instructionID statistics.InstructionID)
 	SetPtrTaken()
-	BoundTo() architecture.Register
-	Volatile() bool
-	AddBytecodeVirtualmachinePtrInstruction(p *assembly.P, target bytecode.R)
+	AddBytecodeVirtualmachinePtrInstruction(p *assembly.P, target bytecode.R, dereferences []uint) (err error)
 }

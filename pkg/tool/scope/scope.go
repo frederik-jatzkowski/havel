@@ -31,7 +31,8 @@ func (s Scope[T]) Child() Scope[T] {
 func (s Scope[T]) Define(entry T) error {
 	identifier := entry.Identifier()
 
-	if _, err := s.Find(identifier); err == nil {
+	_, exists := s.defs[identifier]
+	if exists {
 		return entry.Errorf("%s '%s' is redeclared", s.kind, identifier)
 	}
 

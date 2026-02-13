@@ -17,13 +17,16 @@ import (
 type VarRead struct {
 	tool.Node[VarRead]
 	names.NameResolution[struct {
-		Decl VarDecl
+		Decl   VarDecl
+		Type   types.Type
+		Offset uint
 	}]
 	registeralloc.RegisterAllocation[struct {
 		Register architecture.Register
 	}]
 
-	Ident string `parser:"@Ident"`
+	Ident        string `parser:"@Ident"`
+	Dereferences []uint `parser:"( '[' @Number ']' )*"`
 }
 
 func (node *VarRead) ResolveNames(ctx context.Context) error {
@@ -33,6 +36,14 @@ func (node *VarRead) ResolveNames(ctx context.Context) error {
 	}
 
 	node.NameResolutionPass.Decl = decl
+
+	dereferenced, offset, err := node.NameResolutionPass.Decl.Type().Dereference(node.Dereferences)
+	if err != nil {
+		return node.Wrap(err)
+	}
+
+	node.NameResolutionPass.Type = dereferenced
+	node.NameResolutionPass.Offset = offset
 
 	return nil
 }
@@ -52,13 +63,6 @@ func (node *VarRead) CalculateStatistics(ctx context.Context) {
 }
 
 func (node *VarRead) AllocateRegisters(scope registeralloc.Scope) ([]architecture.Register, error) {
-	decl := node.NameResolutionPass.Decl
-	if reg := decl.BoundTo(); reg != nil && !decl.Volatile() {
-		node.RegisterAllocationPass.Register = reg
-
-		return nil, nil
-	}
-
 	reg, ok := scope.GetScratchRegister()
 	if !ok {
 		return nil, node.Errorf("cannot allocate variable load register")
@@ -70,19 +74,22 @@ func (node *VarRead) AllocateRegisters(scope registeralloc.Scope) ([]architectur
 }
 
 func (node *VarRead) GenerateVirtualMachineAssembly(p *assembly.P) error {
-	decl := node.NameResolutionPass.Decl
-	if reg := decl.BoundTo(); reg != nil && !decl.Volatile() {
-		return nil
-	}
-
-	node.NameResolutionPass.Decl.AddBytecodeVirtualmachinePtrInstruction(p, node.Register().(bytecode.R))
-
-	op, err := bytecode.LoadForSize(node.NameResolutionPass.Decl.Type().Bytes())
-	if err != nil {
+	if err := node.NameResolutionPass.Decl.AddBytecodeVirtualmachinePtrInstruction(
+		p,
+		node.Register().(bytecode.R),
+		node.Dereferences,
+	); err != nil {
 		return node.Wrap(err)
 	}
 
-	p.AddI2R(op, node.Register().(bytecode.R), node.Register().(bytecode.R), node.Position())
+	if node.NameResolutionPass.Type.Bytes() <= 8 {
+		op, err := bytecode.LoadForSize(node.NameResolutionPass.Type.Bytes())
+		if err != nil {
+			return node.Wrap(err)
+		}
+
+		p.AddI2R(op, node.Register().(bytecode.R), node.Register().(bytecode.R), node.Position())
+	}
 
 	return nil
 }
@@ -92,5 +99,5 @@ func (node *VarRead) Register() architecture.Register {
 }
 
 func (node *VarRead) Type() types.Type {
-	return node.NameResolutionPass.Decl.Type()
+	return node.NameResolutionPass.Type
 }

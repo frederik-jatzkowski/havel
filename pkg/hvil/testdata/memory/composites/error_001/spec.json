@@ -1,0 +1,9 @@
+{
+  "compiler": {
+    "errors": [
+      {
+        "contains": "src.hvil:18:9 cannot have composite type { 8 byte, 8 byte } in register"
+      }
+    ]
+  }
+}

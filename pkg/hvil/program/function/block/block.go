@@ -7,7 +7,6 @@ import (
 
 	"github.com/frederik-jatzkowski/havel/pkg/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/architecture/virtualmachine/assembly"
-	"github.com/frederik-jatzkowski/havel/pkg/architecture/virtualmachine/bytecode"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/address"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/optimization/controlflow"
@@ -147,20 +146,6 @@ func (node *Block) AllocateRegisters(scope registeralloc.Scope) error {
 
 func (node *Block) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	p.AddLabel(node.FullyQualifiedIdentifier(), node.Position())
-
-	temp := node.NameResolutionPass.Function.RegisterAllocationPass.Temp.(bytecode.R)
-	for _, param := range node.NameResolutionPass.Function.Params.Items {
-		if param.Volatile() {
-			param.AddBytecodeVirtualmachinePtrInstruction(p, temp)
-
-			op, err := bytecode.StoreForSize(param.Type().Bytes())
-			if err != nil {
-				return node.Wrap(err)
-			}
-
-			p.AddI2R(op, temp, param.BoundTo().(bytecode.R), node.Position())
-		}
-	}
 
 	for i := range node.Instructions {
 		if err := node.Instructions[i].GenerateVirtualMachineAssembly(p); err != nil {

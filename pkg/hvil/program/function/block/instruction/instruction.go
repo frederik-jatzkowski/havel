@@ -36,7 +36,13 @@ func (node *Instruction) ResolveNames(ctx context.Context) error {
 
 func (node *Instruction) ResolveTypes() error {
 	if node.ResultWrite != nil {
-		return node.Operation.ResolveTypes(node.ResultWrite.Type())
+		target := node.ResultWrite.Type()
+
+		if _, ok := target.(*types.Composite); ok {
+			return node.Errorf("cannot have composite type %s in register", target)
+		}
+
+		return node.Operation.ResolveTypes(target)
 	}
 
 	return node.Operation.ResolveTypes(&types.Void{})

@@ -40,3 +40,11 @@ func (node *Ref) Bytes() int {
 func (node *Ref) CanDoArithmetics() bool {
 	return true
 }
+
+func (node *Ref) Dereference(fields []uint) (Type, uint, error) {
+	if len(fields) == 0 {
+		return node, 0, nil
+	}
+
+	return nil, 0, fmt.Errorf("cannot dereference into %T", node)
+}

@@ -53,7 +53,8 @@ import "fmt"
 //		load_8,
 //		load_16,
 //		load_32,
-//		load_64
+//		load_64,
+//		copy
 //	)
 type OP byte
 

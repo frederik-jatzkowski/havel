@@ -52,3 +52,11 @@ func (node *Scalar) Bytes() int {
 func (node *Scalar) CanDoArithmetics() bool {
 	return true
 }
+
+func (node *Scalar) Dereference(fields []uint) (Type, uint, error) {
+	if len(fields) == 0 {
+		return node, 0, nil
+	}
+
+	return nil, 0, fmt.Errorf("cannot dereference into %T", node)
+}

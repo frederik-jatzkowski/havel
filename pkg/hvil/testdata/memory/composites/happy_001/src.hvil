@@ -1,0 +1,29 @@
+
+
+func main() {
+    declare (
+        dist : 8 byte,
+        line : {
+            { 8 byte, 8 byte },
+            { 8 byte, 8 byte }
+        },
+        dist_x : 8 byte,
+        dist_y : 8 byte
+    );
+
+    block entry {
+        line[0][0] = 2;
+        line[0][1] = 1;
+
+        line[1][0] = 5;
+        line[1][1] = 7;
+
+        // calculate the city block distance between start and end
+        dist_x = alu.sub_u(line[1][0], line[0][0]);
+        dist_y = alu.sub_u(line[1][1], line[0][1]);
+
+        dist = alu.add_u(dist_x, dist_y);
+
+        debug.dump(dist);
+    } return;
+}

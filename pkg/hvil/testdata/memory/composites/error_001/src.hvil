@@ -1,0 +1,41 @@
+
+declare (
+    sum : 8 byte = 0
+);
+
+func main() {
+    declare (
+        arr : {
+            8 byte,
+            8 byte
+        }
+    );
+
+    block entry {
+        arr[0] = 1;
+        arr[1] = 2;
+
+        $arr : {
+            8 byte,
+            8 byte
+        } = alu.move(arr);
+
+        call.local.sum_up($arr);
+
+        debug.dump(sum);
+    } return;
+}
+
+func sum_up(
+    arr : {
+        8 byte,
+        8 byte
+    }
+) {
+    block entry {
+        sum = 0;
+
+        sum = alu.add_u(sum, arr[0]);
+        sum = alu.add_u(sum, arr[1]);
+    } return;
+}

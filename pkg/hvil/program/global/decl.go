@@ -3,7 +3,6 @@ package global
 import (
 	"context"
 
-	"github.com/frederik-jatzkowski/havel/pkg/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/architecture/virtualmachine/assembly"
 	"github.com/frederik-jatzkowski/havel/pkg/architecture/virtualmachine/bytecode"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/address"
@@ -27,7 +26,7 @@ type Decl struct {
 
 	Name         string      `parser:"@Ident"`
 	DeclaredType types.Type  `parser:"':' @@"`
-	Initializer  Initializer `parser:"'=' @@"`
+	Initializer  Initializer `parser:"( '=' @@ )?"`
 }
 
 func (node *Decl) Identifier() string {
@@ -35,15 +34,21 @@ func (node *Decl) Identifier() string {
 }
 
 func (node *Decl) ResolveNames(ctx context.Context) error {
-	if err := node.Initializer.ResolveNames(ctx); err != nil {
-		return err
+	if node.Initializer != nil {
+		if err := node.Initializer.ResolveNames(ctx); err != nil {
+			return err
+		}
 	}
 
 	return contexttool.DefineInScope[instruction.VarDecl](ctx, node)
 }
 
 func (node *Decl) ResolveTypes() error {
-	return node.Initializer.ResolveTypes(node.DeclaredType)
+	if node.Initializer != nil {
+		return node.Initializer.ResolveTypes(node.DeclaredType)
+	}
+
+	return nil
 }
 
 func (node *Decl) Type() types.Type {
@@ -70,22 +75,44 @@ func (node *Decl) SetPtrTaken() {
 	node.StatisticsPass.PtrTaken = true
 }
 
-func (node *Decl) BoundTo() architecture.Register {
-	return nil
-}
-
-func (node *Decl) Volatile() bool {
-	return true
-}
-
 func (node *Decl) RelAddr() int {
 	return node.AddressResolutionPass.RelAddr
 }
 
 func (node *Decl) GenerateVirtualMachineAssembly(p *assembly.P) error {
-	return node.Initializer.GenerateVirtualMachineAssembly(p)
+	if node.Initializer != nil {
+		return node.Initializer.GenerateVirtualMachineAssembly(p)
+	}
+
+	// fill with zeros
+	size := node.DeclaredType.Bytes()
+	for size > 0 {
+		switch {
+		case size >= 8:
+			p.AddSLit(8, 0)
+			size -= 8
+		case size >= 4:
+			p.AddSLit(4, 0)
+			size -= 4
+		case size >= 2:
+			p.AddSLit(2, 0)
+			size -= 2
+		default:
+			p.AddSLit(1, 0)
+			size -= 1
+		}
+	}
+
+	return nil
 }
 
-func (node *Decl) AddBytecodeVirtualmachinePtrInstruction(p *assembly.P, target bytecode.R) {
-	p.AddI1RLit(bytecode.OPStaticPtr, target, uint16(node.RelAddr()), node.Position())
+func (node *Decl) AddBytecodeVirtualmachinePtrInstruction(p *assembly.P, target bytecode.R, dereferences []uint) error {
+	_, offset, err := node.DeclaredType.Dereference(dereferences)
+	if err != nil {
+		return err
+	}
+
+	p.AddI1RLit(bytecode.OPStaticPtr, target, uint16(node.RelAddr()+int(offset)), node.Position())
+
+	return nil
 }

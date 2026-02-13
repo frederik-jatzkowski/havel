@@ -190,6 +190,8 @@ func (vm *VM) execI(p *bytecode.P) {
 		vm.execOPLoad32(p, i)
 	case bytecode.OPLoad64:
 		vm.execOPLoad64(p, i)
+	case bytecode.OPCopy:
+		vm.execOPCopy(p, i)
 	default:
 		panic(fmt.Sprintf("invalid opcode: %d (%s)", i.OP(), i.OP()))
 	}
@@ -566,5 +568,17 @@ func (vm *VM) execOPLoad64(p *bytecode.P, i bytecode.I) {
 	r1, r2, _ := i.Regs()
 	ptr := NewFatPtrFromUint64(vm.registers[r2])
 	vm.registers[r1] = vm.heap.Load64(ptr)
+	*vm.pc++
+}
+
+//go:inline
+func (vm *VM) execOPCopy(p *bytecode.P, i bytecode.I) {
+	r1, r2, r3 := i.Regs()
+	dest := NewFatPtrFromUint64(vm.registers[r1])
+	source := NewFatPtrFromUint64(vm.registers[r2])
+	size := vm.registers[r3]
+
+	vm.heap.Copy(dest, source, uint32(size))
+
 	*vm.pc++
 }

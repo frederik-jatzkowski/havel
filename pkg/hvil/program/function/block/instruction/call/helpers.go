@@ -4,7 +4,6 @@ import (
 	"github.com/frederik-jatzkowski/havel/pkg/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/architecture/virtualmachine/assembly"
 	"github.com/frederik-jatzkowski/havel/pkg/architecture/virtualmachine/bytecode"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/optimization/controlflow"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/optimization/statistics"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/program/function"
@@ -28,63 +27,27 @@ func calculateSignature(args []instruction.MemoryRead) *types.Function {
 	return signature
 }
 
+type savedRegisters struct {
+	Register architecture.Register
+	RelAddr  int
+	Bytes    int
+}
+
 func calculateSavedMemory(
 	current *function.Function,
 	block *block.Block,
 	instructionID statistics.InstructionID,
 	scope registeralloc.Scope,
-) []architecture.MemoryAllocation {
-	blockID := block.StatisticsPass.BlockID
-
-	toSave := make([]architecture.MemoryAllocation, 0)
-
-	for _, param := range current.Params.Items {
-		r := param.BoundTo()
-		if r == nil || param.Volatile() {
-			continue
-		}
-
-		if !controlflow.MustBeSavedAt(
-			param.StatisticsPass.LiveRanges[blockID],
-			instructionID,
-		) {
-			continue
-		}
-
-		toSave = append(toSave, architecture.MemoryAllocation{
-			BoundTo: r,
-			RelAddr: param.RelAddr(),
-			Bytes:   param.Type().Bytes(),
-		})
-	}
-
-	for _, local := range current.Locals.Items {
-		r := local.BoundTo()
-		if r == nil || local.Volatile() {
-			continue
-		}
-
-		if !controlflow.MustBeSavedAt(
-			local.StatisticsPass.LiveRanges[blockID],
-			instructionID,
-		) {
-			continue
-		}
-
-		toSave = append(toSave, architecture.MemoryAllocation{
-			BoundTo: r,
-			RelAddr: local.RelAddr(),
-			Bytes:   local.Type().Bytes(),
-		})
-	}
+) []savedRegisters {
+	toSave := make([]savedRegisters, 0)
 
 	for regWrite := range block.RegisterScope().All() {
 		r := regWrite.Register()
 		if scope.IsLiveAt(r, instructionID) {
-			toSave = append(toSave, architecture.MemoryAllocation{
-				BoundTo: r,
-				RelAddr: regWrite.AddressResolutionPass.RelAddr,
-				Bytes:   regWrite.Type().Bytes(),
+			toSave = append(toSave, savedRegisters{
+				Register: r,
+				RelAddr:  regWrite.AddressResolutionPass.RelAddr,
+				Bytes:    regWrite.Type().Bytes(),
 			})
 		}
 	}
@@ -95,7 +58,7 @@ func calculateSavedMemory(
 func generateVirtualMachineAssemblySaveCode(
 	node tool.NodeLike,
 	temp bytecode.R,
-	toSave []architecture.MemoryAllocation,
+	toSave []savedRegisters,
 	p *assembly.P,
 ) error {
 	for _, saved := range toSave {
@@ -106,7 +69,7 @@ func generateVirtualMachineAssemblySaveCode(
 			return node.Wrap(err)
 		}
 
-		p.AddI2R(op, temp, saved.BoundTo.(bytecode.R), node.Position())
+		p.AddI2R(op, temp, saved.Register.(bytecode.R), node.Position())
 	}
 
 	return nil
@@ -114,33 +77,41 @@ func generateVirtualMachineAssemblySaveCode(
 
 func generateVirtualMachineAssemblyParamsCode(
 	node tool.NodeLike,
-	temp bytecode.R,
+	temp1, temp2 bytecode.R,
 	frameSize int,
-	callPlan architecture.CallPlan,
 	args []instruction.MemoryRead,
 	p *assembly.P,
 ) error {
-	for i, param := range callPlan.Params {
-		arg := args[i]
-
+	offset := 16
+	for _, arg := range args {
 		if err := arg.GenerateVirtualMachineAssembly(p); err != nil {
 			return node.Wrap(err)
 		}
 
-		if param.BoundTo != nil {
-			if param.BoundTo != arg.Register() {
-				p.AddI2R(bytecode.OPAluMove, param.BoundTo.(bytecode.R), arg.Register().(bytecode.R), arg.Position())
-			}
-		} else {
-			p.AddI1RLit(bytecode.OPStackPtr, temp, uint16(frameSize+param.RelAddr), node.Position())
+		size := arg.Type().Bytes()
 
-			op, err := bytecode.StoreForSize(param.Bytes)
+		if _, ok := arg.Type().(*types.Composite); !ok {
+			p.AddI1RLit(bytecode.OPStackPtr, temp1, uint16(frameSize+offset), node.Position())
+
+			op, err := bytecode.StoreForSize(size)
 			if err != nil {
 				return node.Wrap(err)
 			}
 
-			p.AddI2R(op, temp, arg.Register().(bytecode.R), node.Position())
+			p.AddI2R(op, temp1, arg.Register().(bytecode.R), node.Position())
+
+			offset += size
+
+			continue
 		}
+
+		sourceBase := arg.Register().(bytecode.R) // here is the initial base offset
+		p.AddI1RLit(bytecode.OPStackPtr, temp1, uint16(frameSize+offset), node.Position())
+		p.AddLit(temp2, 4, uint64(size), node.Position())
+
+		p.AddI3R(bytecode.OPCopy, temp1, sourceBase, temp2, node.Position())
+
+		offset += size
 	}
 
 	return nil
@@ -149,7 +120,7 @@ func generateVirtualMachineAssemblyParamsCode(
 func generateVirtualMachineAssemblyRestoreCode(
 	node tool.NodeLike,
 	temp bytecode.R,
-	toSave []architecture.MemoryAllocation,
+	toSave []savedRegisters,
 	p *assembly.P,
 ) error {
 	for _, saved := range toSave {
@@ -160,7 +131,7 @@ func generateVirtualMachineAssemblyRestoreCode(
 			return node.Wrap(err)
 		}
 
-		p.AddI2R(op, saved.BoundTo.(bytecode.R), temp, node.Position())
+		p.AddI2R(op, saved.Register.(bytecode.R), temp, node.Position())
 	}
 
 	return nil

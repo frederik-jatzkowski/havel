@@ -33,9 +33,8 @@ type Local struct {
 		InstructionID statistics.InstructionID
 	}]
 	registeralloc.RegisterAllocation[struct {
-		Scope    registeralloc.Scope
-		Temp     architecture.Register
-		CallPlan architecture.CallPlan
+		Scope        registeralloc.Scope
+		Temp1, Temp2 architecture.Register
 	}]
 
 	Name string                            `parser:"'local' '.' @Ident"`
@@ -98,14 +97,20 @@ func (node *Local) CalculateStatistics(ctx context.Context) {
 
 func (node *Local) AllocateRegisters(scope registeralloc.Scope) ([]architecture.Register, error) {
 	node.RegisterAllocationPass.Scope = scope
-	node.RegisterAllocationPass.CallPlan = scope.Architecture().CalculateCallPlan(node.TypeCheckPass.Signature)
 
-	temp, ok := scope.GetScratchRegister()
+	temp1, ok := scope.GetScratchRegister()
 	if !ok {
 		return nil, node.Wrap(fmt.Errorf("failed to allocate register"))
 	}
 
-	node.RegisterAllocationPass.Temp = temp
+	node.RegisterAllocationPass.Temp1 = temp1
+
+	temp2, ok := scope.GetScratchRegister()
+	if !ok {
+		return nil, node.Wrap(fmt.Errorf("failed to allocate register"))
+	}
+
+	node.RegisterAllocationPass.Temp2 = temp2
 
 	for _, arg := range node.Args.Items {
 		regs, err := arg.AllocateRegisters(scope)
@@ -116,7 +121,7 @@ func (node *Local) AllocateRegisters(scope registeralloc.Scope) ([]architecture.
 		scope.ReturnScratchRegisters(regs...)
 	}
 
-	return []architecture.Register{temp}, nil
+	return []architecture.Register{temp1, temp2}, nil
 }
 
 func (node *Local) SetResultRegister(r architecture.Register) {
@@ -131,29 +136,29 @@ func (node *Local) GenerateVirtualMachineAssembly(p *assembly.P) error {
 		node.RegisterAllocationPass.Scope,
 	)
 
-	temp := node.RegisterAllocationPass.Temp.(bytecode.R)
+	temp1 := node.RegisterAllocationPass.Temp1.(bytecode.R)
+	temp2 := node.RegisterAllocationPass.Temp2.(bytecode.R)
 
 	p.AddI0R(bytecode.OPDebugStackPush, node.Position())
 
-	if err := generateVirtualMachineAssemblySaveCode(node, temp, toSave, p); err != nil {
+	if err := generateVirtualMachineAssemblySaveCode(node, temp1, toSave, p); err != nil {
 		return err
 	}
 
 	frameSize := node.NameResolutionPass.Current.AddressResolutionPass.FrameSize
-	callPlan := node.RegisterAllocationPass.CallPlan
 
-	if err := generateVirtualMachineAssemblyParamsCode(node, temp, frameSize, callPlan, node.Args.Items, p); err != nil {
+	if err := generateVirtualMachineAssemblyParamsCode(node, temp1, temp2, frameSize, node.Args.Items, p); err != nil {
 		return err
 	}
 
-	p.AddLoadLabel(temp, node.NameResolutionPass.Called.NameResolutionPass.Entry.FullyQualifiedIdentifier(), node.Position())
-	p.AddCall(temp, uint32(frameSize), node.Position())
+	p.AddLoadLabel(temp1, node.NameResolutionPass.Called.NameResolutionPass.Entry.FullyQualifiedIdentifier(), node.Position())
+	p.AddCall(temp1, uint32(frameSize), node.Position())
 
 	// restore stack pointer
-	p.AddI1RLit(bytecode.OPStackPtr, temp, 8, node.Position())
-	p.AddI2R(bytecode.OPLoad64, bytecode.SP, temp, node.Position())
+	p.AddI1RLit(bytecode.OPStackPtr, temp1, 8, node.Position())
+	p.AddI2R(bytecode.OPLoad64, bytecode.SP, temp1, node.Position())
 
-	if err := generateVirtualMachineAssemblyRestoreCode(node, temp, toSave, p); err != nil {
+	if err := generateVirtualMachineAssemblyRestoreCode(node, temp1, toSave, p); err != nil {
 		return err
 	}
 
