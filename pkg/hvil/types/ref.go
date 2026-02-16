@@ -38,7 +38,7 @@ func (node *Ref) Bytes() int {
 }
 
 func (node *Ref) CanDoArithmetics() bool {
-	return true
+	return false
 }
 
 func (node *Ref) Dereference(fields []uint) (Type, uint, error) {

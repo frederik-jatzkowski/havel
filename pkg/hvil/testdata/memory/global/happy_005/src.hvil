@@ -57,8 +57,7 @@ func reduce(ptr : ref, init : 1 byte, action : func(ref, ref), result_ptr : ref)
     } if $done then exit else body;
 
     block body {
-        $offset : 8 byte = alu.mul_u(size, i);
-        $elem : ref = alu.add_u(ptr, $offset);
+        $elem : ref = mem.element_ptr(ptr, 1 byte, i);
 
         $result_val_ptr : ref = mem.ptr(result_val);
 

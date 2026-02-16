@@ -2,10 +2,10 @@
 
 func main() {
     block entry {
-        $basic : ref = mem.sizeof(8 byte);
+        $basic : 1 byte = mem.sizeof(8 byte);
         debug.dump($basic);
 
-        $composite : ref = mem.sizeof({ 8 byte, 8 byte });
+        $composite : 2 byte = mem.sizeof({ 8 byte, 8 byte });
         debug.dump($composite);
     } return;
 }

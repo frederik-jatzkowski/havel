@@ -46,7 +46,14 @@ func (node *EQ) ResolveTypes(target types.Type) error {
 
 	node.TypeCheckPass.Type = target
 
-	return resolveBinOpTypes(node, node.Left, node.Right)
+	leftType := node.Left.Type()
+	rightType := node.Right.Type()
+
+	if leftType.Bytes() != rightType.Bytes() {
+		return node.Errorf("unequally sized parameters %s and %s", leftType, rightType)
+	}
+
+	return nil
 }
 
 func (node *EQ) CalculateStatistics(ctx context.Context) {

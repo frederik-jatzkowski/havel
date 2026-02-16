@@ -1,0 +1,27 @@
+declare (
+    arr_global : { 8 byte, 2 byte }
+);
+
+func main() {
+    declare (
+        arr_local : { 8 byte, 2 byte }
+    );
+
+    block entry {
+        arr_global[0] = 256;
+        arr_global[1] = 16;
+
+        $size : 8 byte = mem.sizeof({ 8 byte, 2 byte });
+        $ptr_heap : ref = mem.alloc($size);
+
+        $ptr_global : ref = mem.ptr(arr_global);
+
+        mem.copy($ptr_heap, $ptr_global, $size);
+
+        $ptr_local : ref = mem.ptr(arr_local);
+        mem.copy($ptr_local, $ptr_heap, $size);
+
+        debug.dump(arr_local[0]);
+        debug.dump(arr_local[1]);
+    } return;
+}

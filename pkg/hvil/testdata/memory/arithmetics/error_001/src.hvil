@@ -5,19 +5,17 @@ func main() {
     );
 
     block entry {
-        $size : 8 byte = 0b1000;
+        $size : 8 byte = mem.sizeof(4 byte);
         $len : 8 byte = 0b101;
         $total : 8 byte = alu.mul_u($size, $len);
 
         $ptr : ref = mem.alloc($total);
 
-        $invalidsize : 8 byte = 0b10000;
-
-        call.local.fill($ptr, $invalidsize, $len); // segfault in here
+        call.local.fill($ptr, $len); // segfault in here
     } return;
 }
 
-func fill(ptr : ref, size : 8 byte, len : 8 byte) {
+func fill(ptr : ref, len : 8 byte) {
     declare (
         i : 8 byte
     );
@@ -31,8 +29,7 @@ func fill(ptr : ref, size : 8 byte, len : 8 byte) {
     } if $done then exit else body;
 
     block body {
-        $offset : 8 byte = alu.mul_u(size, i);
-        $elem : ref = alu.add_u(ptr, $offset);
+        $elem : ref = mem.element_ptr(ptr, 8 byte, i);
 
         $two : 8 byte = 0b10;
         mem.store($elem, $two);

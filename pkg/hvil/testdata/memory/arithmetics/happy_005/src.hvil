@@ -1,0 +1,25 @@
+
+func main() {
+    block entry {
+        $size : 8 byte = mem.sizeof({ 8 byte, 2 byte });
+        $len : 8 byte = 0b100;
+        $total : 8 byte = alu.mul_u($size, $len);
+
+        $ptr : ref = mem.alloc($total);
+
+        $i3 : 8 byte = 3;
+        $element_3_2byte : ref = mem.element_ptr(
+            $ptr,
+            { 8 byte, 2 byte },
+            $i3,
+            self[1]
+        );
+
+        $answer : 2 byte = 42;
+        mem.store($element_3_2byte, $answer);
+
+        $loaded : 2 byte = mem.load($element_3_2byte);
+
+        debug.dump($loaded);
+    } return;
+}

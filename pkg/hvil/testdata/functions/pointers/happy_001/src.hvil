@@ -4,7 +4,7 @@ func main() {
         res_val : 1 byte
     );
     block entry {
-        $size : 8 byte = 0b1;
+        $size : 8 byte = mem.sizeof(1 byte);
         $len : 8 byte = 0b101;
         $total : 8 byte = alu.mul_u($size, $len);
         $zero : 1 byte = 0b0;
@@ -52,12 +52,14 @@ func reduce(
     ) {
     declare (
         i : 8 byte,
-        result_val : 1 byte
+        result_val : 1 byte,
+        result_val_ptr : ref
     );
 
     block entry {
         i = 0b0;
         result_val = alu.move(init);
+        result_val_ptr = mem.ptr(result_val);
     } goto head;
 
     block head {
@@ -65,12 +67,9 @@ func reduce(
     } if $done then exit else body;
 
     block body {
-        $offset : 8 byte = alu.mul_u(size, i);
-        $elem : ref = alu.add_u(ptr, $offset);
+        $elem : ref = mem.element_ptr(ptr, 1 byte, i);
 
-        $result_val_ptr : ref = mem.ptr(result_val);
-
-        call.dyn.action($result_val_ptr, $elem);
+        call.dyn.action(result_val_ptr, $elem);
 
         $one : 8 byte = 0b1;
         i = alu.add_u(i, $one);

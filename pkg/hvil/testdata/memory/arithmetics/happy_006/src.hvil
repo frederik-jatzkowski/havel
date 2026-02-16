@@ -1,0 +1,28 @@
+
+func main() {
+    declare (
+        arr : {
+            { 8 byte, 2 byte },
+            { 8 byte, 2 byte },
+            { 8 byte, 2 byte },
+            { 8 byte, 2 byte }
+        }
+    );
+
+    block entry {
+        $ptr : ref = mem.ptr(arr);
+
+        $i3 : 8 byte = 3;
+        $element_3_2byte : ref = mem.element_ptr(
+            $ptr,
+            { 8 byte, 2 byte },
+            $i3,
+            self[1]
+        );
+
+        $answer : 2 byte = 42;
+        mem.store($element_3_2byte, $answer);
+
+        debug.dump(arr[3][1]);
+    } return;
+}

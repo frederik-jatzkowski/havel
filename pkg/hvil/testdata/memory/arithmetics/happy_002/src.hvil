@@ -34,8 +34,7 @@ func fill(ptr : ref, size : 8 byte, len : 8 byte) {
     } if $done then exit else body;
 
     block body {
-        $offset : 8 byte = alu.mul_u(size, i);
-        $elem : ref = alu.add_u(ptr, $offset);
+        $elem : ref = mem.element_ptr(ptr, 2 byte, i);
 
         $two : 2 byte = 0b10;
         mem.store($elem, $two);
@@ -63,8 +62,7 @@ func sum(ptr : ref, size : 8 byte, len : 8 byte, result_ptr : ref) {
     } if $done then exit else body;
 
     block body {
-        $offset : 8 byte = alu.mul_u(size, i);
-        $elem : ref = alu.add_u(ptr, $offset);
+        $elem : ref = mem.element_ptr(ptr, 2 byte, i);
 
         $loaded : 2 byte = mem.load($elem);
         sum_val = alu.add_u(sum_val, $loaded);

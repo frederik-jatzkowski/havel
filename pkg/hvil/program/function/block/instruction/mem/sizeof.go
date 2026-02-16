@@ -15,6 +15,7 @@ import (
 type SizeOf struct {
 	tool.Node[SizeOf]
 	typecheck.TypeCheck[struct {
+		Result types.Type
 		IsVoid bool
 	}]
 	registeralloc.RegisterAllocation[struct {
@@ -30,12 +31,14 @@ func (node *SizeOf) ResolveNames(ctx context.Context) error {
 
 func (node *SizeOf) ResolveTypes(target types.Type) error {
 	switch target.(type) {
-	case *types.Ref:
+	case *types.Scalar:
 	case *types.Void:
 		node.TypeCheckPass.IsVoid = true
 	default:
-		return node.Errorf("cannot assign ref to %s", target)
+		return node.Errorf("cannot assign size to %s", target)
 	}
+
+	node.TypeCheckPass.Result = target
 
 	return nil
 }
@@ -52,7 +55,7 @@ func (node *SizeOf) SetResultRegister(r architecture.Register) {
 
 func (node *SizeOf) GenerateVirtualMachineAssembly(p *assembly.P) error {
 	if !node.TypeCheckPass.IsVoid {
-		p.AddLit(node.RegisterAllocationPass.Result.(bytecode.R), 8, uint64(node.Param.Bytes()), node.Position())
+		p.AddLit(node.RegisterAllocationPass.Result.(bytecode.R), node.TypeCheckPass.Result.Bytes(), uint64(node.Param.Bytes()), node.Position())
 	}
 
 	return nil
