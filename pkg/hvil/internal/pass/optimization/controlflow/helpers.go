@@ -1,6 +1,8 @@
 package controlflow
 
-import "github.com/frederik-jatzkowski/havel/pkg/hvil/pass/optimization/statistics"
+import (
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/internal/pass/optimization/statistics"
+)
 
 func discoverBlocks(entry Node) (order []Node) {
 	visited := make(map[statistics.BlockID]bool)

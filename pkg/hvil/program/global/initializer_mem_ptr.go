@@ -5,8 +5,8 @@ import (
 
 	"github.com/frederik-jatzkowski/havel/pkg/architecture/virtualmachine"
 	"github.com/frederik-jatzkowski/havel/pkg/architecture/virtualmachine/assembly"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/typecheck"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/internal/pass/names"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/internal/pass/typecheck"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/program/function/block/instruction"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/types"
 	"github.com/frederik-jatzkowski/havel/pkg/tool"

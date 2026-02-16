@@ -3,7 +3,7 @@ package controlflow
 import (
 	"slices"
 
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/optimization/statistics"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/internal/pass/optimization/statistics"
 )
 
 type Access struct {

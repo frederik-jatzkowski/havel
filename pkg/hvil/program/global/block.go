@@ -5,8 +5,8 @@ import (
 
 	"github.com/frederik-jatzkowski/havel/pkg/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/architecture/virtualmachine/assembly"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/address"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/internal/pass/address"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/internal/pass/names"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/program/function/block/instruction"
 	"github.com/frederik-jatzkowski/havel/pkg/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/tool/scope"

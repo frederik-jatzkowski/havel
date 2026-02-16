@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/token"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/internal/pass/token"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/program"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/program/function"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/program/function/block"

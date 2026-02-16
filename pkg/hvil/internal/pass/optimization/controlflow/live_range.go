@@ -1,6 +1,8 @@
 package controlflow
 
-import "github.com/frederik-jatzkowski/havel/pkg/hvil/pass/optimization/statistics"
+import (
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/internal/pass/optimization/statistics"
+)
 
 type LiveRange struct {
 	Start, End *statistics.InstructionID

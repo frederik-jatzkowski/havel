@@ -1,9 +1,10 @@
 package token_test
 
 import (
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/token"
 	"strings"
 	"testing"
+
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/internal/pass/token"
 )
 
 func TestTokenizer(t *testing.T) {

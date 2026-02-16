@@ -5,7 +5,7 @@ import (
 
 	"github.com/frederik-jatzkowski/havel/pkg/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/architecture/virtualmachine/bytecode"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/optimization/statistics"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/internal/pass/optimization/statistics"
 )
 
 type Scope interface {

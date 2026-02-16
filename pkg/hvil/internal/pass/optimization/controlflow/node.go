@@ -1,7 +1,7 @@
 package controlflow
 
 import (
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/optimization/statistics"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/internal/pass/optimization/statistics"
 )
 
 type Node interface {

@@ -5,7 +5,7 @@ import (
 	"io"
 
 	"github.com/frederik-jatzkowski/havel/pkg/architecture/virtualmachine"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/parser"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/internal/pass/parser"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/program"
 )
 
@@ -37,4 +37,22 @@ func (c Compiler) Compile(path string, src io.Reader) (program.Program, error) {
 	}
 
 	return p, nil
+}
+
+func (c Compiler) CompileAST(p *program.Program) error {
+	if err := p.ResolveNames(context.Background()); err != nil {
+		return err
+	}
+
+	if err := p.ResolveTypes(); err != nil {
+		return err
+	}
+
+	p.CalculateStatistics(context.Background())
+
+	if err := p.ResolveAddresses(virtualmachine.NewArchitecture()); err != nil {
+		return err
+	}
+
+	return nil
 }

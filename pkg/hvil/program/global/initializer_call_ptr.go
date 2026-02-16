@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/frederik-jatzkowski/havel/pkg/architecture/virtualmachine/assembly"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/names"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/internal/pass/names"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/program/function"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/types"
 	"github.com/frederik-jatzkowski/havel/pkg/tool"

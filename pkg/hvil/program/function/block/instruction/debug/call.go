@@ -5,7 +5,7 @@ import (
 
 	"github.com/frederik-jatzkowski/havel/pkg/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/architecture/virtualmachine/assembly"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/internal/pass/registeralloc"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/program/function/block/instruction"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/types"
 	"github.com/frederik-jatzkowski/havel/pkg/tool"

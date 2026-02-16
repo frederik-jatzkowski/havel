@@ -3,7 +3,7 @@ package instruction
 import (
 	"github.com/frederik-jatzkowski/havel/pkg/architecture/virtualmachine/assembly"
 	"github.com/frederik-jatzkowski/havel/pkg/architecture/virtualmachine/bytecode"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/optimization/statistics"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/internal/pass/optimization/statistics"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/types"
 	"github.com/frederik-jatzkowski/havel/pkg/tool/scope"
 )

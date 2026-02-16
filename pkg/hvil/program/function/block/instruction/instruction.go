@@ -5,8 +5,8 @@ import (
 
 	"github.com/frederik-jatzkowski/havel/pkg/architecture"
 	"github.com/frederik-jatzkowski/havel/pkg/architecture/virtualmachine/assembly"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/optimization/statistics"
-	"github.com/frederik-jatzkowski/havel/pkg/hvil/pass/registeralloc"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/internal/pass/optimization/statistics"
+	"github.com/frederik-jatzkowski/havel/pkg/hvil/internal/pass/registeralloc"
 	"github.com/frederik-jatzkowski/havel/pkg/hvil/types"
 	"github.com/frederik-jatzkowski/havel/pkg/tool"
 	"github.com/frederik-jatzkowski/havel/pkg/tool/contexttool"
