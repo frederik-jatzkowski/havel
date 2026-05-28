@@ -1,0 +1,47 @@
+
+func main() {
+    let n u64;
+    mem.store(mem.ptr(n), literal.uint(214, 64));
+
+    debug.dump(n);
+    
+    let steps u64;
+    mem.store(mem.ptr(steps), call.local.solve_collatz(n));
+
+    debug.dump(steps);
+
+    return;
+}
+
+func solve_collatz(n u64) -> u64 {
+    debug.dump(n);
+
+    if alu.eq(n, literal.uint(1, 64)) {
+        return literal.uint(1, 64);
+    }
+
+    if call.local.is_even(n) {
+        return call.local.inc(
+            call.local.solve_collatz(
+                alu.div(n, literal.uint(2, 64))
+            )
+        );
+    }
+
+    return call.local.inc(
+        call.local.solve_collatz(
+            alu.mul(n, literal.uint(3, 64))
+        )
+    );
+}
+
+func is_even(n u64) -> bool {
+    return alu.eq(
+        alu.mod(n, literal.uint(2, 64)),
+        literal.uint(0, 64)
+    );
+}
+
+func inc(n u64) -> u64 {
+    return alu.add(n, literal.uint(1, 64));
+}

@@ -1,0 +1,138 @@
+
+func main() {
+    let tree *class_BinaryTree;
+    mem.store(mem.ptr(tree), call.local.constructor_BinaryTree_New());
+
+    call.local.method_BinaryTree_Add(tree, literal.uint(10, 64));
+    call.local.method_BinaryTree_Add(tree, literal.uint(5, 64));
+    call.local.method_BinaryTree_Add(tree, literal.uint(15, 64));
+    call.local.method_BinaryTree_Add(tree, literal.uint(12, 64));
+    call.local.method_BinaryTree_Add(tree, literal.uint(13, 64));
+    call.local.method_BinaryTree_Add(tree, literal.uint(2, 64));
+    call.local.method_BinaryTree_Add(tree, literal.uint(6, 64));
+
+    let i u64;
+    mem.store(mem.ptr(i), literal.uint(0, 64));
+
+    for alu.leq(i, literal.uint(20, 64)); mem.store(mem.ptr(i), alu.add(i, literal.uint(1, 64))) {
+        debug.dump(i);
+        debug.dump(call.local.method_BinaryTree_Find(tree, i));
+    }
+}
+
+type class_BinaryTree struct {
+     root enum_Option_class_Node
+}
+
+func constructor_BinaryTree_New() -> *class_BinaryTree {
+    let tree *class_BinaryTree;
+    mem.store(mem.ptr(tree), mem.alloc(class_BinaryTree));
+
+    mem.store(mem.gep(tree.root), call.local.constructor_NodeOption_None());
+
+    return tree;
+}
+
+func method_BinaryTree_Add(this *class_BinaryTree, value u64) {
+    if mem.load(mem.gep(this.root.present)) {
+        call.local.method_Node_Add(mem.load(mem.gep(this.root.node)), value);
+    } else {
+        mem.store(
+            mem.gep(this.root),
+            call.local.constructor_NodeOption_Some(
+                call.local.constructor_Node_New(value)
+            )
+        );
+    }
+}
+
+func method_BinaryTree_Find(this *class_BinaryTree, value u64) -> bool {
+    let curr enum_Option_class_Node;
+    mem.store(mem.ptr(curr), mem.load(mem.gep(this.root)));
+
+    for literal.true ; {
+        if alu.not(mem.load(mem.gep(mem.ptr(curr).present))) {
+            return literal.false;
+        }
+
+        let node *class_Node;
+        mem.store(mem.ptr(node), mem.load(mem.gep(mem.ptr(curr).node)));
+
+        if alu.gt(mem.load(mem.gep(node.value)), value) {
+            mem.store(mem.ptr(curr), mem.load(mem.gep(node.left)));
+        } else if alu.lt(mem.load(mem.gep(node.value)), value) {
+            mem.store(mem.ptr(curr), mem.load(mem.gep(node.right)));
+        } else {
+            return literal.true;
+        }
+    }
+}
+
+type class_Node struct {
+    value u64,
+    left enum_Option_class_Node,
+    right enum_Option_class_Node
+}
+
+func constructor_Node_New(value u64) -> *class_Node {
+    let node *class_Node;
+    mem.store(mem.ptr(node), mem.alloc(class_Node));
+
+    mem.store(mem.gep(node.value), value);
+    mem.store(mem.gep(node.left), call.local.constructor_NodeOption_None());
+    mem.store(mem.gep(node.right), call.local.constructor_NodeOption_None());
+
+    return node;
+}
+
+func method_Node_Add(this *class_Node, value u64) {
+    if alu.gt(mem.load(mem.gep(this.value)), value) {
+        if mem.load(mem.gep(this.left.present)) {
+            call.local.method_Node_Add(mem.load(mem.gep(this.left.node)), value);
+
+            return;
+        }
+
+        mem.store(
+            mem.gep(this.left),
+            call.local.constructor_NodeOption_Some(
+                call.local.constructor_Node_New(value)
+            )
+        );
+    } else if alu.lt(mem.load(mem.gep(this.value)), value) {
+        if mem.load(mem.gep(this.right.present)) {
+            call.local.method_Node_Add(mem.load(mem.gep(this.right.node)), value);
+
+            return;
+        }
+
+        mem.store(
+            mem.gep(this.right),
+            call.local.constructor_NodeOption_Some(
+                call.local.constructor_Node_New(value)
+            )
+        );
+    }
+}
+
+type enum_Option_class_Node struct {
+    present bool,
+    node *class_Node
+}
+
+func constructor_NodeOption_None() -> enum_Option_class_Node {
+    let option enum_Option_class_Node;
+
+    mem.store(mem.gep(mem.ptr(option).present), literal.false);
+
+    return option;
+}
+
+func constructor_NodeOption_Some(node *class_Node) -> enum_Option_class_Node {
+    let option enum_Option_class_Node;
+
+    mem.store(mem.gep(mem.ptr(option).present), literal.false);
+    mem.store(mem.gep(mem.ptr(option).node), node);
+
+    return option;
+}
